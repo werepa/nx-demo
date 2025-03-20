@@ -15,7 +15,7 @@ describe("InMemoryAdapter", () => {
   })
 
   describe("databaseType", () => {
-    fit("should return sqlite as database type", () => {
+    it("should return sqlite as database type", () => {
       // Arrange & Act
       const type: DatabaseType = adapter.databaseType()
 
@@ -25,7 +25,7 @@ describe("InMemoryAdapter", () => {
   })
 
   describe("run", () => {
-    fit("should execute SQL statement without throwing an error", async () => {
+    it("should execute SQL statement without throwing an error", async () => {
       // Arrange
       const createTableStatement = "CREATE TABLE test (id INTEGER PRIMARY KEY, name TEXT)"
 
@@ -33,7 +33,7 @@ describe("InMemoryAdapter", () => {
       await expect(adapter.run(createTableStatement)).resolves.not.toThrow()
     })
 
-    fit("should throw an error for invalid SQL statement", async () => {
+    it("should throw an error for invalid SQL statement", async () => {
       // Arrange
       const invalidStatement = "CREATE INVALID TABLE test"
 
@@ -43,7 +43,7 @@ describe("InMemoryAdapter", () => {
   })
 
   describe("get", () => {
-    fit("should retrieve a single row", async () => {
+    it("should retrieve a single row", async () => {
       // Arrange
       await adapter.run("CREATE TABLE test (id INTEGER PRIMARY KEY, name TEXT)")
       await adapter.none("INSERT INTO test (id, name) VALUES (1, 'Test Name')")
@@ -60,8 +60,8 @@ describe("InMemoryAdapter", () => {
     it("should retrieve a single row using parameters", async () => {
       // Arrange
       await adapter.run("CREATE TABLE test (id INTEGER PRIMARY KEY, name TEXT)")
-      await adapter.none('INSERT INTO test (id, name) VALUES (1, "Test Name")')
-      await adapter.none('INSERT INTO test (id, name) VALUES (2, "Another Name")')
+      await adapter.none("INSERT INTO test (id, name) VALUES (1, 'Test Name')")
+      await adapter.none("INSERT INTO test (id, name) VALUES (2, 'Another Name')")
 
       // Act
       const result = await adapter.get<{ id: number; name: string }>("SELECT * FROM test WHERE id = ?", [1])
@@ -96,8 +96,8 @@ describe("InMemoryAdapter", () => {
     it("should retrieve all matching rows", async () => {
       // Arrange
       await adapter.run("CREATE TABLE test (id INTEGER PRIMARY KEY, name TEXT)")
-      await adapter.none('INSERT INTO test (id, name) VALUES (1, "Name 1")')
-      await adapter.none('INSERT INTO test (id, name) VALUES (2, "Name 2")')
+      await adapter.none("INSERT INTO test (id, name) VALUES (1, 'Name 1')")
+      await adapter.none("INSERT INTO test (id, name) VALUES (2, 'Name 2')")
 
       // Act
       const results = await adapter.all<{ id: number; name: string }>("SELECT * FROM test ORDER BY id")
@@ -113,9 +113,9 @@ describe("InMemoryAdapter", () => {
     it("should retrieve matching rows using parameters", async () => {
       // Arrange
       await adapter.run("CREATE TABLE test (id INTEGER PRIMARY KEY, name TEXT, type TEXT)")
-      await adapter.none('INSERT INTO test (id, name, type) VALUES (1, "Name 1", "typeA")')
-      await adapter.none('INSERT INTO test (id, name, type) VALUES (2, "Name 2", "typeB")')
-      await adapter.none('INSERT INTO test (id, name, type) VALUES (3, "Name 3", "typeA")')
+      await adapter.none("INSERT INTO test (id, name, type) VALUES (1, 'Name 1', 'typeA')")
+      await adapter.none("INSERT INTO test (id, name, type) VALUES (2, 'Name 2', 'typeB')")
+      await adapter.none("INSERT INTO test (id, name, type) VALUES (3, 'Name 3', 'typeA')")
 
       // Act
       const results = await adapter.all<{ id: number; name: string; type: string }>(
@@ -152,8 +152,8 @@ describe("InMemoryAdapter", () => {
     it("should retrieve all matching rows with row count", async () => {
       // Arrange
       await adapter.run("CREATE TABLE test (id INTEGER PRIMARY KEY, name TEXT)")
-      await adapter.none('INSERT INTO test (id, name) VALUES (1, "Name 1")')
-      await adapter.none('INSERT INTO test (id, name) VALUES (2, "Name 2")')
+      await adapter.none("INSERT INTO test (id, name) VALUES (1, 'Name 1')")
+      await adapter.none("INSERT INTO test (id, name) VALUES (2, 'Name 2')")
 
       // Act
       const result = await adapter.query<{ id: number; name: string }>("SELECT * FROM test ORDER BY id")
@@ -187,7 +187,7 @@ describe("InMemoryAdapter", () => {
     it("should retrieve a single row", async () => {
       // Arrange
       await adapter.run("CREATE TABLE test (id INTEGER PRIMARY KEY, name TEXT)")
-      await adapter.none('INSERT INTO test (id, name) VALUES (1, "Test Name")')
+      await adapter.none("INSERT INTO test (id, name) VALUES (1, 'Test Name')") // Changed to single quotes
 
       // Act
       const result = await adapter.one<{ id: number; name: string }>("SELECT * FROM test WHERE id = 1")
@@ -221,7 +221,7 @@ describe("InMemoryAdapter", () => {
       await adapter.run("CREATE TABLE test (id INTEGER PRIMARY KEY, name TEXT)")
 
       // Act & Assert
-      await expect(adapter.none('INSERT INTO test (id, name) VALUES (1, "Test Name")')).resolves.not.toThrow()
+      await expect(adapter.none("INSERT INTO test (id, name) VALUES (1, 'Test Name')")).resolves.not.toThrow()
     })
 
     it("should throw an error for invalid SQL statement", async () => {
