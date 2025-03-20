@@ -6,17 +6,22 @@ export class PgPromiseAdapter implements DatabaseConnection {
   private connection: pgPromise.IDatabase<object>
   private logger: Logger
 
-  constructor() {
+  constructor(connectionUrl?: string) {
     try {
       const pgp = pgPromise()
-      this.connection = pgp(process.env.DATABASE_URL || "")
+      const dbUrl = connectionUrl || process.env.DATABASE_URL
+      if (!dbUrl) {
+        throw new Error("No database connection URL provided")
+      }
+      this.connection = pgp(dbUrl)
       this.logger = new Logger()
     } catch (error) {
-      console.error("Failed to initialize PostgreSQL database:", error)
+      this.logger = new Logger()
+      this.logger.error("Failed to initialize PostgreSQL database:", error)
       throw error
     }
   }
-
+  F
   databaseType(): DatabaseType {
     return "postgres"
   }
