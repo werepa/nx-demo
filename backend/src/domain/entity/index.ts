@@ -1,0 +1,16 @@
+// @index(['./**/*.ts', /(test|spec)/g], f => `export * from '${f.path}'`)
+export * from "./Discipline"
+export * from "./Learning"
+export * from "./Question"
+export * from "./QuestionOption"
+export * from "./QuestionOptionList"
+export * from "./Quiz"
+export * from "./QuizAnswer"
+export * from "./QuizAnswerList"
+export * from "./QuizTopicList"
+export * from "./Topic"
+export * from "./TopicLearning"
+export * from "./TopicLearningList"
+export * from "./TopicList"
+export * from "./User"
+// @endindex
