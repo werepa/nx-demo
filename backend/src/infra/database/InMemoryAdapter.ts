@@ -17,7 +17,12 @@ export class InMemoryAdapter implements DatabaseConnection {
 
   async run(statement: string, params?: SqlParameter[]): Promise<void> {
     try {
-      this.connection.exec(statement)
+      const stmt = this.connection.prepare(statement)
+      if (params) {
+        stmt.run(...params)
+      } else {
+        stmt.run()
+      }
     } catch (error) {
       this.logger.error(error)
       throw error
@@ -26,7 +31,8 @@ export class InMemoryAdapter implements DatabaseConnection {
 
   async get<T>(statement: string, params?: SqlParameter[]): Promise<T> {
     try {
-      return this.connection.prepare(statement).get(params) as T
+      const stmt = this.connection.prepare(statement)
+      return params ? (stmt.get(...params) as T) : (stmt.get() as T)
     } catch (error) {
       this.logger.error(error)
       throw error
@@ -35,7 +41,8 @@ export class InMemoryAdapter implements DatabaseConnection {
 
   async all<T>(statement: string, params?: SqlParameter[]): Promise<T[]> {
     try {
-      return this.connection.prepare(statement).all(params) as T[]
+      const stmt = this.connection.prepare(statement)
+      return params ? (stmt.all(...params) as T[]) : (stmt.all() as T[])
     } catch (error) {
       this.logger.error(error)
       throw error
@@ -73,9 +80,14 @@ export class InMemoryAdapter implements DatabaseConnection {
     }
   }
 
-  async none(query: string): Promise<void> {
+  async none(query: string, params?: SqlParameter[]): Promise<void> {
     try {
-      this.connection.prepare(query).run()
+      const stmt = this.connection.prepare(query)
+      if (params) {
+        stmt.run(...params)
+      } else {
+        stmt.run()
+      }
     } catch (error) {
       this.logger.error(error)
       throw error
