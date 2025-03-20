@@ -2,7 +2,10 @@
   "name": "@nx-demo/source",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "test:backend": "nx test backend",
+    "test:backend:watch": "nx test backend --watch"
+  },
   "private": true,
   "dependencies": {
     "@faker-js/faker": "^9.6.0"

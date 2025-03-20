@@ -1,4 +1,4 @@
-import { DatabaseConnection, DatabaseType, QueryResult } from "./DatabaseConnection"
+import { DatabaseConnection, DatabaseType, QueryResult, SqlParameter } from "./DatabaseConnection"
 import Database from "better-sqlite3"
 import { Logger } from "../../shared/utils/Logger"
 
@@ -15,7 +15,7 @@ export class InMemoryAdapter implements DatabaseConnection {
     return "sqlite"
   }
 
-  async run(statement: string, params?: any[]): Promise<void> {
+  async run(statement: string, params?: SqlParameter[]): Promise<void> {
     try {
       this.connection.exec(statement)
     } catch (error) {
@@ -24,7 +24,7 @@ export class InMemoryAdapter implements DatabaseConnection {
     }
   }
 
-  async get<T>(statement: string, params?: any[]): Promise<T> {
+  async get<T>(statement: string, params?: SqlParameter[]): Promise<T> {
     try {
       return this.connection.prepare(statement).get(params) as T
     } catch (error) {
@@ -33,7 +33,7 @@ export class InMemoryAdapter implements DatabaseConnection {
     }
   }
 
-  async all<T>(statement: string, params?: any[]): Promise<T[]> {
+  async all<T>(statement: string, params?: SqlParameter[]): Promise<T[]> {
     try {
       return this.connection.prepare(statement).all(params) as T[]
     } catch (error) {
