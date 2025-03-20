@@ -1,6 +1,7 @@
 import { faker } from "@faker-js/faker"
 import { Question, QuestionOption } from "../../domain/entity"
 import { QuestionOptionDTO, QuestionDTO } from "@simulex/models"
+import { QuestionState } from "../../shared/models"
 
 interface IQuestionMockDto {
   questionId?: string
@@ -17,12 +18,12 @@ interface QuestionMockOptions {
   isMultipleChoice?: boolean
 }
 
-export const questionMockPersistence = (dto: IQuestionMockDto = {}): QuestionDTO => {
+export const questionMockState = (dto: IQuestionMockDto = {}): QuestionState => {
   const questionId = dto.questionId || faker.string.uuid()
   const topicId = dto.topicId || faker.string.uuid()
   const createdAt = faker.date.recent()
   const qtyAnswered = Math.floor(Math.random() * 100)
-  const questionDTO: QuestionDTO = {
+  const questionState: QuestionState = {
     questionId: questionId,
     topicId: topicId,
     prompt: "Question " + questionId,
@@ -41,12 +42,12 @@ export const questionMockPersistence = (dto: IQuestionMockDto = {}): QuestionDTO
     createdBy: faker.string.uuid(),
     createdAt: createdAt,
   }
-  return questionDTO
+  return questionState
 }
 
 export const questionMock = (dto: IQuestionMockDto = {}): Question => {
-  const questionDTO = questionMockPersistence(dto)
-  return Question.toDomain(questionDTO)
+  const questionState = questionMockState(dto)
+  return Question.toDomain(questionState)
 }
 
 export const questionState = (question: Question): QuestionDTO => {

@@ -143,8 +143,8 @@ export class User extends Entity<UserProps> {
       role: this.role,
       image: this.image,
       isActive: this.isActive,
-      createdAt: this.createdAt.formatoBr,
-      updatedAt: this.updatedAt,
+      createdAt: this.createdAt.value,
+      updatedAt: this.updatedAt.value,
     }
   }
 }

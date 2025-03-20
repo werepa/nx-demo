@@ -2,7 +2,7 @@ import { DateBr } from "../../shared/domain/valueObject"
 import { QuestionOption, QuestionOptionList } from "."
 import { Entity } from "../../shared/domain/entity"
 import { Md5 } from "ts-md5"
-import { QuestionDTO } from "@simulex/models"
+import { QuestionDTO, QuestionOptionDTO } from "@simulex/models"
 import { QuestionState } from "../../shared/models"
 import { randomUUID } from "crypto"
 
@@ -100,18 +100,15 @@ export class Question extends Entity<QuestionProps> {
       questionId: dto.questionId,
       topicId: dto.topicId,
       prompt: dto.prompt,
-      options: QuestionOptionList.create(
-        dto.questionId,
-        JSON.parse(dto.options).map((option: QuestionOption) => QuestionOption.toDomain(option))
-      ),
+      options: QuestionOptionList.create(dto.questionId, dto.options),
       isMultipleChoice: !!dto.isMultipleChoice,
-      difficulty: parseFloat(dto.difficulty),
+      difficulty: dto.difficulty,
       qtyCorrectAnswered: dto.qtyCorrectAnswers,
       qtyAnswered: dto.qtyAnswered,
-      difficultyRecursive: parseFloat(dto.difficultyRecursive),
+      difficultyRecursive: dto.difficultyRecursive,
       simulexHash: dto.simulexHash,
       topicRootId: dto.topicRootId,
-      linkedTopics: JSON.parse(dto.linkedTopics),
+      linkedTopics: dto.linkedTopics,
       year: dto.year,
       sourceId: dto.sourceId ?? null,
       isActive: !!dto.isActive,

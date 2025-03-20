@@ -1,11 +1,5 @@
 import { Application, Request, Response } from "express"
-import {
-  CreateQuiz,
-  GetQuizzes,
-  GetQuizById,
-  GetNextQuestion,
-  CheckQuizAnswer,
-} from "../../../application/usecase"
+import { CreateQuiz, GetQuizzes, GetQuizById, GetNextQuestion, CheckQuizAnswer } from "../../../application/usecase"
 
 /**
  * @swagger
@@ -21,7 +15,7 @@ export class QuizController {
     getQuizzes: GetQuizzes,
     getQuizById: GetQuizById,
     getNextQuestion: GetNextQuestion,
-    checkQuizAnswer: CheckQuizAnswer,
+    checkQuizAnswer: CheckQuizAnswer
   ) {
     /**
      * @swagger
@@ -70,12 +64,14 @@ export class QuizController {
     app.post("/quizzes", async (req: Request, res: Response) => {
       try {
         const output = await createQuiz.execute(req.body)
-        res.status(201).json(output.toDTO())
-      } catch (error: any) {
-        if (error.message.includes("not found")) {
+        res.status(201).json(output)
+      } catch (error: unknown) {
+        if (error instanceof Error && error.message.includes("not found")) {
           res.status(404).json({ error: error.message })
-        } else {
+        } else if (error instanceof Error) {
           res.status(400).json({ error: error.message })
+        } else {
+          res.status(400).json({ error: "An unknown error occurred" })
         }
       }
     })
@@ -109,7 +105,14 @@ export class QuizController {
      */
     app.get("/quizzes", async (req: Request, res: Response) => {
       try {
-        const output = await getQuizzes.execute(req.query)
+        const { userId, disciplineId } = req.query
+        if (!userId || typeof userId !== "string") {
+          throw new Error("userId is required")
+        }
+        const output = await getQuizzes.execute({
+          userId,
+          disciplineId: disciplineId as string | undefined,
+        })
         res.status(200).json(output.map((quiz) => quiz.toDTO()))
       } catch (error: any) {
         res.status(500).json({ error: error.message })
@@ -185,27 +188,22 @@ export class QuizController {
      *       401:
      *         description: Not authenticated
      */
-    app.get(
-      "/quizzes/:id/next-question",
-      async (req: Request, res: Response) => {
-        try {
-          const { id } = req.params
-          const output = await getNextQuestion.execute({ quizId: id })
-          if (!output) {
-            return res
-              .status(404)
-              .json({ error: "No more questions available" })
-          }
-          res.status(200).json(output.toDTO())
-        } catch (error: any) {
-          if (error.message.includes("not found")) {
-            res.status(404).json({ error: error.message })
-          } else {
-            res.status(500).json({ error: error.message })
-          }
+    app.get("/quizzes/:id/next-question", async (req: Request, res: Response) => {
+      try {
+        const { id } = req.params
+        const output = await getNextQuestion.execute({ quizId: id })
+        if (!output) {
+          return res.status(404).json({ error: "No more questions available" })
         }
-      },
-    )
+        res.status(200).json(output.toDTO())
+      } catch (error: any) {
+        if (error.message.includes("not found")) {
+          res.status(404).json({ error: error.message })
+        } else {
+          res.status(500).json({ error: error.message })
+        }
+      }
+    })
 
     /**
      * @swagger
@@ -274,7 +272,7 @@ export class QuizController {
             quizId: id,
           },
         })
-        res.status(200).json(output.toDTO())
+        res.status(200).json(output)
       } catch (error: any) {
         if (error.message.includes("not found")) {
           res.status(404).json({ error: error.message })

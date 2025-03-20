@@ -77,7 +77,7 @@ export class QuestionOption extends Entity<QuestionOptionProps> {
     return {
       optionId: this.props.optionId,
       text: this.props.text,
-      key: !!this.props.isCorrectAnswer,
+      isCorrectAnswer: !!this.props.isCorrectAnswer,
       item: this.props.item,
       obs: this.props.obs,
       questionId: this.props.questionId,

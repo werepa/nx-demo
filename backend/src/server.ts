@@ -1,4 +1,4 @@
-import app from "./main_api"
+import app from "./main"
 import dotenv from "dotenv"
 
 // Ensure environment variables are loaded
@@ -10,12 +10,8 @@ const NODE_ENV = process.env.NODE_ENV || "development"
 // Check for required environment variables
 if (process.env.NODE_ENV !== "test" && !process.env.DATABASE_URL) {
   console.error("Error: DATABASE_URL environment variable is not set")
-  console.error(
-    "Please set DATABASE_URL to a valid PostgreSQL connection string",
-  )
-  console.error(
-    "Example: DATABASE_URL=postgres://username:password@host:port/database",
-  )
+  console.error("Please set DATABASE_URL to a valid PostgreSQL connection string")
+  console.error("Example: DATABASE_URL=postgres://username:password@host:port/database")
   process.exit(1)
 }
 
@@ -29,12 +25,8 @@ app.listen(PORT, () => {
     console.log("\nEnvironment Configuration:")
     console.log("------------------------")
     console.log(`NODE_ENV: ${NODE_ENV}`)
-    console.log(
-      `Database: ${process.env.DATABASE_URL ? "Configured" : "Not Configured"}`,
-    )
-    console.log(
-      `JWT Secret: ${process.env.JWT_SECRET ? "Configured" : "Using default"}`,
-    )
+    console.log(`Database: ${process.env.DATABASE_URL ? "Configured" : "Not Configured"}`)
+    console.log(`JWT Secret: ${process.env.JWT_SECRET ? "Configured" : "Using default"}`)
     console.log("------------------------\n")
   }
 })

@@ -1,12 +1,9 @@
 import request from "supertest"
 import { AuthController } from "../../infra/http/controller"
 import { CreateUser, LoginUser, LogoutUser } from "../../application/usecase"
-import {
-  DatabaseConnection,
-  getTestDatabaseAdapter,
-} from "../../infra/database"
+import { DatabaseConnection, getTestDatabaseAdapter } from "../../infra/database"
 import { UserRepositoryDatabase } from "../../infra/repository"
-import app from "../../main_api"
+import app from "../../main"
 import { faker } from "@faker-js/faker/."
 
 describe("Auth Integration Tests", () => {
@@ -52,9 +49,7 @@ describe("Auth Integration Tests", () => {
     }
     let response = await request(app).post("/api/auth/register").send(user)
     expect(response.status).toBe(201)
-    response = await request(app)
-      .post("/api/auth/login")
-      .send({ email: user.email, password: user.password })
+    response = await request(app).post("/api/auth/login").send({ email: user.email, password: user.password })
     expect(response.status).toBe(200)
     expect(response.body).toHaveProperty("user")
     expect(response.body.user).toHaveProperty("name", user.name)
@@ -75,9 +70,7 @@ describe("Auth Integration Tests", () => {
       .send({ email: newUser.email, password: newUser.password })
     const token = loginResponse.body.token
 
-    const logoutResponse = await request(app)
-      .post("/api/auth/logout")
-      .set("Authorization", `Bearer ${token}`)
+    const logoutResponse = await request(app).post("/api/auth/logout").set("Authorization", `Bearer ${token}`)
     expect(logoutResponse.status).toBe(200)
   })
 
@@ -94,14 +87,10 @@ describe("Auth Integration Tests", () => {
       .send({ email: newUser.email, password: newUser.password })
     const token = loginResponse.body.token
 
-    let logoutResponse = await request(app)
-      .post("/api/auth/logout")
-      .set("Authorization", `Bearer ${token}`)
+    let logoutResponse = await request(app).post("/api/auth/logout").set("Authorization", `Bearer ${token}`)
     expect(logoutResponse.status).toBe(200)
 
-    logoutResponse = await request(app)
-      .post("/api/auth/logout")
-      .set("Authorization", `Bearer ${token}`)
+    logoutResponse = await request(app).post("/api/auth/logout").set("Authorization", `Bearer ${token}`)
     expect(logoutResponse.status).toBe(400)
     expect(logoutResponse.body).toHaveProperty("error", "Invalid token")
   })

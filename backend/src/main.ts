@@ -33,7 +33,7 @@ import { QuizController, UserController } from "./infra/http/controller"
 import { AuthController } from "./infra/http/controller/AuthController"
 import { setupSwagger } from "./swagger"
 
-const app = express()
+const app: express.Express = express()
 
 // Environment validation
 if (process.env.NODE_ENV !== "test" && !process.env.DATABASE_URL) {

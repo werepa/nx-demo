@@ -148,8 +148,8 @@ export class Quiz extends Entity<QuizProps> {
       topicsRoot: this.props.topicsRoot.toDTO(),
       answers: this.props.answers.toDTO(),
       isActive: this.props.isActive,
-      createdAt: this.props.createdAt.formatoBr,
-      updatedAt: this.props.updatedAt ? this.props.updatedAt.formatoBr : null,
+      createdAt: this.props.createdAt.value,
+      updatedAt: this.props.updatedAt ? this.props.updatedAt.value : null,
     }
   }
 

@@ -9,10 +9,20 @@ import {
   LearningDTO,
   TopicLearningDTO,
 } from "@simulex/models"
-import { Discipline, Topic, QuizAnswer, User, Learning } from "../../domain/entity"
+import { Discipline, Topic, QuizAnswer, User, Learning, TopicLearning, QuestionOption } from "../../domain/entity"
 import { QuizType } from "../../domain/valueObject"
 
-export type UserState = UserDTO
+export type UserState = {
+  userId: string
+  name: string
+  email: string
+  password: string
+  role: string
+  image: string
+  isActive: boolean
+  createdAt: Date
+  updatedAt: Date | null
+}
 
 export type DisciplineState = {
   disciplineId: string
@@ -39,8 +49,35 @@ export type TopicState = {
   updatedAt: Date | null
 }
 
-export type QuestionState = QuestionDTO
-export type QuestionOptionState = QuestionOptionDTO
+export type QuestionState = {
+  questionId: string
+  topicId: string
+  prompt: string
+  isMultipleChoice: boolean
+  options: QuestionOption[]
+  difficulty: number
+  qtyAnswered: number
+  qtyCorrectAnswers: number
+  difficultyRecursive: number
+  simulexHash: string
+  topicRootId: string
+  linkedTopics: string[]
+  year: string
+  sourceId: string
+  isActive: boolean
+  createdBy: string
+  createdAt: Date
+}
+
+export type QuestionOptionState = {
+  optionId: string
+  text: string
+  isCorrectAnswer: boolean
+  item: number
+  obs: string
+  questionId: string
+}
+
 export type QuizState = {
   quizId: string
   user: User
@@ -52,8 +89,26 @@ export type QuizState = {
   createdAt: Date
   updatedAt: Date | null
 }
-export type QuizAnswerState = QuizAnswerDTO
-export type LearningState = LearningDTO
+
+export type QuizAnswerState = {
+  quizAnswerId: string
+  quizId: string
+  questionId: string
+  topicId: string
+  correctOptionId: string | null
+  userOptionId: string | null
+  isUserAnswerCorrect: boolean
+  canRepeat: boolean
+  createdAt: Date
+}
+
+export type LearningState = {
+  learningId: string
+  user: User
+  discipline: Discipline
+  topicsLearning: TopicLearning[]
+  history: QuizAnswer[]
+}
 
 export type TopicLearningState = {
   topicLearningId: string

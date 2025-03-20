@@ -12,32 +12,21 @@ interface TopicLearningComparison {
 }
 
 export class TopicLearningList extends List<TopicLearning> {
-  private constructor(
-    private _userId: string,
-    topicLearnings: TopicLearning[],
-  ) {
+  private constructor(private _userId: string, topicLearnings: TopicLearning[]) {
     super(topicLearnings, "topicLearningId")
   }
 
-  static create(
-    userId: string,
-    topicLearnings: TopicLearning[],
-  ): TopicLearningList {
+  static create(userId: string, topicLearnings: TopicLearning[]): TopicLearningList {
     topicLearnings.forEach((topicLearning) => {
       if (topicLearning.userId !== userId) {
-        throw new Error(
-          `User ID mismatch: expected ${userId}, got ${topicLearning.userId}`,
-        )
+        throw new Error(`User ID mismatch: expected ${userId}, got ${topicLearning.userId}`)
       }
     })
     return new TopicLearningList(userId, topicLearnings)
   }
 
   override add(topicLearning: TopicLearning): void {
-    if (this.exists(topicLearning))
-      throw new Error(
-        `TopicLearning ID:${topicLearning.topicLearningId} already exists!`,
-      )
+    if (this.exists(topicLearning)) throw new Error(`TopicLearning ID:${topicLearning.topicLearningId} already exists!`)
     if (topicLearning.userId !== this._userId) {
       throw new Error("User not matches with userId")
     }
@@ -48,11 +37,7 @@ export class TopicLearningList extends List<TopicLearning> {
 
   findByTopicId(topicId: string): TopicLearning | null {
     if (!topicId) throw new Error("Topic ID is required")
-    return (
-      this.items.find(
-        (topicLearning) => topicLearning.topic.topicId === topicId,
-      ) ?? null
-    )
+    return this.items.find((topicLearning) => topicLearning.topic.topicId === topicId) ?? null
   }
 
   override getItems(): TopicLearning[] {
@@ -67,10 +52,7 @@ export class TopicLearningList extends List<TopicLearning> {
   }
 
   topicsChildren(topicLearning: TopicLearning): TopicLearning[] {
-    return this.getItems().filter(
-      (t: TopicLearning) =>
-        t.topic.topicParentId === topicLearning.topic.topicId,
-    )
+    return this.getItems().filter((t: TopicLearning) => t.topic.topicParentId === topicLearning.topic.topicId)
   }
 
   topicsChildrenRecursive(topicLearning: TopicLearning): TopicLearning[] {
@@ -95,14 +77,11 @@ export class TopicLearningList extends List<TopicLearning> {
       })
   }
 
-  public toDTO(): TopicLearningDTO[] {
+  public override toDTO(): TopicLearningDTO[] {
     return this.getItems().map((topicLearning) => topicLearning.toDTO())
   }
 
-  compareValues(
-    a: TopicLearningComparison,
-    b: TopicLearningComparison,
-  ): number {
+  compareValues(a: TopicLearningComparison, b: TopicLearningComparison): number {
     const scoreA = a.qtyQuestionsRecursive / a.maxQtyAllQuestionsDepth
     const scoreB = b.qtyQuestionsRecursive / b.maxQtyAllQuestionsDepth
 

@@ -187,8 +187,8 @@ export class DisciplineRepositoryDatabase implements DisciplineRepository {
         dependencies: JSON.parse(topic.dependencies),
         obs: topic.obs,
         isActive: !!topic.is_active,
-        createdAt: DateBr.create(topic.created_at).value.toISOString(),
-        updatedAt: topic.updated_at ? DateBr.create(topic.updated_at).value.toISOString() : null,
+        createdAt: DateBr.create(topic.created_at).value,
+        updatedAt: topic.updated_at ? DateBr.create(topic.updated_at).value : null,
       }
       disciplineState.topics.push(topicState)
     })

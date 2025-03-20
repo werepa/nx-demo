@@ -2,6 +2,7 @@ import { DatabaseConnection } from "../database/DatabaseConnection"
 import { UserRepository } from "../../application/repository/UserRepository"
 import { User } from "../../domain/entity/User"
 import { UserState } from "../../shared/models"
+import { UserPassword } from "../../domain/valueObject"
 
 interface RawUserData {
   user_id: string
@@ -125,6 +126,7 @@ export class UserRepositoryDatabase implements UserRepository {
       userId: userFromDB.user_id,
       name: userFromDB.name,
       email: userFromDB.email,
+      password: UserPassword.create(userFromDB.password, true).value,
       role: userFromDB.role,
       image: userFromDB.image,
       isActive: !!userFromDB.is_active,

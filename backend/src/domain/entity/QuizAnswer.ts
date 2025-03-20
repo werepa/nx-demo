@@ -91,7 +91,7 @@ export class QuizAnswer extends Entity<QuizAnswerProps> {
   }
 
   get isUserAnswerCorrect() {
-    return this.props.correctAnswered
+    return this.props.isUserAnswerCorrect
   }
 
   get canRepeat() {
@@ -112,7 +112,7 @@ export class QuizAnswer extends Entity<QuizAnswerProps> {
       userOptionId: this.userOptionId,
       isUserAnswerCorrect: this.isUserAnswerCorrect,
       canRepeat: this.props.canRepeat,
-      createdAt: this.createdAt.formatoISO,
+      createdAt: this.createdAt.value,
     }
   }
 }

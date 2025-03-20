@@ -32,7 +32,18 @@ export const userMock = (dto: IUserMockWithDisciplineDto = {}): User => {
   if (!dto.discipline) {
     dto.discipline = disciplineMock()
   }
-  return User.toDomain(userMockDTO(dto))
+  const mockData = userMockDTO(dto)
+  return User.toDomain({
+    userId: dto.userId || mockData.userId,
+    name: dto.name || mockData.name,
+    email: mockData.email,
+    password: faker.internet.password(),
+    role: dto.role || mockData.role,
+    image: mockData.image,
+    isActive: mockData.isActive,
+    createdAt: mockData.createdAt,
+    updatedAt: mockData.updatedAt,
+  })
 }
 
 export const userState = (user: User): UserDTO => {
