@@ -7,10 +7,8 @@ import { Discipline } from "../../domain/entity/Discipline"
 import { User } from "../../domain/entity/User"
 import { DateBr } from "../../shared/domain/valueObject/DateBr"
 import { DatabaseConnection } from "../database"
-import {
-  LearningFromPersistence,
-  TopicLearningFromPersistence,
-} from "../../shared/models"
+import { LearningState, TopicLearningState } from "../../shared/models"
+import { randomUUID } from "crypto"
 
 interface QuestionStatsByTopic {
   topicId: string
@@ -22,23 +20,16 @@ interface QuestionStatsByTopic {
 export class LearningRepositoryDatabase implements LearningRepository {
   constructor(private readonly connection: DatabaseConnection) {}
 
-  async getDisciplineLearning(
-    user: User,
-    discipline: Discipline,
-  ): Promise<Learning> {
-    if (!user || !discipline)
-      throw new Error("User and Discipline are required")
-    const disciplineStatsFromDB = await this.fetchDisciplineStats(
-      discipline.disciplineId,
-    )
+  async getDisciplineLearning(user: User, discipline: Discipline): Promise<Learning> {
+    if (!user || !discipline) throw new Error("User and Discipline are required")
+    const disciplineStatsFromDB = await this.fetchDisciplineStats(discipline.disciplineId)
     const disciplineLearningFromDB = await this.fetchDisciplineLearning({
       userId: user.userId,
       disciplineId: discipline.disciplineId,
     })
-    const disciplineCollectiveLearningFromDB =
-      await this.fetchCollectiveDisciplineLearning({
-        disciplineId: discipline.disciplineId,
-      })
+    const disciplineCollectiveLearningFromDB = await this.fetchCollectiveDisciplineLearning({
+      disciplineId: discipline.disciplineId,
+    })
     const disciplineHistoryFromDB = await this.fetchDisciplineHistory({
       userId: user.userId,
       disciplineId: discipline.disciplineId,
@@ -49,7 +40,7 @@ export class LearningRepositoryDatabase implements LearningRepository {
       disciplineCollectiveLearningFromDB,
       disciplineHistoryFromDB,
       user,
-      discipline,
+      discipline
     )
 
     this.updateTopicsFrequencies(learning)
@@ -69,11 +60,7 @@ export class LearningRepositoryDatabase implements LearningRepository {
     // atualiza os tópicos com mesmo topicRootId
     learning.topics
       .getItems()
-      .filter(
-        (topicLearning) =>
-          topicLearning.topic.topicRootId ===
-          lastQuestionAnswerTopic?.topicRootId,
-      )
+      .filter((topicLearning) => topicLearning.topic.topicRootId === lastQuestionAnswerTopic?.topicRootId)
       .forEach(async (topicLearning) => {
         const existingTopicLearning = await this.existTopicLearning({
           userId: topicLearning.userId,
@@ -90,18 +77,14 @@ export class LearningRepositoryDatabase implements LearningRepository {
   async clear(): Promise<void> {
     if (this.connection.databaseType() === "postgres") {
       const tables = ["user_topic_learning"]
-      const truncateQuery = `TRUNCATE TABLE ${tables
-        .map((table) => `public.${table}`)
-        .join(", ")} CASCADE`
+      const truncateQuery = `TRUNCATE TABLE ${tables.map((table) => `public.${table}`).join(", ")} CASCADE`
       return this.connection.run(truncateQuery)
     } else {
       return this.connection.run("DELETE FROM user_topic_learning")
     }
   }
 
-  private async insertTopicLearning(
-    topicLearning: TopicLearning,
-  ): Promise<void> {
+  private async insertTopicLearning(topicLearning: TopicLearning): Promise<void> {
     const query = `
       INSERT INTO user_topic_learning (
         user_topic_learning_id, user_id, topic_id, score, avg_grade, level_in_topic, qty_questions_answered
@@ -119,9 +102,7 @@ export class LearningRepositoryDatabase implements LearningRepository {
     await this.connection.run(query, params)
   }
 
-  private async updateTopicLearning(
-    topicLearning: TopicLearning,
-  ): Promise<void> {
+  private async updateTopicLearning(topicLearning: TopicLearning): Promise<void> {
     const query = `
       UPDATE user_topic_learning SET
         user_id = ?, topic_id = ?, score = ?, avg_grade = ?, level_in_topic = ?, qty_questions_answered = ?
@@ -150,10 +131,7 @@ export class LearningRepositoryDatabase implements LearningRepository {
     return this.connection.all(query, disciplineId)
   }
 
-  private async existTopicLearning(dto: {
-    userId: string
-    topicId: string
-  }): Promise<boolean> {
+  private async existTopicLearning(dto: { userId: string; topicId: string }): Promise<boolean> {
     const query = `
     SELECT * FROM user_topic_learning WHERE user_id = ? AND topic_id = ?
     `
@@ -161,10 +139,7 @@ export class LearningRepositoryDatabase implements LearningRepository {
     return result.length > 0
   }
 
-  private async fetchDisciplineLearning(dto: {
-    userId: string
-    disciplineId: string
-  }): Promise<any> {
+  private async fetchDisciplineLearning(dto: { userId: string; disciplineId: string }): Promise<any> {
     const query = `
       SELECT utl.* FROM user_topic_learning utl
       JOIN topic t ON utl.topic_id = t.topic_id
@@ -173,9 +148,7 @@ export class LearningRepositoryDatabase implements LearningRepository {
     return this.connection.all(query, [dto.userId, dto.disciplineId])
   }
 
-  private async fetchCollectiveDisciplineLearning(dto: {
-    disciplineId: string
-  }): Promise<any> {
+  private async fetchCollectiveDisciplineLearning(dto: { disciplineId: string }): Promise<any> {
     const query = `
       SELECT utl.topic_id, AVG(utl.avg_grade) as collective_avg_grade, AVG(utl.score) as collective_avg_score
       FROM user_topic_learning utl
@@ -186,10 +159,7 @@ export class LearningRepositoryDatabase implements LearningRepository {
     return this.connection.all(query, dto.disciplineId)
   }
 
-  private async fetchDisciplineHistory(dto: {
-    userId: string
-    disciplineId: string
-  }): Promise<any> {
+  private async fetchDisciplineHistory(dto: { userId: string; disciplineId: string }): Promise<any> {
     const query = `
       SELECT t.topic_id, qa.* FROM quiz_answer qa
       JOIN question q ON qa.question_id = q.question_id
@@ -206,22 +176,17 @@ export class LearningRepositoryDatabase implements LearningRepository {
     disciplineCollectiveLearningFromDB: any,
     disciplineHistoryFromDB: any,
     user: User,
-    discipline: Discipline,
+    discipline: Discipline
   ): Learning {
     const learning = Learning.create({ discipline, user })
     disciplineStats.forEach((topicStats: any) => {
-      const topicLearningFromDB = disciplineLearningFromDB?.find(
-        (t: any) => t.topic_id === topicStats.topic_id,
+      const topicLearningFromDB = disciplineLearningFromDB?.find((t: any) => t.topic_id === topicStats.topic_id)
+      const topicCollectiveLearningFromDB = disciplineCollectiveLearningFromDB.find(
+        (t: any) => t.topic_id === topicStats.topic_id
       )
-      const topicCollectiveLearningFromDB =
-        disciplineCollectiveLearningFromDB.find(
-          (t: any) => t.topic_id === topicStats.topic_id,
-        )
       const topicLearning = TopicLearning.toDomain({
-        topicLearningId:
-          topicLearningFromDB?.user_topic_learning_id || crypto.randomUUID(),
+        topicLearningId: topicLearningFromDB?.user_topic_learning_id || randomUUID(),
         userId: user.userId,
-        disciplineId: discipline.disciplineId,
         topic: discipline.topic({ topicId: topicStats.topic_id }),
         levelInTopic: topicLearningFromDB?.level_in_topic,
         qtyQuestions: topicStats.qty_questions,
@@ -250,13 +215,12 @@ export class LearningRepositoryDatabase implements LearningRepository {
           topicId: quizAnswerFromDB.topic_id,
           questionId: quizAnswerFromDB.question_id,
           userOptionId: quizAnswerFromDB.user_option_id,
-          isUserAnswerCorrect:
-            quizAnswerFromDB.is_user_answer_correct === this.dbType(1),
+          isUserAnswerCorrect: quizAnswerFromDB.is_user_answer_correct === this.dbType(1),
           canRepeat: quizAnswerFromDB.can_repeat === this.dbType(1),
           createdAt: DateBr.create(quizAnswerFromDB.created_at).value,
           correctOptionId: quizAnswerFromDB.correct_option_id || "",
-        }),
-      ),
+        })
+      )
     )
     return learning
   }
@@ -266,33 +230,22 @@ export class LearningRepositoryDatabase implements LearningRepository {
       const topicLearning = learning.topics.findByTopicId(topic.topicId)
       if (!topicLearning) return
       const qtyQuestions = topicLearning.qtyQuestions
-      const qtyQuestionsRecursive = this.calculateqtyQuestionsRecursive(
-        topic.topicId,
-        learning,
-      )
+      const qtyQuestionsRecursive = this.calculateqtyQuestionsRecursive(topic.topicId, learning)
       topicLearning.setQtyQuestionsRecursive(qtyQuestionsRecursive)
       const qtyAllQuestionsDepth = qtyQuestions + qtyQuestionsRecursive
       topicLearning.setQtyAllQuestionsDepth(qtyAllQuestionsDepth)
-      const maxQtyAllQuestionsDepth = this.calculateMaxQtyAllQuestionsInDepth(
-        topic.depth,
-        learning,
-      )
+      const maxQtyAllQuestionsDepth = this.calculateMaxQtyAllQuestionsInDepth(topic.depth, learning)
       topicLearning.setMaxQtyAllQuestionsDepth(maxQtyAllQuestionsDepth)
-      const maxQtyAllQuestionsRootRecursive =
-        this.calculateMaxQtyAllQuestionsRootRecursive(learning)
-      topicLearning.setMaxQtyAllQuestionsRootRecursive(
-        maxQtyAllQuestionsRootRecursive,
-      )
+      const maxQtyAllQuestionsRootRecursive = this.calculateMaxQtyAllQuestionsRootRecursive(learning)
+      topicLearning.setMaxQtyAllQuestionsRootRecursive(maxQtyAllQuestionsRootRecursive)
       const frequencyInDepth = Number(
         (
           (qtyAllQuestionsDepth / maxQtyAllQuestionsDepth) *
           Math.pow(10, learning.discipline.maxTopicsDepth() - topic.depth)
-        ).toFixed(4),
+        ).toFixed(4)
       )
       topicLearning.setFrequencyInDepth(frequencyInDepth)
-      const frequencyInDiscipline = Number(
-        (qtyAllQuestionsDepth / maxQtyAllQuestionsRootRecursive).toFixed(4),
-      )
+      const frequencyInDiscipline = Number((qtyAllQuestionsDepth / maxQtyAllQuestionsRootRecursive).toFixed(4))
       topicLearning.setFrequencyInDiscipline(frequencyInDiscipline)
     })
   }
@@ -303,48 +256,32 @@ export class LearningRepositoryDatabase implements LearningRepository {
     })
   }
 
-  private updateTopicDifficultyRecursive(
-    topic: Topic,
-    learning: Learning,
-  ): void {
+  private updateTopicDifficultyRecursive(topic: Topic, learning: Learning): void {
     const topicLearning = learning.topics.findByTopicId(topic.topicId)
     if (!topicLearning) return
-    const difficultyRecursive = this.calculateDifficultyRecursive(
-      topic.topicId,
-      learning,
-    )
+    const difficultyRecursive = this.calculateDifficultyRecursive(topic.topicId, learning)
     topicLearning.setDifficultyRecursive(difficultyRecursive)
   }
 
-  private calculateDifficultyRecursive(
-    topicId: string,
-    learning: Learning,
-  ): number | null {
+  private calculateDifficultyRecursive(topicId: string, learning: Learning): number | null {
     let qty = 0
     let difficultyRecursive = 0
-    const qtyQuestionsAnswered =
-      learning.topics.findByTopicId(topicId)?.qtyQuestionsAnswered() || 0
+    const qtyQuestionsAnswered = learning.topics.findByTopicId(topicId)?.qtyQuestionsAnswered() || 0
     if (qtyQuestionsAnswered > 2) {
-      difficultyRecursive =
-        learning.topics.findByTopicId(topicId)?.difficulty ?? 50
+      difficultyRecursive = learning.topics.findByTopicId(topicId)?.difficulty ?? 50
       qty++
     }
-    learning.discipline
-      .topicsChildrenRecursive(topicId)
-      .forEach((topic: Topic) => {
-        const topicLearning = learning.topics.findByTopicId(topic.topicId)
-        if (topicLearning?.qtyQuestionsAnswered) {
-          difficultyRecursive += topicLearning.difficulty
-          qty++
-        }
-      })
+    learning.discipline.topicsChildrenRecursive(topicId).forEach((topic: Topic) => {
+      const topicLearning = learning.topics.findByTopicId(topic.topicId)
+      if (topicLearning?.qtyQuestionsAnswered) {
+        difficultyRecursive += topicLearning.difficulty
+        qty++
+      }
+    })
     return qty ? Number((difficultyRecursive / qty).toFixed(4)) : null
   }
 
-  private calculateMaxQtyAllQuestionsInDepth(
-    depth: number,
-    learning: Learning,
-  ): number {
+  private calculateMaxQtyAllQuestionsInDepth(depth: number, learning: Learning): number {
     let maxQtyAllQuestionsDepth = 0
     learning.discipline.topics
       .getItems()
@@ -353,28 +290,19 @@ export class LearningRepositoryDatabase implements LearningRepository {
         const topicLearning = learning.topics.findByTopicId(topic.topicId)
         if (!topicLearning) return
         const qtyAllQuestionsDepth =
-          topicLearning.qtyQuestions +
-          this.calculateqtyQuestionsRecursive(topic.topicId, learning)
-        if (qtyAllQuestionsDepth > maxQtyAllQuestionsDepth)
-          maxQtyAllQuestionsDepth = qtyAllQuestionsDepth
+          topicLearning.qtyQuestions + this.calculateqtyQuestionsRecursive(topic.topicId, learning)
+        if (qtyAllQuestionsDepth > maxQtyAllQuestionsDepth) maxQtyAllQuestionsDepth = qtyAllQuestionsDepth
       })
     return maxQtyAllQuestionsDepth
   }
 
-  private calculateqtyQuestionsRecursive(
-    topicId: string,
-    learning: Learning,
-  ): number {
+  private calculateqtyQuestionsRecursive(topicId: string, learning: Learning): number {
     let qtyQuestionsRecursive = 0
-    learning.discipline
-      .topicsChildrenRecursive(topicId)
-      .forEach((topic: Topic) => {
-        const topicLearning: TopicLearning = learning.topics.findByTopicId(
-          topic.topicId,
-        )
-        if (!topicLearning) return
-        qtyQuestionsRecursive += topicLearning.qtyQuestions
-      })
+    learning.discipline.topicsChildrenRecursive(topicId).forEach((topic: Topic) => {
+      const topicLearning: TopicLearning = learning.topics.findByTopicId(topic.topicId)
+      if (!topicLearning) return
+      qtyQuestionsRecursive += topicLearning.qtyQuestions
+    })
     return qtyQuestionsRecursive
   }
 
@@ -386,25 +314,17 @@ export class LearningRepositoryDatabase implements LearningRepository {
       .map((topic: Topic) => {
         const topicLearning = learning.topics.findByTopicId(topic.topicId)
         if (!topicLearning) return
-        const qtyAllQuestionsRoot =
-          topicLearning.qtyQuestions +
-          this.calculateqtyQuestionsRecursive(topic.topicId, learning)
-        if (qtyAllQuestionsRoot > maxQtyAllQuestionsRootRecursive)
-          maxQtyAllQuestionsRootRecursive = qtyAllQuestionsRoot
+        const qtyAllQuestionsRoot = topicLearning.qtyQuestions + this.calculateqtyQuestionsRecursive(topic.topicId, learning)
+        if (qtyAllQuestionsRoot > maxQtyAllQuestionsRootRecursive) maxQtyAllQuestionsRootRecursive = qtyAllQuestionsRoot
       })
     return maxQtyAllQuestionsRootRecursive
   }
 
   private dbType(value: number): any {
-    return this.connection.databaseType() === "postgres"
-      ? Boolean(value)
-      : value
+    return this.connection.databaseType() === "postgres" ? Boolean(value) : value
   }
 
-  private async getQuestionStatsByTopic(
-    userId: string,
-    disciplineId: string,
-  ): Promise<QuestionStatsByTopic[]> {
+  private async getQuestionStatsByTopic(userId: string, disciplineId: string): Promise<QuestionStatsByTopic[]> {
     const result = await this.connection.query<QuestionStatsByTopic>(`
       SELECT 
         q.topic_id as "topicId",
@@ -419,13 +339,11 @@ export class LearningRepositoryDatabase implements LearningRepository {
     return result.rows
   }
 
-  private mapToDomain(learningData: LearningFromPersistence): Learning {
+  private mapToDomain(learningData: LearningState): Learning {
     return Learning.toDomain(learningData)
   }
 
-  private mapToTopicLearningDomain(
-    data: TopicLearningFromPersistence,
-  ): TopicLearning {
+  private mapToTopicLearningDomain(data: TopicLearningState): TopicLearning {
     return TopicLearning.toDomain(data)
   }
 }

@@ -49,7 +49,7 @@ export const questionMock = (dto: IQuestionMockDto = {}): Question => {
   return Question.toDomain(questionDTO)
 }
 
-export const questionFromPersistence = (question: Question): QuestionDTO => {
+export const questionState = (question: Question): QuestionDTO => {
   return {
     questionId: question.id,
     topicId: question.topicId,

@@ -4,8 +4,9 @@ import { Topic } from "./Topic"
 import { QuizAnswerList } from "./QuizAnswerList"
 import { QuizAnswer } from "./QuizAnswer"
 import { Learning } from "./Learning"
-import { TopicLearningFromPersistence } from "../../shared/models"
+import { TopicLearningState } from "../../shared/models"
 import { TopicLearningDTO } from "@simulex/models"
+import { randomUUID } from "crypto"
 
 interface TopicLearningProps {
   topicLearningId: string
@@ -29,12 +30,12 @@ export class TopicLearning extends Entity<TopicLearningProps> {
     super(props, "topicLearningId")
   }
 
-  static create(dto: CreateTopicLearningInput): TopicLearning {
+  static create(dto: CreateTopicLearningCommand): TopicLearning {
     if (!dto.topic || !dto.userId || !dto.parent) {
       throw new Error("Missing required properties")
     }
 
-    const topicLearningId = crypto.randomUUID()
+    const topicLearningId = randomUUID()
     const props: TopicLearningProps = {
       topicLearningId,
       userId: dto.userId,
@@ -55,7 +56,7 @@ export class TopicLearning extends Entity<TopicLearningProps> {
     return new TopicLearning(props)
   }
 
-  public static toDomain(dto: TopicLearningFromPersistence): TopicLearning {
+  public static toDomain(dto: TopicLearningState): TopicLearning {
     if (!dto.topicLearningId || !dto.topic || !dto.userId || !dto.parent) {
       throw new Error("Missing required properties")
     }
@@ -64,31 +65,15 @@ export class TopicLearning extends Entity<TopicLearningProps> {
       userId: dto.userId,
       topic: dto.topic,
       qtyQuestions: dto.qtyQuestions ? Number(dto.qtyQuestions) : 0,
-      qtyQuestionsRecursive: dto.qtyQuestionsRecursive
-        ? Number(dto.qtyQuestionsRecursive)
-        : 0,
-      qtyAllQuestionsDepth: dto.qtyAllQuestionsDepth
-        ? Number(dto.qtyAllQuestionsDepth)
-        : 0,
-      maxQtyAllQuestionsDepth: dto.maxQtyAllQuestionsDepth
-        ? Number(dto.maxQtyAllQuestionsDepth)
-        : 0,
-      maxQtyAllQuestionsRootRecursive: dto.maxQtyAllQuestionsRootRecursive
-        ? Number(dto.maxQtyAllQuestionsRootRecursive)
-        : 0,
+      qtyQuestionsRecursive: dto.qtyQuestionsRecursive ? Number(dto.qtyQuestionsRecursive) : 0,
+      qtyAllQuestionsDepth: dto.qtyAllQuestionsDepth ? Number(dto.qtyAllQuestionsDepth) : 0,
+      maxQtyAllQuestionsDepth: dto.maxQtyAllQuestionsDepth ? Number(dto.maxQtyAllQuestionsDepth) : 0,
+      maxQtyAllQuestionsRootRecursive: dto.maxQtyAllQuestionsRootRecursive ? Number(dto.maxQtyAllQuestionsRootRecursive) : 0,
       frequencyInDepth: dto.frequencyInDepth ? Number(dto.frequencyInDepth) : 0,
-      frequencyInDiscipline: dto.frequencyInDiscipline
-        ? Number(dto.frequencyInDiscipline)
-        : 0,
-      difficultyRecursive: dto.difficultyRecursive
-        ? Number(dto.difficultyRecursive)
-        : 50,
-      collectiveAvgGrade: dto.collectiveAvgGrade
-        ? Number(dto.collectiveAvgGrade)
-        : null,
-      collectiveAvgScore: dto.collectiveAvgScore
-        ? Number(dto.collectiveAvgScore)
-        : null,
+      frequencyInDiscipline: dto.frequencyInDiscipline ? Number(dto.frequencyInDiscipline) : 0,
+      difficultyRecursive: dto.difficultyRecursive ? Number(dto.difficultyRecursive) : 50,
+      collectiveAvgGrade: dto.collectiveAvgGrade ? Number(dto.collectiveAvgGrade) : null,
+      collectiveAvgScore: dto.collectiveAvgScore ? Number(dto.collectiveAvgScore) : null,
       parent: dto.parent,
     })
   }
@@ -161,16 +146,7 @@ export class TopicLearning extends Entity<TopicLearningProps> {
   }
 
   public learningLabel(): string {
-    const labels = [
-      "Não verificado",
-      "Em análise",
-      "Iniciante",
-      "Leigo",
-      "Aprendiz",
-      "Bacharel",
-      "Mestre",
-      "Doutor",
-    ]
+    const labels = ["Não verificado", "Em análise", "Iniciante", "Leigo", "Aprendiz", "Bacharel", "Mestre", "Doutor"]
     return labels[this.learning()]
   }
 
@@ -180,31 +156,16 @@ export class TopicLearning extends Entity<TopicLearningProps> {
     if (this.learning() > 1) {
       values.push(this.learning())
     }
-    this.props.parent.topics
-      .topicsChildrenRecursive(this)
-      .forEach((topicLearning: TopicLearning) => {
-        if (topicLearning.learning() > 1) {
-          values.push(topicLearning.learning())
-        }
-      })
-    return values.length
-      ? Math.floor(
-          values.reduce((acc, value) => acc + value, 0) / values.length,
-        )
-      : 0
+    this.props.parent.topics.topicsChildrenRecursive(this).forEach((topicLearning: TopicLearning) => {
+      if (topicLearning.learning() > 1) {
+        values.push(topicLearning.learning())
+      }
+    })
+    return values.length ? Math.floor(values.reduce((acc, value) => acc + value, 0) / values.length) : 0
   }
 
   public learningRecursiveLabel(): string {
-    const labels = [
-      "Não verificado",
-      "Em análise",
-      "Iniciante",
-      "Leigo",
-      "Aprendiz",
-      "Bacharel",
-      "Mestre",
-      "Doutor",
-    ]
+    const labels = ["Não verificado", "Em análise", "Iniciante", "Leigo", "Aprendiz", "Bacharel", "Mestre", "Doutor"]
     return labels[this.learningRecursive()]
   }
 
@@ -238,17 +199,10 @@ export class TopicLearning extends Entity<TopicLearningProps> {
   // Taxa de esquecimento do usuário
   // Anula a contribuição da pontuação no SRS após prazo de revisão, de forma a forçar a revisão do assunto
   public forgettingRate(): number {
-    if (
-      this.updatedAt() &&
-      this.score() > 0 &&
-      this.collectiveAvgGrade !== null
-    ) {
-      const waitingTime = Math.floor(
-        Math.pow(1 + (2 * this.collectiveAvgGrade) / 100, this.score() - 1),
-      )
+    if (this.updatedAt() && this.score() > 0 && this.collectiveAvgGrade !== null) {
+      const waitingTime = Math.floor(Math.pow(1 + (2 * this.collectiveAvgGrade) / 100, this.score() - 1))
       const deadline = this.updatedAt()?.addDays(waitingTime)
-      if (deadline && deadline.value <= DateBr.create().value)
-        return this.score()
+      if (deadline && deadline.value <= DateBr.create().value) return this.score()
     }
     return 0
   }
@@ -292,25 +246,19 @@ export class TopicLearning extends Entity<TopicLearningProps> {
   // Dificuldade do assunto atual
   // 0 a 100 (100 - média de acertos do assunto atual)
   get difficulty() {
-    return this.props.collectiveAvgGrade !== null
-      ? Number((100 - this.props.collectiveAvgGrade).toFixed(2))
-      : 50
+    return this.props.collectiveAvgGrade !== null ? Number((100 - this.props.collectiveAvgGrade).toFixed(2)) : 50
   }
 
   // Dificuldade do assunto atual recursivamente
   // 0 a 100 (100 - média de acertos do assunto atual recursivamente)
   get difficultyRecursive() {
-    return this.props.difficultyRecursive !== null
-      ? Number(this.props.difficultyRecursive.toFixed(2))
-      : 50
+    return this.props.difficultyRecursive !== null ? Number(this.props.difficultyRecursive.toFixed(2)) : 50
   }
 
   // Média de acertos coletivos do assunto atual
   // 0 a 100
   get collectiveAvgGrade() {
-    return this.props.collectiveAvgGrade
-      ? Number(this.props.collectiveAvgGrade.toFixed(2))
-      : null
+    return this.props.collectiveAvgGrade ? Number(this.props.collectiveAvgGrade.toFixed(2)) : null
   }
 
   // Média da pontuação coletiva
@@ -325,30 +273,20 @@ export class TopicLearning extends Entity<TopicLearningProps> {
 
   // Qtde de questões respondidas corretamente
   public qtyQuestionsCorrectAnswered() {
-    return this.history.getItems().filter((item) => item.isUserAnswerCorrect)
-      .length
+    return this.history.getItems().filter((item) => item.isUserAnswerCorrect).length
   }
 
   // Última questão foi respondida corretamente?
   public isLastQuestionCorrectAnswered() {
-    return this.history.getCount()
-      ? this.history.getShortHistory(1)[0].isUserAnswerCorrect
-      : null
+    return this.history.getCount() ? this.history.getShortHistory(1)[0].isUserAnswerCorrect : null
   }
 
   // SRS (Spaced Repetition System)
   // SRS = (frequencyInDepth + collectiveAvgScore )/(2ˆ(Score - forgettingRate))
   // * assuntos com menor SRS devem ser priorizados
   public srs() {
-    const collectiveAvgGradeValue = this.collectiveAvgGrade
-      ? this.collectiveAvgGrade
-      : 100
-    return Number(
-      (
-        (3 - this.frequencyInDepth - collectiveAvgGradeValue / 100) *
-        Math.pow(2, this.score())
-      ).toFixed(4),
-    )
+    const collectiveAvgGradeValue = this.collectiveAvgGrade ? this.collectiveAvgGrade : 100
+    return Number(((3 - this.frequencyInDepth - collectiveAvgGradeValue / 100) * Math.pow(2, this.score())).toFixed(4))
   }
 
   // Histórico de respostas do usuário no assunto
@@ -357,20 +295,13 @@ export class TopicLearning extends Entity<TopicLearningProps> {
   }
 
   public updatedAt(): DateBr | null {
-    return this.history.getShortHistory(1).length
-      ? this.history.getShortHistory(1)[0].createdAt
-      : null
+    return this.history.getShortHistory(1).length ? this.history.getShortHistory(1)[0].createdAt : null
   }
 
   // Média da nota do usuário
   public avgGrade() {
     return this.qtyQuestionsAnswered()
-      ? Number(
-          (
-            (100 * this.qtyQuestionsCorrectAnswered()) /
-            this.qtyQuestionsAnswered()
-          ).toFixed(2),
-        )
+      ? Number(((100 * this.qtyQuestionsCorrectAnswered()) / this.qtyQuestionsAnswered()).toFixed(2))
       : null
   }
 
@@ -410,9 +341,7 @@ export class TopicLearning extends Entity<TopicLearningProps> {
     this.props.maxQtyAllQuestionsDepth = maxQtyAllQuestionsDepth
   }
 
-  public setMaxQtyAllQuestionsRootRecursive(
-    maxQtyAllQuestionsRootRecursive: number,
-  ): void {
+  public setMaxQtyAllQuestionsRootRecursive(maxQtyAllQuestionsRootRecursive: number): void {
     this.props.maxQtyAllQuestionsRootRecursive = maxQtyAllQuestionsRootRecursive
   }
 
@@ -465,9 +394,7 @@ export class TopicLearning extends Entity<TopicLearningProps> {
     // calcula a média das últimas 5 questões do assunto
     function avgCorrectAnswered(list: QuizAnswer[]): number | null {
       if (!list.length) return null
-      const correctAnswered = list.filter(
-        (quizAnswer: QuizAnswer) => quizAnswer.isUserAnswerCorrect,
-      ).length
+      const correctAnswered = list.filter((quizAnswer: QuizAnswer) => quizAnswer.isUserAnswerCorrect).length
       return Math.floor((correctAnswered * 1000) / list.length) / 10
     }
 
@@ -478,12 +405,10 @@ export class TopicLearning extends Entity<TopicLearningProps> {
       weightedSum: number,
       avgCorrectAnswered: number | null,
       maxWeightedSum: number,
-      maxAvgCorrectAnswered: number,
+      maxAvgCorrectAnswered: number
     ): boolean | null {
       if (avgCorrectAnswered === null) return null
-      const result =
-        avgCorrectAnswered ** 2 / maxAvgCorrectAnswered ** 2 +
-        weightedSum ** 2 / maxWeightedSum ** 2
+      const result = avgCorrectAnswered ** 2 / maxAvgCorrectAnswered ** 2 + weightedSum ** 2 / maxWeightedSum ** 2
       return result <= 1
     }
 
@@ -495,65 +420,31 @@ export class TopicLearning extends Entity<TopicLearningProps> {
       // 6: mestre
       learning = 6
       // 5: bacharel
-      if (
-        insideEllipse(
-          weightedSum(shortHistory),
-          avgCorrectAnswered(shortHistory),
-          115,
-          121,
-        )
-      ) {
+      if (insideEllipse(weightedSum(shortHistory), avgCorrectAnswered(shortHistory), 115, 121)) {
         learning = 5
       }
       // 4: aprendiz
-      if (
-        insideEllipse(
-          weightedSum(shortHistory),
-          avgCorrectAnswered(shortHistory),
-          93,
-          99,
-        )
-      ) {
+      if (insideEllipse(weightedSum(shortHistory), avgCorrectAnswered(shortHistory), 93, 99)) {
         learning = 4
       }
       // 3: leigo
-      if (
-        insideEllipse(
-          weightedSum(shortHistory),
-          avgCorrectAnswered(shortHistory),
-          57,
-          70,
-        )
-      ) {
+      if (insideEllipse(weightedSum(shortHistory), avgCorrectAnswered(shortHistory), 57, 70)) {
         learning = 3
       }
       // 2: ignorante
-      if (
-        insideEllipse(
-          weightedSum(shortHistory),
-          avgCorrectAnswered(shortHistory),
-          11,
-          25,
-        )
-      ) {
+      if (insideEllipse(weightedSum(shortHistory), avgCorrectAnswered(shortHistory), 11, 25)) {
         learning = 2
       }
       if (shortHistory.length === 2) {
         if (weightedSum(shortHistory) === 100) {
           learning = 5 // bacharel
         }
-        if (
-          weightedSum(shortHistory) === 66.6 &&
-          avgCorrectAnswered(shortHistory) === 50
-        ) {
+        if (weightedSum(shortHistory) === 66.6 && avgCorrectAnswered(shortHistory) === 50) {
           learning = 4 // aprendiz
         }
       }
       if (shortHistory.length === 3) {
-        if (
-          weightedSum(shortHistory) === 83.3 &&
-          avgCorrectAnswered(shortHistory) === 66.6
-        ) {
+        if (weightedSum(shortHistory) === 83.3 && avgCorrectAnswered(shortHistory) === 66.6) {
           learning = 4 // aprendiz
         }
         if (weightedSum(shortHistory) === 100) {
@@ -561,10 +452,7 @@ export class TopicLearning extends Entity<TopicLearningProps> {
         }
       }
       if (shortHistory.length === 4) {
-        if (
-          weightedSum(shortHistory) === 60 &&
-          avgCorrectAnswered(shortHistory) === 75
-        ) {
+        if (weightedSum(shortHistory) === 60 && avgCorrectAnswered(shortHistory) === 75) {
           learning = 5 // bacharel
         }
         if (weightedSum(shortHistory) === 100) {
@@ -605,7 +493,7 @@ export class TopicLearning extends Entity<TopicLearningProps> {
 //  todas as questões serão movidas para o assunto "A classificar" de forma a não impactarem na frequencia dos assuntos e o assunto "A classificar" será mostrado nos gráficos como sendo o assunto root
 // caso haja o assunto "Conceito", o mesmo será mostrado nos gráficos como sendo o assunto pai
 
-export type CreateTopicLearningInput = {
+export type CreateTopicLearningCommand = {
   topic: Topic
   userId: string
   parent: Learning

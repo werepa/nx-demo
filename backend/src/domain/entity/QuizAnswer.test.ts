@@ -1,7 +1,7 @@
 import { CreateQuizAnswerInput, QuizAnswer } from "./QuizAnswer"
 import { DateBr } from "../../shared/domain/valueObject/DateBr"
 import { faker } from "@faker-js/faker"
-import { QuizAnswerFromPersistence } from "../../shared/models"
+import { QuizAnswerState } from "../../shared/models"
 
 describe("QuizAnswer", () => {
   describe("create", () => {
@@ -25,7 +25,7 @@ describe("QuizAnswer", () => {
 
   describe("toDomain", () => {
     it("should create a QuizAnswer instance", () => {
-      const fromPersistence: QuizAnswerFromPersistence = {
+      const state: QuizAnswerState = {
         quizAnswerId: "quizAnswerId",
         quizId: "quizId",
         questionId: "questionId",
@@ -35,19 +35,19 @@ describe("QuizAnswer", () => {
         canRepeat: false,
         createdAt: faker.date.recent(),
       }
-      const quizAnswer = QuizAnswer.toDomain(fromPersistence)
+      const quizAnswer = QuizAnswer.toDomain(state)
       expect(quizAnswer).toBeInstanceOf(QuizAnswer)
-      expect(quizAnswer.quizAnswerId).toBe(fromPersistence.quizAnswerId)
-      expect(quizAnswer.quizId).toBe(fromPersistence.quizId)
-      expect(quizAnswer.questionId).toBe(fromPersistence.questionId)
-      expect(quizAnswer.optionId).toBe(fromPersistence.optionId)
-      expect(quizAnswer.correctAnswered).toBe(fromPersistence.correctAnswered)
+      expect(quizAnswer.quizAnswerId).toBe(state.quizAnswerId)
+      expect(quizAnswer.quizId).toBe(state.quizId)
+      expect(quizAnswer.questionId).toBe(state.questionId)
+      expect(quizAnswer.optionId).toBe(state.optionId)
+      expect(quizAnswer.correctAnswered).toBe(state.correctAnswered)
       expect(quizAnswer.createdAt).toBeInstanceOf(DateBr)
     })
 
     it("should throw an error if required properties are missing", () => {
       // @ts-expect-error Testing missing createdAt
-      const fromPersistence: QuizAnswerFromPersistence = {
+      const state: QuizAnswerState = {
         quizAnswerId: "quizAnswerId",
         quizId: "quizId",
         questionId: "questionId",
@@ -56,9 +56,7 @@ describe("QuizAnswer", () => {
         correctAnswered: true,
         canRepeat: false,
       }
-      expect(() => QuizAnswer.toDomain(fromPersistence)).toThrow(
-        "Missing required properties",
-      )
+      expect(() => QuizAnswer.toDomain(state)).toThrow("Missing required properties")
     })
   })
 })

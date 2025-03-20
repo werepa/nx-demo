@@ -1,7 +1,9 @@
 import { faker } from "@faker-js/faker"
 import { Quiz, QuizAnswer } from "../../domain/entity"
 import { QuizDTO, QuizAnswerDTO } from "@simulex/models"
-import { userMock, disciplineMockFromPersistence } from "."
+import { userMock, disciplineMockState, disciplineMock } from "."
+import { QuizState } from "../../shared/models"
+import { QuizType } from "../../domain/valueObject"
 
 interface QuizMockOptions {
   quizId?: string
@@ -22,7 +24,7 @@ interface QuizAnswerMockOptions {
   canRepeat?: boolean
 }
 
-export const quizMockFromPersistence = (options: QuizMockOptions = {}): QuizDTO => {
+export const quizMockState = (options: QuizMockOptions = {}): QuizState => {
   const quizId = options.quizId || faker.string.uuid()
   const userId = options.userId || faker.string.uuid()
   const disciplineId = options.disciplineId || faker.string.uuid()
@@ -30,10 +32,10 @@ export const quizMockFromPersistence = (options: QuizMockOptions = {}): QuizDTO 
 
   return {
     quizId,
-    userId,
-    discipline: disciplineMockFromPersistence({ disciplineId }),
-    topicsRoot: [],
-    quizType: options.quizType || "random",
+    user: userMock({ userId }),
+    discipline: disciplineMock({ disciplineId }),
+    topicsRootId: [],
+    quizType: QuizType.create(options.quizType || "random"),
     answers: [],
     isActive: options.isActive !== undefined ? options.isActive : true,
     createdAt,
@@ -43,11 +45,11 @@ export const quizMockFromPersistence = (options: QuizMockOptions = {}): QuizDTO 
 
 export const quizMock = (options: QuizMockOptions = {}): Quiz => {
   const user = userMock()
-  const quizDTO = quizMockFromPersistence({ ...options, userId: user.userId })
+  const quizDTO: QuizState = quizMockState({ ...options, userId: user.userId })
   return Quiz.toDomain(quizDTO)
 }
 
-export const quizAnswerMockFromPersistence = (options: QuizAnswerMockOptions = {}): QuizAnswerDTO => {
+export const quizAnswerMockState = (options: QuizAnswerMockOptions = {}): QuizAnswerDTO => {
   const quizAnswerId = options.quizAnswerId || faker.string.uuid()
   const createdAt = faker.date.recent()
 
@@ -64,7 +66,7 @@ export const quizAnswerMockFromPersistence = (options: QuizAnswerMockOptions = {
   }
 }
 
-export const quizAnswerFromPersistence = (answer: QuizAnswer): QuizAnswerDTO => {
+export const quizAnswerState = (answer: QuizAnswer): QuizAnswerDTO => {
   return {
     quizAnswerId: answer.id,
     quizId: answer.quizId,
@@ -103,7 +105,7 @@ export const quizAnswerFromPersistence = (answer: QuizAnswer): QuizAnswerDTO => 
 //       .forEach(async (answer, index) => {
 //         const question = questions.find((question) => question.topicId === answer.topicId)
 //         if (!question) return
-//         const quizAnswerFromPersistence: QuizAnswerDTO = {
+//         const quizAnswerState: QuizAnswerDTO = {
 //           quizAnswerId: faker.string.uuid(),
 //           quizId: quiz.quizId,
 //           questionId: question.questionId,
@@ -114,7 +116,7 @@ export const quizAnswerFromPersistence = (answer: QuizAnswer): QuizAnswerDTO => 
 //           canRepeat: false,
 //           createdAt: new Date(baseDate.getTime() + index),
 //         }
-//         await quizRepository.saveAnswer(QuizAnswer.toDomain(quizAnswerFromPersistence))
+//         await quizRepository.saveAnswer(QuizAnswer.toDomain(quizAnswerState))
 //         questions = questions.filter((q) => q.questionId !== question.questionId)
 //       })
 //   })

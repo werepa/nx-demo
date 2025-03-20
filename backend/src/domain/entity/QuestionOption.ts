@@ -1,6 +1,6 @@
 import { Entity } from "../../shared/domain/entity"
 import { QuestionOptionDTO } from "@simulex/models"
-import { QuestionOptionFromPersistence } from "../../shared/models"
+import { QuestionOptionState } from "../../shared/models"
 import { randomUUID } from "crypto"
 
 interface QuestionOptionProps {
@@ -73,7 +73,7 @@ export class QuestionOption extends Entity<QuestionOptionProps> {
     this.props.questionId = questionId
   }
 
-  toPersistence(): QuestionOptionFromPersistence {
+  toPersistence(): QuestionOptionState {
     return {
       optionId: this.props.optionId,
       text: this.props.text,
@@ -95,7 +95,7 @@ export class QuestionOption extends Entity<QuestionOptionProps> {
     }
   }
 
-  public static toDomain(dto: QuestionOptionFromPersistence): QuestionOption {
+  public static toDomain(dto: QuestionOptionState): QuestionOption {
     if (!dto.optionId || !dto.text || dto.isCorrectAnswer === undefined || !dto.questionId) {
       throw new Error("Missing required properties")
     }

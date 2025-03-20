@@ -8,7 +8,8 @@ import { QuizTypeEnum, RoleEnum } from "../../shared/enum"
 import { QuizAnswerList } from "./QuizAnswerList"
 import { Topic } from "./Topic"
 import { QuizDTO } from "@simulex/models"
-import { QuizFromPersistence } from "../../shared/models"
+import { QuizState } from "../../shared/models"
+import { randomUUID } from "crypto"
 
 export interface QuizProps {
   quizId: string
@@ -27,19 +28,18 @@ export class Quiz extends Entity<QuizProps> {
     super(props, "quizId")
   }
 
-  static create(dto: CreateQuizInput): Quiz {
+  static create(dto: CreateQuizCommand): Quiz {
     if (!dto.user || !dto.discipline) {
       throw new Error("Missing required properties")
     }
     if (!dto.quizType) dto.quizType = QuizType.create("aleatorio")
     if (
-      (dto.quizType.value === QuizTypeEnum.LEARNING ||
-        dto.quizType.value === QuizTypeEnum.CHECK) &&
+      (dto.quizType.value === QuizTypeEnum.LEARNING || dto.quizType.value === QuizTypeEnum.CHECK) &&
       dto.user.isRole(RoleEnum.FREE)
     )
       throw new Error("Free users can only create random or review quizzes")
 
-    const quizId = crypto.randomUUID()
+    const quizId = randomUUID()
     const props: QuizProps = {
       quizId,
       quizType: dto.quizType,
@@ -54,15 +54,8 @@ export class Quiz extends Entity<QuizProps> {
     return new Quiz(props)
   }
 
-  public static toDomain(dto: QuizFromPersistence): Quiz {
-    if (
-      !dto.quizId ||
-      !dto.quizType ||
-      !dto.user ||
-      !dto.discipline ||
-      !dto.answers ||
-      !dto.createdAt
-    ) {
+  public static toDomain(dto: QuizState): Quiz {
+    if (!dto.quizId || !dto.quizType || !dto.user || !dto.discipline || !dto.answers || !dto.createdAt) {
       throw new Error("Missing required properties")
     }
 
@@ -162,8 +155,7 @@ export class Quiz extends Entity<QuizProps> {
 
   public updateQuizType(quizType: QuizType) {
     if (
-      (quizType.value === QuizTypeEnum.LEARNING ||
-        quizType.value === QuizTypeEnum.CHECK) &&
+      (quizType.value === QuizTypeEnum.LEARNING || quizType.value === QuizTypeEnum.CHECK) &&
       this.user.isRole(RoleEnum.FREE)
     ) {
       throw new Error("Free users can only create random or review quizzes")
@@ -171,28 +163,20 @@ export class Quiz extends Entity<QuizProps> {
     this.props.quizType = quizType
   }
 
-  public topic({
-    topicId,
-    name,
-  }: {
-    topicId?: string
-    name?: string
-  }): Topic | null {
+  public topic({ topicId, name }: { topicId?: string; name?: string }): Topic | null {
     if (topicId) {
       const topic = this.topics.find((t) => t.topicId === topicId)
       return topic ? topic : null
     }
     if (name) {
-      const topic = this.topics.filter(
-        (topic) => topic.name.toLowerCase() === name.toLowerCase(),
-      )[0]
+      const topic = this.topics.filter((topic) => topic.name.toLowerCase() === name.toLowerCase())[0]
       return topic ? topic : null
     }
     return null
   }
 }
 
-export interface CreateQuizInput {
+export interface CreateQuizCommand {
   user: User
   discipline: Discipline
   quizType?: QuizType

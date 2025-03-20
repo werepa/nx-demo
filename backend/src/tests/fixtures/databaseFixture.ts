@@ -5,7 +5,7 @@ import { getCorrectOption, getIncorrectOption } from "../mocks"
 import { CheckQuizAnswer } from "../../application/usecase"
 import { DisciplineRepository, QuestionRepository, QuizRepository, UserRepository } from "../../application/repository"
 import { DatabaseConnection } from "../../infra/database/DatabaseConnection"
-import { DisciplineFromPersistence, TopicFromPersistence, UserFromPersistence } from "../../shared/models"
+import { DisciplineState, TopicState, UserState } from "../../shared/models"
 
 type DbResultType<T> = {
   rows: T[]
@@ -15,9 +15,9 @@ type DbResultType<T> = {
 }
 
 interface DatabaseFixture {
-  users: UserFromPersistence[]
-  disciplines: DisciplineFromPersistence[]
-  topics: TopicFromPersistence[]
+  users: UserState[]
+  disciplines: DisciplineState[]
+  topics: TopicState[]
 }
 
 export class TestDatabaseFixture {
@@ -37,20 +37,20 @@ export class TestDatabaseFixture {
     return TestDatabaseFixture.instance
   }
 
-  async loadUsers(): Promise<DbResultType<UserFromPersistence>> {
-    const result = await this.connection.query<UserFromPersistence>("SELECT * FROM users")
+  async loadUsers(): Promise<DbResultType<UserState>> {
+    const result = await this.connection.query<UserState>("SELECT * FROM users")
     this.fixture.users = result.rows
     return result
   }
 
-  async loadDisciplines(): Promise<DbResultType<DisciplineFromPersistence>> {
-    const result = await this.connection.query<DisciplineFromPersistence>("SELECT * FROM disciplines")
+  async loadDisciplines(): Promise<DbResultType<DisciplineState>> {
+    const result = await this.connection.query<DisciplineState>("SELECT * FROM disciplines")
     this.fixture.disciplines = result.rows
     return result
   }
 
-  async loadTopics(): Promise<DbResultType<TopicFromPersistence>> {
-    const result = await this.connection.query<TopicFromPersistence>("SELECT * FROM topics")
+  async loadTopics(): Promise<DbResultType<TopicState>> {
+    const result = await this.connection.query<TopicState>("SELECT * FROM topics")
     this.fixture.topics = result.rows
     return result
   }

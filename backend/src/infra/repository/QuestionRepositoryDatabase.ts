@@ -5,7 +5,7 @@ import {
 } from "../../application/repository/QuestionRepository"
 import { Question } from "../../domain/entity/Question"
 import { DateBr } from "../../shared/domain/valueObject/DateBr"
-import { QuestionFromPersistence } from "../../shared/models"
+import { QuestionState } from "../../shared/models"
 import { DatabaseConnection } from "../database"
 
 export class QuestionRepositoryDatabase implements QuestionRepository {
@@ -28,9 +28,7 @@ export class QuestionRepositoryDatabase implements QuestionRepository {
       question.sourceId,
       question.isActive ? this.dbType(1) : this.dbType(0),
       question.createdBy,
-      question.createdAt
-        ? question.createdAt.value.toISOString()
-        : DateBr.create().value.toISOString(),
+      question.createdAt ? question.createdAt.value.toISOString() : DateBr.create().value.toISOString(),
     ]
   }
 
@@ -55,10 +53,7 @@ export class QuestionRepositoryDatabase implements QuestionRepository {
         created_at = ?
       WHERE question_id = ?
     `
-    const params = [
-      ...this.prepareQuestionParams(question),
-      question.questionId,
-    ]
+    const params = [...this.prepareQuestionParams(question), question.questionId]
     await this.connection.run(query, params)
   }
 
@@ -84,10 +79,7 @@ export class QuestionRepositoryDatabase implements QuestionRepository {
         created_at
       ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
     `
-    const params = [
-      question.questionId,
-      ...this.prepareQuestionParams(question),
-    ]
+    const params = [question.questionId, ...this.prepareQuestionParams(question)]
     await this.connection.run(query, params)
   }
 
@@ -104,16 +96,14 @@ export class QuestionRepositoryDatabase implements QuestionRepository {
     if (!questionId) return null
     const query = "SELECT * FROM question WHERE question_id = ?"
     const questionFromDB = await this.connection.get(query, questionId)
-    return questionFromDB
-      ? Question.toDomain(this.convertDatabaseQuestion(questionFromDB))
-      : null
+    return questionFromDB ? Question.toDomain(this.convertDatabaseQuestion(questionFromDB)) : null
   }
 
   async getAll(
     { topicId, showAll }: { topicId?: string; showAll?: boolean } = {
       topicId: null,
       showAll: false,
-    },
+    }
   ): Promise<Question[]> {
     const queryParts = [`SELECT * FROM question WHERE ${this.dbType(1)}`]
     if (!showAll) queryParts.push(`AND is_active = ${this.dbType(1)}`)
@@ -121,9 +111,7 @@ export class QuestionRepositoryDatabase implements QuestionRepository {
     queryParts.push("ORDER BY created_at DESC LIMIT 100")
     const query = queryParts.join(" ")
     const questionsFromDB = await this.connection.all(query)
-    return questionsFromDB.map((question: any) =>
-      Question.toDomain(this.convertDatabaseQuestion(question)),
-    )
+    return questionsFromDB.map((question: any) => Question.toDomain(this.convertDatabaseQuestion(question)))
   }
 
   async getRandom({
@@ -147,9 +135,7 @@ export class QuestionRepositoryDatabase implements QuestionRepository {
         FROM quiz_answer qa
         JOIN quiz qz ON qa.quiz_id = qz.quiz_id
         JOIN question q ON qa.question_id = q.question_id
-        WHERE q.topic_id = ? AND qz.user_id = ? AND qa.can_repeat = ${this.dbType(
-          0,
-        )}
+        WHERE q.topic_id = ? AND qz.user_id = ? AND qa.can_repeat = ${this.dbType(0)}
       )
       AND t.topic_root_id IN (${topicsRootParam})
       ORDER BY RANDOM()
@@ -169,15 +155,11 @@ export class QuestionRepositoryDatabase implements QuestionRepository {
     if (!simulexHash) return null
     const query = "SELECT * FROM question WHERE simulex_hash = ?"
     const questionFromDB = await this.connection.get(query, simulexHash)
-    return questionFromDB
-      ? Question.toDomain(this.convertDatabaseQuestion(questionFromDB))
-      : null
+    return questionFromDB ? Question.toDomain(this.convertDatabaseQuestion(questionFromDB)) : null
   }
 
   // retorna o total de questões ativas de cada tópico da disciplina
-  async getDisciplineStatistics(
-    disciplineId: string,
-  ): Promise<QuestionDisciplineStatistics> {
+  async getDisciplineStatistics(disciplineId: string): Promise<QuestionDisciplineStatistics> {
     const query = `
     SELECT
       q.topic_id,
@@ -207,16 +189,14 @@ export class QuestionRepositoryDatabase implements QuestionRepository {
 
     if (this.connection.databaseType() === "postgres") {
       const tables = ["question"]
-      const truncateQuery = `TRUNCATE TABLE ${tables
-        .map((table) => `public.${table}`)
-        .join(", ")} CASCADE`
+      const truncateQuery = `TRUNCATE TABLE ${tables.map((table) => `public.${table}`).join(", ")} CASCADE`
       return this.connection.run(truncateQuery)
     } else {
       return this.connection.run("DELETE FROM question")
     }
   }
 
-  private convertDatabaseQuestion(question: any): QuestionFromPersistence {
+  private convertDatabaseQuestion(question: any): QuestionState {
     return {
       questionId: question.question_id,
       topicId: question.topic_id,
@@ -239,8 +219,6 @@ export class QuestionRepositoryDatabase implements QuestionRepository {
   }
 
   private dbType(value: number): any {
-    return this.connection.databaseType() === "postgres"
-      ? Boolean(value)
-      : value
+    return this.connection.databaseType() === "postgres" ? Boolean(value) : value
   }
 }

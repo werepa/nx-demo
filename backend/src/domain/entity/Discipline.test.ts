@@ -1,6 +1,6 @@
 import { DateBr } from "../../shared/domain/valueObject"
 import { Discipline, Topic, TopicList } from "."
-import { DisciplineFromPersistence } from "../../shared/models"
+import { DisciplineState } from "../../shared/models"
 import { topicMock } from "../../tests/mocks"
 
 describe("Entity => Discipline", () => {
@@ -128,60 +128,44 @@ describe("Entity => Discipline", () => {
       portugues.setTopicParent({
         topic: topicNonExistent,
         topicParent: pronomes,
-      }),
+      })
     ).toThrow(`Topic ID:${topicNonExistent.topicId} does not exist!`)
 
     expect(() =>
       portugues.setTopicParent({
         topic: pronomes,
         topicParent: topicNonExistent,
-      }),
+      })
     ).toThrow(`TopicParent ID:${topicNonExistent.topicId} does not exist!`)
 
-    expect(() =>
-      portugues.setTopicParent({ topic: null, topicParent: pronomes }),
-    ).toThrow(`The child topic is required`)
-    expect(() =>
-      portugues.setTopicParent({ topic: pronomes, topicParent: null }),
-    ).toThrow(`The parent topic is required`)
+    expect(() => portugues.setTopicParent({ topic: null, topicParent: pronomes })).toThrow(`The child topic is required`)
+    expect(() => portugues.setTopicParent({ topic: pronomes, topicParent: null })).toThrow(`The parent topic is required`)
 
-    expect(() =>
-      portugues.setTopicParent({ topic: null, topicParent: pronomes }),
-    ).toThrow(`The child topic is required`)
+    expect(() => portugues.setTopicParent({ topic: null, topicParent: pronomes })).toThrow(`The child topic is required`)
 
-    expect(() =>
-      portugues.setTopicParent({ topic: pronomes, topicParent: pronomes }),
-    ).toThrow(`A topic cannot be its own child!`)
+    expect(() => portugues.setTopicParent({ topic: pronomes, topicParent: pronomes })).toThrow(
+      `A topic cannot be its own child!`
+    )
 
-    expect(() =>
-      portugues.setTopicParent({ topic: pronomes, topicParent: classificar }),
-    ).toThrow(`Topic "A classificar" cannot have children!`)
+    expect(() => portugues.setTopicParent({ topic: pronomes, topicParent: classificar })).toThrow(
+      `Topic "A classificar" cannot have children!`
+    )
 
-    expect(() =>
-      portugues.setTopicParent({ topic: classificar, topicParent: pronomes }),
-    ).toThrow(`Topic "A classificar" cannot be a child of another topic!`)
+    expect(() => portugues.setTopicParent({ topic: classificar, topicParent: pronomes })).toThrow(
+      `Topic "A classificar" cannot be a child of another topic!`
+    )
   })
 
   it("should list all child topics of a topic recursively", () => {
     createDisciplinePortugues()
     expect(portugues.topicsChildrenRecursive(crase.topicId)).toHaveLength(6)
-    expect(
-      portugues.topicsChildrenRecursive(palavrasRepetidas.topicId),
-    ).toHaveLength(0)
-    expect(
-      portugues.topicsChildrenRecursive(palavrasEspeciais.topicId),
-    ).toHaveLength(2)
-    expect(
-      portugues.topicsChildrenRecursive(palavrasEspeciais.topicId),
-    ).toEqual([distancia, terra])
+    expect(portugues.topicsChildrenRecursive(palavrasRepetidas.topicId)).toHaveLength(0)
+    expect(portugues.topicsChildrenRecursive(palavrasEspeciais.topicId)).toHaveLength(2)
+    expect(portugues.topicsChildrenRecursive(palavrasEspeciais.topicId)).toEqual([distancia, terra])
     expect(portugues.topicsChildrenRecursive(distancia.topicId)).toHaveLength(0)
     expect(portugues.topicsChildrenRecursive(terra.topicId)).toHaveLength(0)
-    expect(
-      portugues.topicsChildrenRecursive(palavrasMasculinas.topicId),
-    ).toHaveLength(0)
-    expect(
-      portugues.topicsChildrenRecursive(nomesCidades.topicId),
-    ).toHaveLength(0)
+    expect(portugues.topicsChildrenRecursive(palavrasMasculinas.topicId)).toHaveLength(0)
+    expect(portugues.topicsChildrenRecursive(nomesCidades.topicId)).toHaveLength(0)
   })
 
   it("should list the path from the topicRoot to a topic", () => {
@@ -189,27 +173,13 @@ describe("Entity => Discipline", () => {
     expect(portugues.topicPath(crase.topicId)).toHaveLength(1)
     expect(portugues.topicPath(crase.topicId)).toEqual([crase])
     expect(portugues.topicPath(palavrasRepetidas.topicId)).toHaveLength(2)
-    expect(portugues.topicPath(palavrasRepetidas.topicId)).toEqual([
-      crase,
-      palavrasRepetidas,
-    ])
+    expect(portugues.topicPath(palavrasRepetidas.topicId)).toEqual([crase, palavrasRepetidas])
     expect(portugues.topicPath(palavrasEspeciais.topicId)).toHaveLength(2)
-    expect(portugues.topicPath(palavrasEspeciais.topicId)).toEqual([
-      crase,
-      palavrasEspeciais,
-    ])
+    expect(portugues.topicPath(palavrasEspeciais.topicId)).toEqual([crase, palavrasEspeciais])
     expect(portugues.topicPath(distancia.topicId)).toHaveLength(3)
-    expect(portugues.topicPath(distancia.topicId)).toEqual([
-      crase,
-      palavrasEspeciais,
-      distancia,
-    ])
+    expect(portugues.topicPath(distancia.topicId)).toEqual([crase, palavrasEspeciais, distancia])
     expect(portugues.topicPath(terra.topicId)).toHaveLength(3)
-    expect(portugues.topicPath(terra.topicId)).toEqual([
-      crase,
-      palavrasEspeciais,
-      terra,
-    ])
+    expect(portugues.topicPath(terra.topicId)).toEqual([crase, palavrasEspeciais, terra])
   })
 
   it("should list the topics of a discipline", () => {
@@ -225,9 +195,7 @@ describe("Entity => Discipline", () => {
 
   it("should throw an error when creating an instance without the required properties", () => {
     // @ts-ignore
-    expect(() => Discipline.create({})).toThrow(
-      "Discipline - Missing required property: name",
-    )
+    expect(() => Discipline.create({})).toThrow("Discipline - Missing required property: name")
   })
 
   it("should convert a Discipline instance to a DTO object", () => {
@@ -253,7 +221,7 @@ describe("Entity => Discipline", () => {
   })
 
   it("should convert a persistence object to a Discipline instance", () => {
-    const disciplineFromPersistence: DisciplineFromPersistence = {
+    const disciplineState: DisciplineState = {
       disciplineId: portugues.disciplineId,
       name: portugues.name,
       topics: [
@@ -319,10 +287,10 @@ describe("Entity => Discipline", () => {
       createdAt: DateBr.create().value,
       updatedAt: null,
     }
-    const discipline = Discipline.toDomain(disciplineFromPersistence)
+    const discipline = Discipline.toDomain(disciplineState)
     expect(discipline).toBeInstanceOf(Discipline)
-    expect(discipline.disciplineId).toBe(disciplineFromPersistence.disciplineId)
-    expect(discipline.name).toBe(disciplineFromPersistence.name)
+    expect(discipline.disciplineId).toBe(disciplineState.disciplineId)
+    expect(discipline.name).toBe(disciplineState.name)
     expect(discipline.topics.getCount()).toBe(4)
     expect(discipline.topics.getItems()[0].name).toBe("A classificar")
     expect(discipline.topics.getItems()[1].name).toBe("Crase")
@@ -332,9 +300,9 @@ describe("Entity => Discipline", () => {
     expect(discipline.topics.getItems()[1].depth).toBe(1)
     expect(discipline.topics.getItems()[2].depth).toBe(3)
     expect(discipline.topics.getItems()[3].depth).toBe(2)
-    expect(discipline.image).toBe(disciplineFromPersistence.image)
-    expect(discipline.isActive).toBe(disciplineFromPersistence.isActive)
-    expect(discipline.createdAt.value).toBe(disciplineFromPersistence.createdAt)
+    expect(discipline.image).toBe(disciplineState.image)
+    expect(discipline.isActive).toBe(disciplineState.isActive)
+    expect(discipline.createdAt.value).toBe(disciplineState.createdAt)
     expect(discipline.updatedAt).toBeNull()
   })
 

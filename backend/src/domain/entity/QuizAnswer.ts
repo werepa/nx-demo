@@ -1,7 +1,8 @@
 import { Entity } from "../../shared/domain/entity"
 import { DateBr } from "../../shared/domain/valueObject"
-import { QuizAnswerFromPersistence } from "../../shared/models"
+import { QuizAnswerState } from "../../shared/models"
 import { QuizAnswerDTO } from "@simulex/models"
+import { randomUUID } from "crypto"
 
 export interface QuizAnswerProps {
   quizAnswerId: string
@@ -21,15 +22,10 @@ export class QuizAnswer extends Entity<QuizAnswerProps> {
   }
 
   static create(dto: CreateQuizAnswerInput): QuizAnswer {
-    if (
-      !dto.quizId ||
-      !dto.questionId ||
-      dto.isUserAnswerCorrect === undefined ||
-      !dto.topicId
-    ) {
+    if (!dto.quizId || !dto.questionId || dto.isUserAnswerCorrect === undefined || !dto.topicId) {
       throw new Error("Missing required properties")
     }
-    const answerId = crypto.randomUUID()
+    const answerId = randomUUID()
     const props: QuizAnswerProps = {
       quizAnswerId: answerId,
       quizId: dto.quizId,
@@ -44,7 +40,7 @@ export class QuizAnswer extends Entity<QuizAnswerProps> {
     return new QuizAnswer(props)
   }
 
-  public static toDomain(dto: QuizAnswerFromPersistence): QuizAnswer {
+  public static toDomain(dto: QuizAnswerState): QuizAnswer {
     if (
       !dto.quizAnswerId ||
       !dto.quizId ||

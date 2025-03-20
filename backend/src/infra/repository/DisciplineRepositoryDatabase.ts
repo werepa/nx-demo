@@ -1,7 +1,7 @@
 import { DisciplineRepository } from "../../application/repository"
 import { Discipline, Topic } from "../../domain/entity"
 import { DateBr } from "../../shared/domain/valueObject"
-import { DisciplineFromPersistence, TopicFromPersistence } from "../../shared/models"
+import { DisciplineState, TopicState } from "../../shared/models"
 import { DatabaseConnection } from "../database"
 
 export class DisciplineRepositoryDatabase implements DisciplineRepository {
@@ -25,8 +25,8 @@ export class DisciplineRepositoryDatabase implements DisciplineRepository {
     if (!disciplineFromSqlite) return null
 
     const topicsFromSqlite = await this.fetchTopicsByDisciplineId(disciplineFromSqlite.discipline_id)
-    const disciplineFromPersistence = this.convertDatabaseDiscipline(disciplineFromSqlite, topicsFromSqlite)
-    return Discipline.toDomain(disciplineFromPersistence)
+    const disciplineState = this.convertDatabaseDiscipline(disciplineFromSqlite, topicsFromSqlite)
+    return Discipline.toDomain(disciplineState)
   }
 
   async getByName(name: string): Promise<Discipline | null> {
@@ -34,8 +34,8 @@ export class DisciplineRepositoryDatabase implements DisciplineRepository {
     if (!disciplineFromSqlite) return null
 
     const topicsFromSqlite = await this.fetchTopicsByDisciplineId(disciplineFromSqlite.discipline_id)
-    const disciplineFromPersistence = this.convertDatabaseDiscipline(disciplineFromSqlite, topicsFromSqlite)
-    return Discipline.toDomain(disciplineFromPersistence)
+    const disciplineState = this.convertDatabaseDiscipline(disciplineFromSqlite, topicsFromSqlite)
+    return Discipline.toDomain(disciplineState)
   }
 
   async getAll(
@@ -60,16 +60,14 @@ export class DisciplineRepositoryDatabase implements DisciplineRepository {
       ? await this.connection.all(queryDiscipline, `%${search?.trim().toLowerCase()}%`)
       : await this.connection.all(queryDiscipline)
 
-    const disciplinesFromPersistence: DisciplineFromPersistence[] = await Promise.all(
+    const disciplinesState: DisciplineState[] = await Promise.all(
       disciplinesFromSqlite.map(async (disciplineFromSqlite: any) => {
         const topicsFromSqlite = await this.fetchTopicsByDisciplineId(disciplineFromSqlite.discipline_id)
         return this.convertDatabaseDiscipline(disciplineFromSqlite, topicsFromSqlite)
       })
     )
 
-    return disciplinesFromPersistence.map((disciplineFromPersistence: DisciplineFromPersistence) =>
-      Discipline.toDomain(disciplineFromPersistence)
-    )
+    return disciplinesState.map((disciplineState: DisciplineState) => Discipline.toDomain(disciplineState))
   }
 
   async delete(disciplineId: string): Promise<void> {
@@ -167,8 +165,8 @@ export class DisciplineRepositoryDatabase implements DisciplineRepository {
     return this.connection.get(query, `%${name?.trim().toLowerCase()}%`)
   }
 
-  private convertDatabaseDiscipline(disciplineFromDB: any, topicsFromDB: any): DisciplineFromPersistence {
-    const disciplineFromPersistence: DisciplineFromPersistence = {
+  private convertDatabaseDiscipline(disciplineFromDB: any, topicsFromDB: any): DisciplineState {
+    const disciplineState: DisciplineState = {
       disciplineId: disciplineFromDB.discipline_id,
       name: disciplineFromDB.name,
       topics: [],
@@ -178,7 +176,7 @@ export class DisciplineRepositoryDatabase implements DisciplineRepository {
       updatedAt: disciplineFromDB.updated_at ? DateBr.create(disciplineFromDB.updated_at).value : null,
     }
     topicsFromDB.map((topic: any) => {
-      const topicFromPersistence: TopicFromPersistence = {
+      const topicState: TopicState = {
         topicId: topic.topic_id,
         disciplineId: topic.discipline_id,
         name: topic.name,
@@ -192,21 +190,21 @@ export class DisciplineRepositoryDatabase implements DisciplineRepository {
         createdAt: DateBr.create(topic.created_at).value.toISOString(),
         updatedAt: topic.updated_at ? DateBr.create(topic.updated_at).value.toISOString() : null,
       }
-      disciplineFromPersistence.topics.push(topicFromPersistence)
+      disciplineState.topics.push(topicState)
     })
-    return disciplineFromPersistence
+    return disciplineState
   }
 
   private dbType(value: number): any {
     return this.connection.databaseType() === "postgres" ? Boolean(value) : value
   }
 
-  private mapToDomain(result: DisciplineFromPersistence): Discipline {
+  private mapToDomain(result: DisciplineState): Discipline {
     return Discipline.toDomain(result)
   }
 
-  private async getTopics(disciplineId: string): Promise<TopicFromPersistence[]> {
-    const result = await this.connection.query<TopicFromPersistence>(`
+  private async getTopics(disciplineId: string): Promise<TopicState[]> {
+    const result = await this.connection.query<TopicState>(`
       SELECT 
         t.topic_id as "topicId",
         t.discipline_id as "disciplineId",
@@ -227,8 +225,8 @@ export class DisciplineRepositoryDatabase implements DisciplineRepository {
     return result.rows
   }
 
-  private async getDiscipline(disciplineId: string): Promise<DisciplineFromPersistence> {
-    return this.connection.one<DisciplineFromPersistence>(`
+  private async getDiscipline(disciplineId: string): Promise<DisciplineState> {
+    return this.connection.one<DisciplineState>(`
       SELECT 
         d.discipline_id as "disciplineId",
         d.name,

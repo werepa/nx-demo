@@ -1,9 +1,10 @@
-import { UserFromPersistence } from "../../shared/models"
+import { UserState } from "../../shared/models"
 import { DateBr } from "../../shared/domain/valueObject"
 import { RoleEnum } from "../../shared/enum"
 import { Entity } from "../../shared/domain/entity"
 import { Email, UserPassword, UserRole } from "../valueObject"
 import { UserDTO } from "@simulex/models"
+import { randomUUID } from "crypto"
 
 interface UserProps {
   userId: string
@@ -27,7 +28,7 @@ export class User extends Entity<UserProps> {
       throw new Error("Missing required properties")
     }
 
-    const userId = crypto.randomUUID()
+    const userId = randomUUID()
     const props: UserProps = {
       userId,
       name: dto.name,
@@ -44,15 +45,8 @@ export class User extends Entity<UserProps> {
     return user
   }
 
-  public static toDomain(dto: UserFromPersistence): User {
-    if (
-      !dto.userId ||
-      !dto.name ||
-      !dto.email ||
-      !dto.password ||
-      !dto.role ||
-      !dto.createdAt
-    ) {
+  public static toDomain(dto: UserState): User {
+    if (!dto.userId || !dto.name || !dto.email || !dto.password || !dto.role || !dto.createdAt) {
       throw new Error("Missing required properties")
     }
 

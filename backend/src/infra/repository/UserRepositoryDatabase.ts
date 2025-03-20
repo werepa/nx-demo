@@ -1,7 +1,7 @@
 import { DatabaseConnection } from "../database/DatabaseConnection"
 import { UserRepository } from "../../application/repository/UserRepository"
 import { User } from "../../domain/entity/User"
-import { UserFromPersistence } from "../../shared/models"
+import { UserState } from "../../shared/models"
 
 interface RawUserData {
   user_id: string
@@ -120,7 +120,7 @@ export class UserRepositoryDatabase implements UserRepository {
     }
   }
 
-  private convertDatabaseUser(userFromDB: RawUserData): UserFromPersistence {
+  private convertDatabaseUser(userFromDB: RawUserData): UserState {
     return {
       userId: userFromDB.user_id,
       name: userFromDB.name,
@@ -133,7 +133,7 @@ export class UserRepositoryDatabase implements UserRepository {
     }
   }
 
-  private mapToDomain(userData: UserFromPersistence): User {
+  private mapToDomain(userData: UserState): User {
     return User.toDomain(userData)
   }
 

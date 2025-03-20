@@ -1,16 +1,14 @@
-import crypto from "crypto"
+import { randomUUID } from "crypto"
 
-export abstract class Entity<Props extends { [key: string]: unknown }> {
+export abstract class Entity<T> {
   protected readonly _id: string
-  protected props: Props
+  protected readonly props: T
 
-  protected constructor(props: Props, idName = "id") {
-    const generatedId = crypto.randomUUID()
-    this._id = (props[idName] as string) ?? generatedId
-    this.props = {
-      ...props,
-      [idName]: this._id,
-    } as Props
+  constructor(props: T, idName = "id") {
+    const generatedId = randomUUID()
+    this._id = props[idName] ?? generatedId
+    this.props = props
+    this.props[idName] = this._id
   }
 
   get id(): string {
@@ -18,13 +16,10 @@ export abstract class Entity<Props extends { [key: string]: unknown }> {
   }
 
   set id(value: string) {
-    this.props = {
-      ...this.props,
-      id: value,
-    } as Props
+    this.props["id"] = value
   }
 
-  public equals(entity: Entity<Props>): boolean {
+  public equals(entity: Entity<T>): boolean {
     if (entity === null || entity === undefined) {
       return false
     }

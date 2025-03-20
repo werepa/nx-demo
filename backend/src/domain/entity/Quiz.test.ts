@@ -9,7 +9,7 @@ import { Topic } from "./Topic"
 import { User } from "./User"
 import { RoleEnum, QuizTypeEnum } from "../../shared/enum"
 import { UserRole, QuizType } from "../valueObject"
-import { CreateQuizDTO, QuizFromPersistence } from "@simulex/models"
+import { CreateQuizDTO, QuizState } from "@simulex/models"
 
 describe("Entity => Quiz", () => {
   let quiz: Quiz
@@ -96,9 +96,9 @@ describe("Entity => Quiz", () => {
     expect(quiz.createdAt).toBeInstanceOf(DateBr)
     expect(quiz.updatedAt).toBeNull()
 
-    expect(() =>
-      Quiz.create({ ...dto, quizType: QuizType.create(QuizTypeEnum.LEARNING) }),
-    ).toThrow("Free users can only create random or review quizzes")
+    expect(() => Quiz.create({ ...dto, quizType: QuizType.create(QuizTypeEnum.LEARNING) })).toThrow(
+      "Free users can only create random or review quizzes"
+    )
 
     quiz = Quiz.create({
       user: userMember,
@@ -111,7 +111,7 @@ describe("Entity => Quiz", () => {
   })
 
   it("should convert persistence object to Domain correctly", () => {
-    const dto: QuizFromPersistence = {
+    const dto: QuizState = {
       quizId: faker.string.uuid(),
       quizType: QuizTypeEnum.RANDOM,
       userId: userFree.userId,
@@ -135,12 +135,10 @@ describe("Entity => Quiz", () => {
     expect(quiz.createdAt.value).toBe(dto.createdAt)
     expect(quiz.updatedAt?.value).toBe(dto.updatedAt)
 
-    expect(() =>
-      Quiz.toDomain({ ...dto, userId: "any_id" }, userFree, portugues),
-    ).toThrow("User not matches with userId")
-    expect(() =>
-      Quiz.toDomain({ ...dto, disciplineId: "any_id" }, userFree, portugues),
-    ).not.toThrow("User not matches with userId")
+    expect(() => Quiz.toDomain({ ...dto, userId: "any_id" }, userFree, portugues)).toThrow("User not matches with userId")
+    expect(() => Quiz.toDomain({ ...dto, disciplineId: "any_id" }, userFree, portugues)).not.toThrow(
+      "User not matches with userId"
+    )
   })
 
   it("should convert Quiz to DTO", () => {

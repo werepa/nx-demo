@@ -1,6 +1,8 @@
 import { faker } from "@faker-js/faker"
-import { Discipline, Topic } from "../../domain/entity"
-import { DisciplineDTO, TopicDTO } from "@simulex/models"
+import { Discipline, Topic, TopicList } from "../../domain/entity"
+import { DisciplineDTO } from "@simulex/models"
+import { DateBr } from "../../shared/domain/valueObject"
+import { DisciplineState, TopicState } from "../../shared/models"
 
 interface DisciplineMockOptions {
   disciplineId?: string
@@ -15,7 +17,7 @@ interface TopicMockOptions extends DisciplineMockOptions {
   depth?: number
 }
 
-export const disciplineMockFromPersistence = (options: DisciplineMockOptions = {}): DisciplineDTO => {
+export const disciplineMockState = (options: DisciplineMockOptions = {}): DisciplineState => {
   const disciplineId = options.disciplineId || faker.string.uuid()
   const createdAt = faker.date.recent()
   return {
@@ -24,12 +26,12 @@ export const disciplineMockFromPersistence = (options: DisciplineMockOptions = {
     topics: [],
     image: "Base64 ou URL da image",
     isActive: options.isActive !== undefined ? options.isActive : true,
-    createdAt: createdAt.toISOString(),
-    updatedAt: "",
+    createdAt: createdAt,
+    updatedAt: null,
   }
 }
 
-export const topicMockFromPersistence = (options: TopicMockOptions = {}): TopicDTO => {
+export const topicMockState = (options: TopicMockOptions = {}): TopicState => {
   const topicId = options.topicId || faker.string.uuid()
   const disciplineId = options.disciplineId || faker.string.uuid()
   const createdAt = faker.date.recent()
@@ -44,23 +46,23 @@ export const topicMockFromPersistence = (options: TopicMockOptions = {}): TopicD
     dependencies: [],
     obs: "",
     isActive: options.isActive !== undefined ? options.isActive : true,
-    createdAt: createdAt.toISOString(),
+    createdAt: createdAt,
     updatedAt: null,
   }
 }
 
 export const disciplineMock = (options: DisciplineMockOptions = {}): Discipline => {
-  const disciplineDTO = disciplineMockFromPersistence(options)
-  return Discipline.toDomain(disciplineDTO)
+  const disciplineState = disciplineMockState(options)
+  return Discipline.toDomain(disciplineState)
 }
 
 export const topicMock = (options: TopicMockOptions = {}): Topic => {
-  const topic = Topic.toDomain(topicMockFromPersistence(options))
+  const topic = Topic.toDomain(topicMockState(options))
   topic.setDepth(1)
   return topic
 }
 
-export const disciplineFromPersistence = (discipline: Discipline): DisciplineDTO => {
+export const disciplineState = (discipline: Discipline): DisciplineDTO => {
   return {
     disciplineId: discipline.id,
     name: discipline.name,

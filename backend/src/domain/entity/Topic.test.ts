@@ -1,7 +1,7 @@
 import { DateBr } from "../../shared/domain/valueObject"
-import { topicMockFromPersistence } from "../../tests/mocks"
+import { topicMockState } from "../../tests/mocks"
 import { Topic } from "."
-import { TopicFromPersistence } from "../../shared/models"
+import { TopicState } from "../../shared/models"
 import { TopicDTO } from "@simulex/models"
 
 describe("Entity => Topic", () => {
@@ -31,38 +31,31 @@ describe("Entity => Topic", () => {
     expect(proname.name).toBe("Alterado")
     const classificar = Topic.create({ name: "A classificar" })
     classificar.setIsTopicClassify(true)
-    expect(() => classificar.updateName("Alterado")).toThrow(
-      `Cannot change the name of the topic "A classificar"`,
-    )
+    expect(() => classificar.updateName("Alterado")).toThrow(`Cannot change the name of the topic "A classificar"`)
   })
 
   it("should not deactivate the Topic 'A classificar'", async () => {
     const classificar = Topic.create({ name: "A classificar" })
     classificar.setIsTopicClassify(true)
-    expect(() => classificar.deactivate()).toThrow(
-      `Cannot deactivate the topic "A classificar"`,
-    )
+    expect(() => classificar.deactivate()).toThrow(`Cannot deactivate the topic "A classificar"`)
     expect(classificar.isActive).toBeTruthy()
   })
 
   it("should create an instance of Topic with persistence data", () => {
-    const topicFromPersistence: TopicFromPersistence =
-      topicMockFromPersistence()
-    const topic = Topic.toDomain(topicFromPersistence)
+    const topicState: TopicState = topicMockState()
+    const topic = Topic.toDomain(topicState)
     expect(topic).toBeInstanceOf(Topic)
-    expect(topic.topicId).toBe(topicFromPersistence.topicId)
-    expect(topic.name).toBe(topicFromPersistence.name)
-    expect(topic.disciplineId).toBe(topicFromPersistence.disciplineId)
-    expect(topic.isActive).toBe(topicFromPersistence.isActive)
+    expect(topic.topicId).toBe(topicState.topicId)
+    expect(topic.name).toBe(topicState.name)
+    expect(topic.disciplineId).toBe(topicState.disciplineId)
+    expect(topic.isActive).toBe(topicState.isActive)
     expect(topic.createdAt).toBeInstanceOf(DateBr)
     expect(topic.updatedAt).toBeNull()
   })
 
   it("should throw an error when creating an instance without the required properties", () => {
     // @ts-expect-error - Testing the validation of the required properties
-    expect(() => Topic.create({})).toThrow(
-      "Topic - Missing required property: name",
-    )
+    expect(() => Topic.create({})).toThrow("Topic - Missing required property: name")
   })
 
   it("should convert a Topic instance to a DTO object", () => {
@@ -77,14 +70,13 @@ describe("Entity => Topic", () => {
   })
 
   it("should convert a persistence object to a Topic instance", () => {
-    const topicFromPersistence: TopicFromPersistence =
-      topicMockFromPersistence()
-    const topic = Topic.toDomain(topicFromPersistence)
-    expect(topic.topicId).toBe(topicFromPersistence.topicId)
-    expect(topic.name).toBe(topicFromPersistence.name)
-    expect(topic.disciplineId).toBe(topicFromPersistence.disciplineId)
-    expect(topic.isActive).toBe(topicFromPersistence.isActive)
-    expect(topic.createdAt.value).toBe(topicFromPersistence.createdAt)
+    const topicState: TopicState = topicMockState()
+    const topic = Topic.toDomain(topicState)
+    expect(topic.topicId).toBe(topicState.topicId)
+    expect(topic.name).toBe(topicState.name)
+    expect(topic.disciplineId).toBe(topicState.disciplineId)
+    expect(topic.isActive).toBe(topicState.isActive)
+    expect(topic.createdAt.value).toBe(topicState.createdAt)
     expect(topic.updatedAt).toBeNull()
   })
 })

@@ -2,7 +2,7 @@ import { faker } from "@faker-js/faker"
 import { userMockDTO } from "../../tests/mocks"
 import { CreateUserInput, User } from "."
 import { UserPassword, UserRole } from "../valueObject"
-import { UserFromPersistence } from "../../shared/models"
+import { UserState } from "../../shared/models"
 
 describe("Entity => User", () => {
   describe("User properties", () => {
@@ -31,17 +31,17 @@ describe("Entity => User", () => {
     })
 
     test("should create a User instance with persistence data", () => {
-      const userFromPersistence: UserFromPersistence = userMockDTO()
-      const user = User.toDomain(userFromPersistence)
+      const userState: UserState = userMockDTO()
+      const user = User.toDomain(userState)
       expect(user).toBeInstanceOf(User)
-      expect(user.userId).toBe(userFromPersistence.userId)
-      expect(user.name).toBe(userFromPersistence.name)
-      expect(user.email).toBe(userFromPersistence.email)
-      expect(user.password).toBe(userFromPersistence.password)
-      expect(user.role).toBe(userFromPersistence.role)
-      expect(user.image).toBe(userFromPersistence.image)
-      expect(user.isActive).toBe(userFromPersistence.isActive)
-      expect(user.createdAt.value).toBe(userFromPersistence.createdAt)
+      expect(user.userId).toBe(userState.userId)
+      expect(user.name).toBe(userState.name)
+      expect(user.email).toBe(userState.email)
+      expect(user.password).toBe(userState.password)
+      expect(user.role).toBe(userState.role)
+      expect(user.image).toBe(userState.image)
+      expect(user.isActive).toBe(userState.isActive)
+      expect(user.createdAt.value).toBe(userState.createdAt)
       expect(user.updatedAt).toBeNull()
     })
 
@@ -51,9 +51,7 @@ describe("Entity => User", () => {
     })
 
     test("Password should have at least 6 characters", () => {
-      expect(() => UserPassword.create("1234")).toThrow(
-        "Password must be at least 6 characters long",
-      )
+      expect(() => UserPassword.create("1234")).toThrow("Password must be at least 6 characters long")
     })
 
     test("Password should be encrypted", () => {

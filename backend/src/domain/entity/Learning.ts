@@ -4,10 +4,11 @@ import { QuizAnswerList } from "./QuizAnswerList"
 import { QuizAnswer } from "./QuizAnswer"
 import { Discipline } from "./Discipline"
 import { TopicLearningList } from "./TopicLearningList"
-import { LearningFromPersistence } from "../../shared/models"
+import { LearningState } from "../../shared/models"
 import { User } from "./User"
 import { TopicLearning } from "./TopicLearning"
 import { LearningDTO } from "@simulex/models"
+import { randomUUID } from "crypto"
 
 interface LearningProps {
   learningId: string
@@ -22,11 +23,11 @@ export class Learning extends Entity<LearningProps> {
     super(props, "learningId")
   }
 
-  static create(dto: CreateLearningInput): Learning {
+  static create(dto: CreateLearningCommand): Learning {
     if (!dto.user || !dto.discipline) {
       throw new Error("Missing required properties")
     }
-    const learningId = crypto.randomUUID()
+    const learningId = randomUUID()
     const props: LearningProps = {
       learningId,
       user: dto.user,
@@ -44,28 +45,28 @@ export class Learning extends Entity<LearningProps> {
             topic,
             userId: dto.user.userId,
             parent: learning,
-          }),
+          })
         )
       })
     return learning
   }
 
-  public static toDomain(dto: LearningFromPersistence): Learning {
+  public static toDomain(dto: LearningState): Learning {
     if (!dto.user || !dto.discipline || !dto.topics || !dto.history) {
       throw new Error("Missing required properties")
     }
-    const learningId = crypto.randomUUID()
+    const learningId = randomUUID()
     return new Learning({
       learningId,
       user: User.toDomain(dto.user),
       discipline: Discipline.toDomain(dto.discipline),
       topics: TopicLearningList.create(
         dto.user.userId,
-        dto.topics.map((t) => TopicLearning.toDomain(t)),
+        dto.topics.map((t) => TopicLearning.toDomain(t))
       ),
       history: QuizAnswerList.create(
         null,
-        dto.history.map((answer) => QuizAnswer.toDomain(answer)),
+        dto.history.map((answer) => QuizAnswer.toDomain(answer))
       ),
     })
   }
@@ -99,17 +100,13 @@ export class Learning extends Entity<LearningProps> {
       learningId: this.props.learningId,
       user: this.props.user.toDTO(),
       discipline: this.props.discipline.toDTO(),
-      topics: this.props.topics
-        .getItems()
-        .map((topicLearning: TopicLearning) => topicLearning.toDTO()),
-      history: this.props.history
-        .getItems()
-        .map((item: QuizAnswer) => item.toDTO()),
+      topics: this.props.topics.getItems().map((topicLearning: TopicLearning) => topicLearning.toDTO()),
+      history: this.props.history.getItems().map((item: QuizAnswer) => item.toDTO()),
     }
   }
 }
 
-export type CreateLearningInput = {
+export type CreateLearningCommand = {
   user: User
   discipline: Discipline
 }

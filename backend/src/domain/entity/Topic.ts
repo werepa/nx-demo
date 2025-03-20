@@ -1,7 +1,8 @@
 import { Entity } from "../../shared/domain/entity"
 import { DateBr } from "../../shared/domain/valueObject"
-import { TopicFromPersistence } from "../../shared/models"
+import { TopicState } from "../../shared/models"
 import { TopicDTO } from "@simulex/models"
+import { randomUUID } from "crypto"
 
 interface TopicProps {
   topicId: string
@@ -27,12 +28,12 @@ export class Topic extends Entity<TopicProps> {
     }
   }
 
-  static create(dto: CreateTopicInput): Topic {
+  static create(dto: CreateTopicCommand): Topic {
     if (!dto.name) {
       throw new Error("Topic - Missing required property: name")
     }
 
-    const topicId = crypto.randomUUID()
+    const topicId = randomUUID()
     const props: TopicProps = {
       topicId,
       name: dto.name,
@@ -52,16 +53,14 @@ export class Topic extends Entity<TopicProps> {
     return topic
   }
 
-  public static toDomain(dto: TopicFromPersistence): Topic {
+  public static toDomain(dto: TopicState): Topic {
     const missingProperties = []
     if (!dto.topicId) missingProperties.push("topicId")
     if (!dto.name) missingProperties.push("name")
     if (!dto.disciplineId) missingProperties.push("disciplineId")
     if (!dto.createdAt) missingProperties.push("createdAt")
     if (missingProperties.length > 0) {
-      throw new Error(
-        `Topic - Missing required properties: [${missingProperties.join(", ")}]`,
-      )
+      throw new Error(`Topic - Missing required properties: [${missingProperties.join(", ")}]`)
     }
 
     return new Topic({
@@ -208,6 +207,7 @@ export class Topic extends Entity<TopicProps> {
   }
 }
 
-export type CreateTopicInput = {
+export type CreateTopicCommand = {
   name: string
+  disciplineId?: string
 }

@@ -1,4 +1,4 @@
-import { TopicDTO, TopicFromPersistence } from "./TopicDTO"
+import { TopicDTO } from "./TopicDTO"
 
 export type CreateDisciplineDTO = {
   name: string
@@ -12,16 +12,6 @@ export type DisciplineDTO = {
   isActive: boolean
   createdAt: string
   updatedAt: string
-}
-
-export type DisciplineFromPersistence = {
-  disciplineId: string
-  name: string
-  topics: TopicFromPersistence[]
-  image: string
-  isActive: boolean
-  createdAt: Date
-  updatedAt: Date | null
 }
 
 export type DisciplineUpdateDTO = {

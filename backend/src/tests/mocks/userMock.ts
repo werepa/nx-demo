@@ -35,7 +35,7 @@ export const userMock = (dto: IUserMockWithDisciplineDto = {}): User => {
   return User.toDomain(userMockDTO(dto))
 }
 
-export const userFromPersistence = (user: User): UserDTO => {
+export const userState = (user: User): UserDTO => {
   return {
     userId: user.userId,
     name: user.name,

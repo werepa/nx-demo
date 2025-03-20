@@ -3,7 +3,8 @@ import { QuestionOption, QuestionOptionList } from "."
 import { Entity } from "../../shared/domain/entity"
 import { Md5 } from "ts-md5"
 import { QuestionDTO } from "@simulex/models"
-import { QuestionFromPersistence } from "../../shared/models"
+import { QuestionState } from "../../shared/models"
+import { randomUUID } from "crypto"
 
 interface QuestionProps {
   questionId: string
@@ -46,7 +47,7 @@ export class Question extends Entity<QuestionProps> {
       throw new Error("TopicId and TopicRootId is required")
     }
 
-    const questionId = crypto.randomUUID()
+    const questionId = randomUUID()
     const options: QuestionOption[] = []
     dto.options.forEach((option) => {
       options.push(
@@ -90,7 +91,7 @@ export class Question extends Entity<QuestionProps> {
     return new Question(props)
   }
 
-  static toDomain(dto: QuestionFromPersistence): Question {
+  static toDomain(dto: QuestionState): Question {
     if (!dto.questionId || !dto.topicId || !dto.topicRootId || !dto.options) {
       throw new Error("Missing required properties")
     }

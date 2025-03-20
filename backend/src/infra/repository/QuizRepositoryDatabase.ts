@@ -2,8 +2,31 @@ import { DisciplineRepository, QuizRepository, UserRepository } from "../../appl
 import { Quiz, QuizAnswer } from "../../domain/entity"
 import { QuizType } from "../../domain/valueObject"
 import { DateBr } from "../../shared/domain/valueObject"
-import { QuizFromPersistence } from "../../shared/models"
+import { QuizState } from "../../shared/models"
 import { DatabaseConnection } from "../database"
+
+interface QuizRow {
+  quiz_id: string
+  quiz_type: string
+  user_id: string
+  discipline_id: string
+  topics_id: string
+  is_active: number | boolean
+  created_at: string
+  updated_at: string | null
+}
+
+interface QuizAnswerRow {
+  quiz_answer_id: string
+  quiz_id: string
+  question_id: string
+  topic_id: string
+  correct_option_id: string
+  user_option_id: string
+  is_user_answer_correct: number | boolean
+  can_repeat: number | boolean
+  created_at: string
+}
 
 export class QuizRepositoryDatabase implements QuizRepository {
   constructor(
@@ -83,14 +106,14 @@ export class QuizRepositoryDatabase implements QuizRepository {
     if (!showAll) queryParts.push(`AND is_active = ${this.dbType(1)}`)
     queryParts.push("ORDER BY created_at DESC LIMIT 100")
     const query = queryParts.join(" ")
-    const quizzesFromDB = await this.connection.all(query)
+    const quizzesFromDB = (await this.connection.all(query)) as QuizRow[]
     return Promise.all(
-      quizzesFromDB.map(async (quizFromDB: any) => {
+      quizzesFromDB.map(async (quizFromDB: QuizRow) => {
         const user = await this.userRepository.getById(quizFromDB.user_id)
 
         const discipline = await this.disciplineRepository.getById(quizFromDB.discipline_id)
 
-        const quizFromPersistence: QuizFromPersistence = {
+        const quizState: QuizState = {
           quizId: quizFromDB.quiz_id,
           quizType: QuizType.create(quizFromDB.quiz_type),
           user,
@@ -101,21 +124,21 @@ export class QuizRepositoryDatabase implements QuizRepository {
           updatedAt: quizFromDB.updated_at ? DateBr.create(quizFromDB.updated_at).value : null,
           topicsRootId: [],
         }
-        return Quiz.toDomain(quizFromPersistence)
+        return Quiz.toDomain(quizState)
       })
     )
   }
 
   async getById(quizId: string): Promise<Quiz | null> {
     const query = "SELECT * FROM quiz WHERE quiz_id = ?"
-    const quizFromDB: any = await this.connection.get(query, quizId)
+    const quizFromDB = (await this.connection.get(query, quizId)) as QuizRow
     if (!quizFromDB) return null
     const user = await this.userRepository.getById(quizFromDB.user_id)
     const discipline = await this.disciplineRepository.getById(quizFromDB.discipline_id)
     const answers = await this.getAnswers(quizId)
-    const quizFromPersistence: QuizFromPersistence = {
+    const quizState: QuizState = {
       quizId: quizFromDB.quiz_id,
-      quizType: quizFromDB.quiz_type,
+      quizType: QuizType.create(quizFromDB.quiz_type),
       user,
       discipline,
       answers,
@@ -124,13 +147,13 @@ export class QuizRepositoryDatabase implements QuizRepository {
       updatedAt: quizFromDB.updated_at ? DateBr.create(quizFromDB.updated_at).value : null,
       topicsRootId: [],
     }
-    return Quiz.toDomain(quizFromPersistence)
+    return Quiz.toDomain(quizState)
   }
 
   async getAnswers(quizId: string): Promise<QuizAnswer[]> {
     const query = "SELECT * FROM quiz_answer WHERE quiz_id = ? ORDER BY created_at ASC"
-    const answersFromDB = await this.connection.all(query, [quizId])
-    return answersFromDB.map((answerFromDB: any) => {
+    const answersFromDB = (await this.connection.all(query, [quizId])) as QuizAnswerRow[]
+    return answersFromDB.map((answerFromDB) => {
       return QuizAnswer.toDomain({
         quizAnswerId: answerFromDB.quiz_answer_id,
         quizId: answerFromDB.quiz_id,
@@ -140,7 +163,7 @@ export class QuizRepositoryDatabase implements QuizRepository {
         userOptionId: answerFromDB.user_option_id,
         isUserAnswerCorrect: !!answerFromDB.is_user_answer_correct,
         canRepeat: !!answerFromDB.can_repeat,
-        createdAt: answerFromDB.created_at,
+        createdAt: DateBr.create(answerFromDB.created_at).value,
       })
     })
   }
