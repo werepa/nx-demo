@@ -218,7 +218,7 @@ describe("PgPromiseAdapter", () => {
 
       // Assert
       expect(result).toBeDefined()
-      expect(result.id).toBe 1)
+      expect(result.id).toBe(1)
       expect(result.name).toBe("Test Name")
     })
 
