@@ -1,4 +1,4 @@
-import { OptionState } from "../../shared/models"
+import { QuestionOptionState } from "../../shared/models"
 import { QuestionOption } from "./QuestionOption"
 
 describe("Entity => QuestionOption", () => {
@@ -53,10 +53,10 @@ describe("Entity => QuestionOption", () => {
   })
 
   it("should convert persistence format to Option Domain correctly", () => {
-    const persistence: OptionState = {
+    const persistence: QuestionOptionState = {
       optionId: "option-123",
       text: "Paris",
-      key: true,
+      isCorrectAnswer: true,
       item: 1,
       obs: null,
       questionId: "question-123",
@@ -85,7 +85,7 @@ describe("Entity => QuestionOption", () => {
         optionId: "option-123",
         text: "Paris",
         item: 1,
-        key: true,
+        isCorrectAnswer: true,
       })
     }
     expect(convertPersistenceWithMissingProperties).toThrow("Missing required properties")

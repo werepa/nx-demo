@@ -68,7 +68,7 @@ export class QuizRepositoryDatabase implements QuizRepository {
     await this.connection.run(query, params)
   }
 
-  async saveAnswer(quizAnswer: QuizAnswer): Promise<void> {
+  async saveAnswer(userQuizAnswer: QuizAnswer): Promise<void> {
     const query = `INSERT INTO quiz_answer (
       quiz_answer_id,
       quiz_id,
@@ -81,14 +81,14 @@ export class QuizRepositoryDatabase implements QuizRepository {
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
 
     const params = [
-      quizAnswer.quizAnswerId,
-      quizAnswer.quizId,
-      quizAnswer.questionId,
-      quizAnswer.correctOptionId,
-      quizAnswer.userOptionId,
-      quizAnswer.isUserAnswerCorrect ? this.dbType(1) : this.dbType(0),
-      quizAnswer.canRepeat ? this.dbType(1) : this.dbType(0),
-      quizAnswer.createdAt ? quizAnswer.createdAt.value.toISOString() : DateBr.create().value.toISOString(),
+      userQuizAnswer.quizAnswerId,
+      userQuizAnswer.quizId,
+      userQuizAnswer.questionId,
+      userQuizAnswer.correctOptionId,
+      userQuizAnswer.userOptionId,
+      userQuizAnswer.isUserAnswerCorrect ? this.dbType(1) : this.dbType(0),
+      userQuizAnswer.canRepeat ? this.dbType(1) : this.dbType(0),
+      userQuizAnswer.createdAt ? userQuizAnswer.createdAt.value.toISOString() : DateBr.create().value.toISOString(),
     ]
     await this.connection.run(query, params)
   }

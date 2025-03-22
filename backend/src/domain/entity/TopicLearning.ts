@@ -381,9 +381,9 @@ export class TopicLearning extends Entity<TopicLearningProps> {
       let counter = 0
       let sum = 0
       let maxWeightedSum = 0
-      list.forEach((quizAnswer: QuizAnswer) => {
+      list.forEach((userQuizAnswer: QuizAnswer) => {
         counter++
-        if (quizAnswer.isUserAnswerCorrect) {
+        if (userQuizAnswer.isUserAnswerCorrect) {
           sum += counter
         }
         maxWeightedSum += counter
@@ -394,7 +394,7 @@ export class TopicLearning extends Entity<TopicLearningProps> {
     // calcula a média das últimas 5 questões do assunto
     function avgCorrectAnswered(list: QuizAnswer[]): number | null {
       if (!list.length) return null
-      const correctAnswered = list.filter((quizAnswer: QuizAnswer) => quizAnswer.isUserAnswerCorrect).length
+      const correctAnswered = list.filter((userQuizAnswer: QuizAnswer) => userQuizAnswer.isUserAnswerCorrect).length
       return Math.floor((correctAnswered * 1000) / list.length) / 10
     }
 

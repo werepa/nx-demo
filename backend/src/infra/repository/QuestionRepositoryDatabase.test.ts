@@ -85,9 +85,7 @@ describe("QuestionRepositoryDatabase", () => {
     await questionRepository.save(question)
     question.updatePrompt("What is your favorite food?")
     await questionRepository.save(question)
-    const updatedQuestion = await questionRepository.getById(
-      question.questionId,
-    )
+    const updatedQuestion = await questionRepository.getById(question.questionId)
     expect(updatedQuestion?.prompt).toEqual("What is your favorite food?")
   })
 
@@ -179,9 +177,7 @@ describe("QuestionRepositoryDatabase", () => {
       topicRootId: crase.topicRootId,
     })
     await questionRepository.save(question)
-    const foundQuestion = await questionRepository.getByHash(
-      question.simulexHash,
-    )
+    const foundQuestion = await questionRepository.getByHash(question.simulexHash)
     expect(foundQuestion).toEqual(question)
   })
 
@@ -251,8 +247,7 @@ describe("QuestionRepositoryDatabase", () => {
     await questionRepository.save(question4)
     await questionRepository.save(question5)
 
-    const portuguesStatistics =
-      await questionRepository.getDisciplineStatistics(portugues.disciplineId)
+    const portuguesStatistics = await questionRepository.getDisciplineStatistics(portugues.disciplineId)
     expect(portuguesStatistics.disciplineId).toBe(portugues.disciplineId)
     expect(portuguesStatistics.topics).toHaveLength(2)
     expect(portuguesStatistics.topics).toContainEqual({
@@ -264,10 +259,7 @@ describe("QuestionRepositoryDatabase", () => {
       qtyQuestions: 1,
     })
 
-    const direitoPenalStatistics =
-      await questionRepository.getDisciplineStatistics(
-        direitoPenal.disciplineId,
-      )
+    const direitoPenalStatistics = await questionRepository.getDisciplineStatistics(direitoPenal.disciplineId)
     expect(direitoPenalStatistics.disciplineId).toBe(direitoPenal.disciplineId)
     expect(direitoPenalStatistics.topics).toHaveLength(1)
     expect(direitoPenalStatistics.topics).toContainEqual({
@@ -296,11 +288,7 @@ describe("QuestionRepositoryDatabase", () => {
     beforeEach(async () => {
       //repositories
       userRepository = new UserRepositoryDatabase(connection)
-      quizRepository = new QuizRepositoryDatabase(
-        connection,
-        userRepository,
-        disciplineRepository,
-      )
+      quizRepository = new QuizRepositoryDatabase(connection, userRepository, disciplineRepository)
       learningRepository = new LearningRepositoryDatabase(connection)
 
       await learningRepository.clear()
@@ -310,11 +298,7 @@ describe("QuestionRepositoryDatabase", () => {
       await userRepository.clear()
 
       // useCases
-      createQuiz = new CreateQuiz(
-        quizRepository,
-        userRepository,
-        disciplineRepository,
-      )
+      createQuiz = new CreateQuiz(quizRepository, userRepository, disciplineRepository)
 
       getQuizById = new GetQuizById(quizRepository)
 
@@ -323,7 +307,7 @@ describe("QuestionRepositoryDatabase", () => {
         disciplineRepository,
         questionRepository,
         quizRepository,
-        learningRepository,
+        learningRepository
       )
 
       const fixture = await databaseFixture({
@@ -348,10 +332,7 @@ describe("QuestionRepositoryDatabase", () => {
       })
       quiz1 = await getQuizById.execute(quizId)
 
-      learning1 = await learningRepository.getDisciplineLearning(
-        userMember1,
-        portugues,
-      )
+      learning1 = await learningRepository.getDisciplineLearning(userMember1, portugues)
     })
 
     test("should get a random question from a topic that the user has not answered yet", async () => {
@@ -370,14 +351,11 @@ describe("QuestionRepositoryDatabase", () => {
         userQuizAnswer: {
           quizId: quiz1.quizId,
           questionId: nextQuestion.questionId ?? null,
-          selectedOptionId: getCorrectOption(nextQuestion),
+          userOptionId: getCorrectOption(nextQuestion),
           topicId: nextQuestion?.topicId ?? "",
         },
       })
-      learning1 = await learningRepository.getDisciplineLearning(
-        userMember1,
-        portugues,
-      )
+      learning1 = await learningRepository.getDisciplineLearning(userMember1, portugues)
 
       expect(learning1.topic(crase.topicId)?.qtyQuestionsAnswered()).toBe(1)
 
@@ -396,14 +374,11 @@ describe("QuestionRepositoryDatabase", () => {
         userQuizAnswer: {
           quizId: quiz1.quizId,
           questionId: nextQuestion.questionId ?? "",
-          selectedOptionId: getCorrectOption(nextQuestion),
+          userOptionId: getCorrectOption(nextQuestion),
           topicId: nextQuestion.topicId ?? "",
         },
       })
-      learning1 = await learningRepository.getDisciplineLearning(
-        userMember1,
-        portugues,
-      )
+      learning1 = await learningRepository.getDisciplineLearning(userMember1, portugues)
 
       expect(learning1.topic(crase.topicId)?.qtyQuestionsAnswered()).toBe(2)
 
@@ -422,14 +397,11 @@ describe("QuestionRepositoryDatabase", () => {
         userQuizAnswer: {
           quizId: quiz1.quizId,
           questionId: nextQuestion.questionId ?? "",
-          selectedOptionId: getCorrectOption(nextQuestion),
+          userOptionId: getCorrectOption(nextQuestion),
           topicId: nextQuestion.topicId ?? "",
         },
       })
-      learning1 = await learningRepository.getDisciplineLearning(
-        userMember1,
-        portugues,
-      )
+      learning1 = await learningRepository.getDisciplineLearning(userMember1, portugues)
 
       expect(learning1.topic(pronomes.topicId)?.qtyQuestionsAnswered()).toBe(1)
     })

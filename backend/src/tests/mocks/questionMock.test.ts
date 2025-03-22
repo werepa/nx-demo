@@ -3,7 +3,7 @@ import { Question } from "../../domain/entity/Question"
 import { faker } from "@faker-js/faker"
 import { DateBr } from "../../shared/domain/valueObject/DateBr"
 import { QuestionOption } from "../../domain/entity/QuestionOption"
-import { getCorrectOption, getIncorrectOption } from "./questionMock"
+import { getCorrectOption } from "./questionMock"
 import { QuestionDTO } from "@simulex/models"
 
 describe("mockQuestion", () => {
@@ -41,9 +41,7 @@ describe("mockQuestion", () => {
 
   it("should have at least one option with key set to true", () => {
     const question = questionMock()
-    const hasKeyOption = question.options
-      .getItems()
-      .some((option: QuestionOption) => option.key)
+    const hasKeyOption = question.options.getItems().some((option: QuestionOption) => option.key)
     expect(hasKeyOption).toBe(true)
   })
 
@@ -70,8 +68,7 @@ describe("Question Mock Utils", () => {
       let correctOption = getCorrectOption(question)
       expect(correctOption).toBe(question.options.getItems()[1].optionId)
 
-      const questionDTO: QuestionDTO = question.toDTO()
-      correctOption = getCorrectOption(questionDTO)
+      correctOption = getCorrectOption(question)
       expect(correctOption).toBe(question.options.getItems()[1].optionId)
     })
 
@@ -85,9 +82,8 @@ describe("Question Mock Utils", () => {
       let correctOption = getCorrectOption(question)
       expect(correctOption).toBe(question.options.getItems()[0].optionId)
 
-      const questionDTO: QuestionDTO = question.toDTO()
-      correctOption = getCorrectOption(questionDTO)
-      expect(correctOption).toBe(questionDTO.options[0].optionId)
+      correctOption = getCorrectOption(question)
+      expect(correctOption).toBe(question.options[0].optionId)
     })
 
     it("should return null for single choice question with fir+st option incorrect", () => {
@@ -100,15 +96,12 @@ describe("Question Mock Utils", () => {
       let correctOption = getCorrectOption(question)
       expect(correctOption).toBeNull()
 
-      const questionDTO: QuestionDTO = question.toDTO()
-      correctOption = getCorrectOption(questionDTO)
+      correctOption = getCorrectOption(question)
       expect(correctOption).toBeNull()
     })
 
     it("should throw error if question is not provided", () => {
-      expect(() => getCorrectOption(null as any)).toThrow(
-        "Question is required",
-      )
+      expect(() => getCorrectOption(null as any)).toThrow("Question is required")
     })
   })
 

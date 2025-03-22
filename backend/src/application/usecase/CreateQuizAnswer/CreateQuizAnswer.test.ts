@@ -1,14 +1,6 @@
 import { faker } from "@faker-js/faker"
 import { CreateQuizAnswer } from "./CreateQuizAnswer"
-import {
-  CreateQuizAnswerInput,
-  Discipline,
-  Question,
-  Quiz,
-  QuizAnswer,
-  Topic,
-  User,
-} from "../../../domain/entity"
+import { CreateQuizAnswerCommand, Discipline, Question, Quiz, QuizAnswer, Topic, User } from "../../../domain/entity"
 import { disciplineMock, topicMock } from "../../../tests/mocks/disciplineMock"
 import { UserRole } from "../../../domain/valueObject"
 import {
@@ -17,18 +9,10 @@ import {
   QuizRepositoryDatabase,
   UserRepositoryDatabase,
 } from "../../../infra/repository"
-import {
-  DisciplineRepository,
-  QuestionRepository,
-  QuizRepository,
-  UserRepository,
-} from "../../repository"
-import {
-  DatabaseConnection,
-  getTestDatabaseAdapter,
-} from "../../../infra/database"
+import { DisciplineRepository, QuestionRepository, QuizRepository, UserRepository } from "../../repository"
+import { DatabaseConnection, getTestDatabaseAdapter } from "../../../infra/database"
 import { RoleEnum } from "../../../shared/enum"
-import { userMock } from "../../../tests/mocks"
+import { getCorrectOption, getIncorrectOption, userMock } from "../../../tests/mocks"
 
 describe("CreateQuizAnswer", () => {
   let connection: DatabaseConnection
@@ -53,11 +37,7 @@ describe("CreateQuizAnswer", () => {
     userRepository = new UserRepositoryDatabase(connection)
     disciplineRepository = new DisciplineRepositoryDatabase(connection)
     questionRepository = new QuestionRepositoryDatabase(connection)
-    quizRepository = new QuizRepositoryDatabase(
-      connection,
-      userRepository,
-      disciplineRepository,
-    )
+    quizRepository = new QuizRepositoryDatabase(connection, userRepository, disciplineRepository)
 
     await quizRepository.clear()
     await questionRepository.clear()
@@ -124,64 +104,70 @@ describe("CreateQuizAnswer", () => {
   })
 
   test("should create a quiz answer", async () => {
-    const dto1: CreateQuizAnswerInput = {
+    const dto1: CreateQuizAnswerCommand = {
       quizId: quiz.quizId,
       questionId: question1.questionId,
       topicId: question1.topicId,
-      optionId: question1.options.getItems()[0].optionId,
+      correctOptionId: getCorrectOption(question1),
+      userOptionId: getCorrectOption(question1),
     }
     let result = await createQuizAnswer.execute(dto1)
     expect(result).toBeInstanceOf(QuizAnswer)
     expect(result.quizId).toBe(quiz.quizId)
     expect(result.questionId).toBe(question1.questionId)
-    expect(result.optionId).toBe(question1.options.getItems()[0].optionId)
-    expect(result.correctAnswered).toBe(true)
+    expect(result.userOptionId).toBe(question1.options.getItems()[0].optionId)
+    expect(result.isUserAnswerCorrect).toBe(true)
     expect(result.createdAt).toBeDefined()
 
-    const dto2: CreateQuizAnswerInput = {
+    const dto2: CreateQuizAnswerCommand = {
       quizId: quiz.quizId,
       questionId: question2.questionId,
       topicId: question2.topicId,
-      optionId: question2.options.getItems()[1].optionId,
+      correctOptionId: getCorrectOption(question2),
+      userOptionId: getIncorrectOption(question2),
     }
     result = await createQuizAnswer.execute(dto2)
-    expect(result.correctAnswered).toBe(false)
+    expect(result.isUserAnswerCorrect).toBe(false)
 
-    const dto3: CreateQuizAnswerInput = {
+    const dto3: CreateQuizAnswerCommand = {
       quizId: quiz.quizId,
       questionId: question3.questionId,
       topicId: question3.topicId,
-      optionId: null,
+      correctOptionId: getCorrectOption(question3),
+      userOptionId: getIncorrectOption(question3),
     }
     result = await createQuizAnswer.execute(dto3)
-    expect(result.correctAnswered).toBe(false)
+    expect(result.isUserAnswerCorrect).toBe(false)
 
-    const dto4: CreateQuizAnswerInput = {
+    const dto4: CreateQuizAnswerCommand = {
       quizId: quiz.quizId,
       questionId: question3.questionId,
       topicId: question3.topicId,
-      optionId: question3.options.getItems()[0].optionId,
+      correctOptionId: getCorrectOption(question3),
+      userOptionId: getIncorrectOption(question3),
     }
     result = await createQuizAnswer.execute(dto4)
-    expect(result.correctAnswered).toBe(true)
+    expect(result.isUserAnswerCorrect).toBe(true)
 
-    const dto5: CreateQuizAnswerInput = {
+    const dto5: CreateQuizAnswerCommand = {
       quizId: quiz.quizId,
       questionId: question4.questionId,
       topicId: question4.topicId,
-      optionId: question4.options.getItems()[0].optionId,
+      correctOptionId: getCorrectOption(question4),
+      userOptionId: getIncorrectOption(question4),
     }
     result = await createQuizAnswer.execute(dto5)
-    expect(result.correctAnswered).toBe(false)
+    expect(result.isUserAnswerCorrect).toBe(false)
 
-    const dto6: CreateQuizAnswerInput = {
+    const dto6: CreateQuizAnswerCommand = {
       quizId: quiz.quizId,
       questionId: question4.questionId,
       topicId: question4.topicId,
-      optionId: null,
+      correctOptionId: getCorrectOption(question4),
+      userOptionId: null,
     }
     result = await createQuizAnswer.execute(dto6)
-    expect(result.correctAnswered).toBe(true)
+    expect(result.isUserAnswerCorrect).toBe(true)
   })
 
   test("should throw an error if quiz does not exist!", async () => {
@@ -189,11 +175,9 @@ describe("CreateQuizAnswer", () => {
     const dto = {
       quizId: nonExistentQuizId,
       questionId: question1.questionId,
-      optionId: question1.options.getItems()[0].optionId,
+      userOptionId: question1.options.getItems()[0].optionId,
     }
-    await expect(createQuizAnswer.execute(dto)).rejects.toThrow(
-      `Quiz ID:${dto.quizId} does not exist!`,
-    )
+    await expect(createQuizAnswer.execute(dto)).rejects.toThrow(`Quiz ID:${dto.quizId} does not exist!`)
   })
 
   test("should throw an error if question does not exist!", async () => {
@@ -201,11 +185,9 @@ describe("CreateQuizAnswer", () => {
     const dto = {
       quizId: quiz.quizId,
       questionId: nonExistentQuestionId,
-      optionId: question1.options.getItems()[0].optionId,
+      userOptionId: question1.options.getItems()[0].optionId,
     }
-    await expect(createQuizAnswer.execute(dto)).rejects.toThrow(
-      `Question ID:${dto.questionId} does not exist!`,
-    )
+    await expect(createQuizAnswer.execute(dto)).rejects.toThrow(`Question ID:${dto.questionId} does not exist!`)
   })
 
   test("should throw an error if option does not exist!", async () => {
@@ -213,10 +195,8 @@ describe("CreateQuizAnswer", () => {
     const dto = {
       quizId: quiz.quizId,
       questionId: question1.questionId,
-      optionId: nonExistentOptionId,
+      userOptionId: nonExistentOptionId,
     }
-    await expect(createQuizAnswer.execute(dto)).rejects.toThrow(
-      `Option ID:${dto.optionId} does not exist!`,
-    )
+    await expect(createQuizAnswer.execute(dto)).rejects.toThrow(`Option ID:${dto.userOptionId} does not exist!`)
   })
 })

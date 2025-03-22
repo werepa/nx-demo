@@ -13,16 +13,16 @@ export class QuizAnswerList extends List<QuizAnswer> {
     return new QuizAnswerList(quizId, quizAnswers)
   }
 
-  override add(quizAnswer: QuizAnswer): void {
-    if (!quizAnswer) throw new Error("QuizAnswer is required")
-    if (this.quizId && quizAnswer.quizId !== this.quizId) throw new Error("QuizAnswer not matches with Quiz")
-    if (this.exists(quizAnswer)) throw new Error(`Answer ID:${quizAnswer.quizAnswerId} already in the list!`)
-    this.items.push(quizAnswer)
+  override add(userQuizAnswer: QuizAnswer): void {
+    if (!userQuizAnswer) throw new Error("QuizAnswer is required")
+    if (this.quizId && userQuizAnswer.quizId !== this.quizId) throw new Error("QuizAnswer not matches with Quiz")
+    if (this.exists(userQuizAnswer)) throw new Error(`Answer ID:${userQuizAnswer.quizAnswerId} already in the list!`)
+    this.items.push(userQuizAnswer)
     this.items = this.getItems()
   }
 
-  override remove(quizAnswer: QuizAnswer): void {
-    super.remove(quizAnswer)
+  override remove(userQuizAnswer: QuizAnswer): void {
+    super.remove(userQuizAnswer)
     this.items = this.getItems()
   }
 
@@ -40,7 +40,7 @@ export class QuizAnswerList extends List<QuizAnswer> {
   }
 
   // Get the last n answers of the list
-  getShortHistory(n: number = 5): QuizAnswer[] {
+  getShortHistory(n = 5): QuizAnswer[] {
     return this.getItems().slice(-n)
   }
 }

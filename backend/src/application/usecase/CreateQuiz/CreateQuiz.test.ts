@@ -14,14 +14,7 @@ import { LearningRepositoryDatabase } from "../../../infra/repository/LearningRe
 import { DateBr } from "../../../shared/domain/valueObject/DateBr"
 import { QuizTypeEnum } from "../../../shared/enum/QuizTypeEnum"
 import { databaseFixture } from "../../../tests/fixtures/databaseFixture"
-import {
-  CreateQuizInput,
-  Discipline,
-  Quiz,
-  Topic,
-  TopicLearning,
-  User,
-} from "../../../domain/entity"
+import { CreateQuizCommand, Discipline, Quiz, Topic, TopicLearning, User } from "../../../domain/entity"
 import { faker } from "@faker-js/faker"
 import { CheckQuizAnswer } from "../CheckQuizAnswer/CheckQuizAnswer"
 import { CreateQuiz } from "./CreateQuiz"
@@ -54,11 +47,7 @@ describe("UseCase => CreateQuiz", () => {
     userRepository = new UserRepositoryDatabase(connection)
     disciplineRepository = new DisciplineRepositoryDatabase(connection)
     questionRepository = new QuestionRepositoryDatabase(connection)
-    quizRepository = new QuizRepositoryDatabase(
-      connection,
-      userRepository,
-      disciplineRepository,
-    )
+    quizRepository = new QuizRepositoryDatabase(connection, userRepository, disciplineRepository)
     learningRepository = new LearningRepositoryDatabase(connection)
 
     await learningRepository.clear()
@@ -68,18 +57,14 @@ describe("UseCase => CreateQuiz", () => {
     await userRepository.clear()
 
     // useCases
-    createQuiz = new CreateQuiz(
-      quizRepository,
-      userRepository,
-      disciplineRepository,
-    )
+    createQuiz = new CreateQuiz(quizRepository, userRepository, disciplineRepository)
     getQuizById = new GetQuizById(quizRepository)
     correctQuizAnswer = new CheckQuizAnswer(
       userRepository,
       disciplineRepository,
       questionRepository,
       quizRepository,
-      learningRepository,
+      learningRepository
     )
 
     const fixture = await databaseFixture({
@@ -122,18 +107,13 @@ describe("UseCase => CreateQuiz", () => {
     expect(quiz.quizType.value).toBe(QuizTypeEnum.RANDOM)
     expect(quiz.user.userId).toBe(userMember.userId)
     expect(quiz.discipline.disciplineId).toBe(portugues.disciplineId)
-    expect(quiz.topicsRoot.listId()).toEqual(
-      [crase.topicId, pronomes.topicId].sort(),
-    )
+    expect(quiz.topicsRoot.listId()).toEqual([crase.topicId, pronomes.topicId].sort())
     expect(quiz.answers.getItems()).toEqual([])
     expect(quiz.isActive).toBe(true)
     expect(quiz.createdAt).toBeInstanceOf(DateBr)
     expect(quiz.updatedAt).toBe(null)
 
-    const learning = await learningRepository.getDisciplineLearning(
-      userMember,
-      portugues,
-    )
+    const learning = await learningRepository.getDisciplineLearning(userMember, portugues)
 
     const craseLearning = learning.topics.findByTopicId(crase.topicId)
 
@@ -189,21 +169,19 @@ describe("UseCase => CreateQuiz", () => {
 
     expect(quiz1.quizId).toBe(quiz2.quizId)
     expect(quiz2.isActive).toBe(true)
-    expect(quiz2.topicsRoot.listId()).toHaveLength(
-      portugues.topicsRoot().length,
-    )
+    expect(quiz2.topicsRoot.listId()).toHaveLength(portugues.topicsRoot().length)
     expect(quizzes.length).toBe(1)
   })
 
   test("should prevent free users from creating special quizzes", async () => {
-    const dto: CreateQuizInput = {
+    const dto: CreateQuizCommand = {
       user: userFree,
       discipline: portugues,
     }
     const quiz = Quiz.create(dto)
     expect(quiz.quizType.value).toBe(QuizTypeEnum.RANDOM)
     expect(() => quiz.updateQuizType(QuizType.create("learning"))).toThrow(
-      "Free users can only create random or review quizzes",
+      "Free users can only create random or review quizzes"
     )
   })
 
@@ -214,9 +192,7 @@ describe("UseCase => CreateQuiz", () => {
       disciplineId: portugues.disciplineId,
       topicsRoot: [crase.topicId, pronomes.topicId],
     }
-    await expect(createQuiz.execute(dto)).rejects.toThrow(
-      `User ID:${nonExistentUserId} does not exist!`,
-    )
+    await expect(createQuiz.execute(dto)).rejects.toThrow(`User ID:${nonExistentUserId} does not exist!`)
   })
 
   test("should throw an error if the discipline does not exist!", async () => {
@@ -226,9 +202,7 @@ describe("UseCase => CreateQuiz", () => {
       disciplineId: nonExistentDisciplineId,
       topicsRoot: [crase.topicId, pronomes.topicId],
     }
-    await expect(createQuiz.execute(dto)).rejects.toThrow(
-      `Discipline ID:${nonExistentDisciplineId} does not exist!`,
-    )
+    await expect(createQuiz.execute(dto)).rejects.toThrow(`Discipline ID:${nonExistentDisciplineId} does not exist!`)
   })
 
   test("should throw an error if no root topics are provided", async () => {
@@ -238,8 +212,6 @@ describe("UseCase => CreateQuiz", () => {
       disciplineId: portugues.disciplineId,
       topicsRoot: [nonExistentTopicId],
     }
-    await expect(createQuiz.execute(dto)).rejects.toThrow(
-      `No root topics provided`,
-    )
+    await expect(createQuiz.execute(dto)).rejects.toThrow(`No root topics provided`)
   })
 })

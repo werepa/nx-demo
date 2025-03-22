@@ -10,8 +10,8 @@ describe("quizMock", () => {
     const quizPersistence = quizMockState()
     expect(quizPersistence).toBeDefined()
     expect(quizPersistence.quizId).toBeDefined()
-    expect(quizPersistence.userId).toBeDefined()
-    expect(quizPersistence.disciplineId).toBeDefined()
+    expect(quizPersistence.user).toBeDefined()
+    expect(quizPersistence.discipline).toBeDefined()
     expect(quizPersistence.topicsRootId).toBeDefined()
     expect(quizPersistence.createdAt).toBeDefined()
   })
@@ -32,7 +32,12 @@ describe("quizMock", () => {
     const topic2 = topicMock({ name: "topic 2" })
     discipline.topics.add(topic1)
     discipline.topics.add(topic2)
-    const quiz = quizMock({ quizId: "any_id", user, discipline })
+    const quiz = quizMock({
+      quizId: "any_id",
+      userId: user.userId,
+      disciplineId: discipline.disciplineId,
+      topicsRootId: [topic1.topicId, topic2.topicId],
+    })
     expect(quiz.quizId).toBe("any_id")
     expect(quiz.user).toBe(user)
     expect(quiz.discipline).toBe(discipline)

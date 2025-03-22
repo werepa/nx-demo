@@ -17,7 +17,7 @@ export class QuestionOption extends Entity<QuestionOptionProps> {
     super(props, "optionId")
   }
 
-  static create(dto: CreateOptionInput): QuestionOption {
+  static create(dto: CreateOptionCommand): QuestionOption {
     if (!dto.text || dto.text.trim() === "") {
       throw new Error("Text of option is required")
     }
@@ -111,7 +111,7 @@ export class QuestionOption extends Entity<QuestionOptionProps> {
   }
 }
 
-export type CreateOptionInput = {
+export type CreateOptionCommand = {
   questionId: string
   text: string
   key?: boolean

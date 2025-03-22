@@ -8,10 +8,7 @@ import { Learning } from "../../../domain/entity/Learning"
 import { databaseFixture } from "../../../tests/fixtures/databaseFixture"
 import { CheckQuizAnswer } from "../CheckQuizAnswer/CheckQuizAnswer"
 import { CreateQuiz } from "../CreateQuiz/CreateQuiz"
-import {
-  getCorrectOption,
-  getIncorrectOption,
-} from "../../../tests/mocks/questionMock"
+import { getCorrectOption, getIncorrectOption } from "../../../tests/mocks/questionMock"
 import { DatabaseConnection } from "../../../infra/database/DatabaseConnection"
 import { getTestDatabaseAdapter } from "../../../infra/database/TestDatabaseAdapter"
 import { DisciplineRepository } from "../../repository/DisciplineRepository"
@@ -67,11 +64,7 @@ describe("GetNextQuestion", () => {
     userRepository = new UserRepositoryDatabase(connection)
     disciplineRepository = new DisciplineRepositoryDatabase(connection)
     questionRepository = new QuestionRepositoryDatabase(connection)
-    quizRepository = new QuizRepositoryDatabase(
-      connection,
-      userRepository,
-      disciplineRepository,
-    )
+    quizRepository = new QuizRepositoryDatabase(connection, userRepository, disciplineRepository)
     learningRepository = new LearningRepositoryDatabase(connection)
 
     await learningRepository.clear()
@@ -81,26 +74,18 @@ describe("GetNextQuestion", () => {
     await userRepository.clear()
 
     // useCases
-    createQuiz = new CreateQuiz(
-      quizRepository,
-      userRepository,
-      disciplineRepository,
-    )
+    createQuiz = new CreateQuiz(quizRepository, userRepository, disciplineRepository)
 
     getQuizById = new GetQuizById(quizRepository)
 
-    getNextQuestion = new GetNextQuestion(
-      questionRepository,
-      quizRepository,
-      learningRepository,
-    )
+    getNextQuestion = new GetNextQuestion(questionRepository, quizRepository, learningRepository)
 
     correctQuizAnswer = new CheckQuizAnswer(
       userRepository,
       disciplineRepository,
       questionRepository,
       quizRepository,
-      learningRepository,
+      learningRepository
     )
 
     const fixture = await databaseFixture({
@@ -136,10 +121,7 @@ describe("GetNextQuestion", () => {
     })
     quiz1 = await getQuizById.execute(quizId)
 
-    learning1 = await learningRepository.getDisciplineLearning(
-      userMember1,
-      portugues,
-    )
+    learning1 = await learningRepository.getDisciplineLearning(userMember1, portugues)
   })
 
   afterEach(() => {
@@ -147,10 +129,7 @@ describe("GetNextQuestion", () => {
   })
 
   test("should return the next question for a given topic and user", async () => {
-    const verifyNextQuestion = async (
-      expectedTopic: Topic,
-      correctAnswered = true,
-    ) => {
+    const verifyNextQuestion = async (expectedTopic: Topic, correctAnswered = true) => {
       const nextQuestion = await getNextQuestion.execute({
         quizId: quiz1.quizId,
       })
@@ -164,16 +143,11 @@ describe("GetNextQuestion", () => {
         userQuizAnswer: {
           quizId: quiz1.quizId,
           questionId: nextQuestion.questionId,
-          selectedOptionId: correctAnswered
-            ? getCorrectOption(nextQuestion)
-            : getIncorrectOption(nextQuestion),
+          userOptionId: correctAnswered ? getCorrectOption(nextQuestion) : getIncorrectOption(nextQuestion),
           topicId: nextQuestion.topicId,
         },
       })
-      learning1 = await learningRepository.getDisciplineLearning(
-        userMember1,
-        portugues,
-      )
+      learning1 = await learningRepository.getDisciplineLearning(userMember1, portugues)
     }
 
     /* Questions in database:
@@ -204,12 +178,8 @@ describe("GetNextQuestion", () => {
     expect(learning1.topic(distancia.topicId)?.qtyQuestionsAnswered()).toBe(1)
     expect(learning1.topic(tratamento.topicId)?.qtyQuestionsAnswered()).toBe(1)
     expect(learning1.topic(obliquos.topicId)?.qtyQuestionsAnswered()).toBe(0)
-    expect(
-      learning1.topic(palavrasMasculinas.topicId)?.qtyQuestionsAnswered(),
-    ).toBe(0)
-    expect(
-      learning1.topic(palavrasRepetidas.topicId)?.qtyQuestionsAnswered(),
-    ).toBe(0)
+    expect(learning1.topic(palavrasMasculinas.topicId)?.qtyQuestionsAnswered()).toBe(0)
+    expect(learning1.topic(palavrasRepetidas.topicId)?.qtyQuestionsAnswered()).toBe(0)
 
     expect(learning1.topic(crase.topicId)?.score()).toBe(1)
     expect(learning1.topic(pronomes.topicId)?.score()).toBe(0)

@@ -62,14 +62,14 @@ export const topicMock = (options: TopicMockOptions = {}): Topic => {
   return topic
 }
 
-export const disciplineState = (discipline: Discipline): DisciplineDTO => {
+export const disciplineState = (discipline: Discipline): DisciplineState => {
   return {
     disciplineId: discipline.id,
     name: discipline.name,
     image: discipline.image,
     topics: discipline.topics.toDTO(),
     isActive: discipline.isActive,
-    createdAt: discipline.createdAt.formatoBr,
-    updatedAt: discipline.updatedAt?.formatoBr || "",
+    createdAt: discipline.createdAt.value,
+    updatedAt: discipline.updatedAt?.value || null,
   }
 }

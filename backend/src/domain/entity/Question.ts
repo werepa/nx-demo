@@ -34,7 +34,7 @@ export class Question extends Entity<QuestionProps> {
     }
   }
 
-  static create(dto: CreateQuestionInput): Question {
+  static create(dto: CreateQuestionCommand): Question {
     if (!dto.prompt) {
       dto.prompt = dto.options.length > 1 ? "Julgue os itens abaixo:" : "Julgue o item abaixo:"
     }
@@ -279,7 +279,7 @@ export class Question extends Entity<QuestionProps> {
   }
 }
 
-export type CreateQuestionInput = {
+export type CreateQuestionCommand = {
   topicId: string
   topicRootId: string
   prompt?: string

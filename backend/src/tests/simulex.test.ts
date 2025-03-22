@@ -84,40 +84,24 @@ describe("Simulex", () => {
     userRepository = new UserRepositoryDatabase(connection)
     disciplineRepository = new DisciplineRepositoryDatabase(connection)
     questionRepository = new QuestionRepositoryDatabase(connection)
-    quizRepository = new QuizRepositoryDatabase(
-      connection,
-      userRepository,
-      disciplineRepository,
-    )
+    quizRepository = new QuizRepositoryDatabase(connection, userRepository, disciplineRepository)
     learningRepository = new LearningRepositoryDatabase(connection)
 
     // UseCases
-    getLearning = new GetLearning(
-      disciplineRepository,
-      userRepository,
-      learningRepository,
-    )
+    getLearning = new GetLearning(disciplineRepository, userRepository, learningRepository)
 
-    createQuiz = new CreateQuiz(
-      quizRepository,
-      userRepository,
-      disciplineRepository,
-    )
+    createQuiz = new CreateQuiz(quizRepository, userRepository, disciplineRepository)
 
     getQuizById = new GetQuizById(quizRepository)
 
-    getNextQuestion = new GetNextQuestion(
-      questionRepository,
-      quizRepository,
-      learningRepository,
-    )
+    getNextQuestion = new GetNextQuestion(questionRepository, quizRepository, learningRepository)
 
     correctQuizAnswer = new CheckQuizAnswer(
       userRepository,
       disciplineRepository,
       questionRepository,
       quizRepository,
-      learningRepository,
+      learningRepository
     )
   })
   beforeEach(async () => {
@@ -210,73 +194,29 @@ describe("Simulex", () => {
       expect(learning1.topic(figurasDeLinguagem.topicId).qtyQuestions).toBe(5)
 
       expect(learning1.topic(crase.topicId).frequencyInDiscipline).toBe(1)
-      expect(learning1.topic(pronomes.topicId).frequencyInDiscipline).toBe(
-        0.7949,
-      )
-      expect(learning1.topic(pessoais.topicId).frequencyInDiscipline).toBe(
-        0.4103,
-      )
-      expect(
-        learning1.topic(palavrasEspeciais.topicId).frequencyInDiscipline,
-      ).toBe(0.359)
+      expect(learning1.topic(pronomes.topicId).frequencyInDiscipline).toBe(0.7949)
+      expect(learning1.topic(pessoais.topicId).frequencyInDiscipline).toBe(0.4103)
+      expect(learning1.topic(palavrasEspeciais.topicId).frequencyInDiscipline).toBe(0.359)
       expect(learning1.topic(terra.topicId).frequencyInDiscipline).toBe(0.2051)
-      expect(learning1.topic(casoReto.topicId).frequencyInDiscipline).toBe(
-        0.1538,
-      )
-      expect(learning1.topic(distancia.topicId).frequencyInDiscipline).toBe(
-        0.1538,
-      )
-      expect(
-        learning1.topic(acentuacaoGrafica.topicId).frequencyInDiscipline,
-      ).toBe(0.1282)
-      expect(
-        learning1.topic(concordanciaNominal.topicId).frequencyInDiscipline,
-      ).toBe(0.1282)
-      expect(
-        learning1.topic(concordanciaVerbal.topicId).frequencyInDiscipline,
-      ).toBe(0.1282)
-      expect(
-        learning1.topic(figurasDeLinguagem.topicId).frequencyInDiscipline,
-      ).toBe(0.1282)
-      expect(learning1.topic(fonetica.topicId).frequencyInDiscipline).toBe(
-        0.1282,
-      )
-      expect(learning1.topic(morfologia.topicId).frequencyInDiscipline).toBe(
-        0.1282,
-      )
-      expect(learning1.topic(nomesCidades.topicId).frequencyInDiscipline).toBe(
-        0.1282,
-      )
-      expect(learning1.topic(obliquos.topicId).frequencyInDiscipline).toBe(
-        0.1282,
-      )
-      expect(
-        learning1.topic(palavrasMasculinas.topicId).frequencyInDiscipline,
-      ).toBe(0.1282)
-      expect(
-        learning1.topic(palavrasRepetidas.topicId).frequencyInDiscipline,
-      ).toBe(0.1282)
-      expect(learning1.topic(pontuacao.topicId).frequencyInDiscipline).toBe(
-        0.1282,
-      )
-      expect(
-        learning1.topic(portuguesClassificar.topicId).frequencyInDiscipline,
-      ).toBe(0.1282)
-      expect(
-        learning1.topic(regenciaNominal.topicId).frequencyInDiscipline,
-      ).toBe(0.1282)
-      expect(
-        learning1.topic(regenciaVerbal.topicId).frequencyInDiscipline,
-      ).toBe(0.1282)
-      expect(learning1.topic(semantica.topicId).frequencyInDiscipline).toBe(
-        0.1282,
-      )
-      expect(learning1.topic(sintaxe.topicId).frequencyInDiscipline).toBe(
-        0.1282,
-      )
-      expect(learning1.topic(tratamento.topicId).frequencyInDiscipline).toBe(
-        0.1282,
-      )
+      expect(learning1.topic(casoReto.topicId).frequencyInDiscipline).toBe(0.1538)
+      expect(learning1.topic(distancia.topicId).frequencyInDiscipline).toBe(0.1538)
+      expect(learning1.topic(acentuacaoGrafica.topicId).frequencyInDiscipline).toBe(0.1282)
+      expect(learning1.topic(concordanciaNominal.topicId).frequencyInDiscipline).toBe(0.1282)
+      expect(learning1.topic(concordanciaVerbal.topicId).frequencyInDiscipline).toBe(0.1282)
+      expect(learning1.topic(figurasDeLinguagem.topicId).frequencyInDiscipline).toBe(0.1282)
+      expect(learning1.topic(fonetica.topicId).frequencyInDiscipline).toBe(0.1282)
+      expect(learning1.topic(morfologia.topicId).frequencyInDiscipline).toBe(0.1282)
+      expect(learning1.topic(nomesCidades.topicId).frequencyInDiscipline).toBe(0.1282)
+      expect(learning1.topic(obliquos.topicId).frequencyInDiscipline).toBe(0.1282)
+      expect(learning1.topic(palavrasMasculinas.topicId).frequencyInDiscipline).toBe(0.1282)
+      expect(learning1.topic(palavrasRepetidas.topicId).frequencyInDiscipline).toBe(0.1282)
+      expect(learning1.topic(pontuacao.topicId).frequencyInDiscipline).toBe(0.1282)
+      expect(learning1.topic(portuguesClassificar.topicId).frequencyInDiscipline).toBe(0.1282)
+      expect(learning1.topic(regenciaNominal.topicId).frequencyInDiscipline).toBe(0.1282)
+      expect(learning1.topic(regenciaVerbal.topicId).frequencyInDiscipline).toBe(0.1282)
+      expect(learning1.topic(semantica.topicId).frequencyInDiscipline).toBe(0.1282)
+      expect(learning1.topic(sintaxe.topicId).frequencyInDiscipline).toBe(0.1282)
+      expect(learning1.topic(tratamento.topicId).frequencyInDiscipline).toBe(0.1282)
     })
   })
 
@@ -304,10 +244,7 @@ describe("Simulex", () => {
   })
 
   xdescribe("Answer quiz - Leveling phase and Quiz by Frequency", () => {
-    const verifyNextQuestion = async (
-      expectedTopic: Topic,
-      correctAnswered = true,
-    ) => {
+    const verifyNextQuestion = async (expectedTopic: Topic, correctAnswered = true) => {
       if (!expectedTopic) {
         expect(expectedTopic).toBeDefined()
         return
@@ -330,9 +267,7 @@ describe("Simulex", () => {
         userQuizAnswer: {
           quizId: quiz1.quizId,
           questionId: nextQuestion.questionId,
-          selectedOptionId: correctAnswered
-            ? getCorrectOption(nextQuestion)
-            : getIncorrectOption(nextQuestion),
+          userOptionId: correctAnswered ? getCorrectOption(nextQuestion) : getIncorrectOption(nextQuestion),
           topicId: nextQuestion.topicId,
         },
       })
@@ -372,9 +307,7 @@ describe("Simulex", () => {
       expect(learning1.topic(pronomes.topicId).qtyQuestionsAnswered()).toBe(0)
 
       expect(learning1.topic(crase.topicId).frequencyInDiscipline).toBe(1)
-      expect(learning1.topic(casoReto.topicId).frequencyInDiscipline).toBe(
-        0.1538,
-      )
+      expect(learning1.topic(casoReto.topicId).frequencyInDiscipline).toBe(0.1538)
 
       // Primeira rodada - Início da fase de nivelamento
       await verifyNextQuestion(crase)
@@ -448,172 +381,90 @@ describe("Simulex", () => {
       await verifyNextQuestion(tratamento, false)
 
       // // 0 a 7 (0: não verificado, 1: em análise, 2: iniciante, 3: leigo, 4: aprendiz, 5: bacharel, 6: mestre, 7: doutor)
-      expect(learning1.topic(casoReto.topicId).learningLabel()).toBe(
-        "Iniciante",
-      )
-      expect(learning1.topic(distancia.topicId).learningLabel()).toBe(
-        "Iniciante",
-      )
+      expect(learning1.topic(casoReto.topicId).learningLabel()).toBe("Iniciante")
+      expect(learning1.topic(distancia.topicId).learningLabel()).toBe("Iniciante")
       expect(learning1.topic(crase.topicId).learningLabel()).toBe("Leigo")
       expect(learning1.topic(pronomes.topicId).learningLabel()).toBe("Aprendiz")
       expect(learning1.topic(pessoais.topicId).learningLabel()).toBe("Aprendiz")
       expect(learning1.topic(terra.topicId).learningLabel()).toBe("Bacharel")
-      expect(learning1.topic(acentuacaoGrafica.topicId).learningLabel()).toBe(
-        "Leigo",
-      )
-      expect(learning1.topic(concordanciaNominal.topicId).learningLabel()).toBe(
-        "Leigo",
-      )
-      expect(learning1.topic(concordanciaVerbal.topicId).learningLabel()).toBe(
-        "Leigo",
-      )
-      expect(learning1.topic(figurasDeLinguagem.topicId).learningLabel()).toBe(
-        "Leigo",
-      )
+      expect(learning1.topic(acentuacaoGrafica.topicId).learningLabel()).toBe("Leigo")
+      expect(learning1.topic(concordanciaNominal.topicId).learningLabel()).toBe("Leigo")
+      expect(learning1.topic(concordanciaVerbal.topicId).learningLabel()).toBe("Leigo")
+      expect(learning1.topic(figurasDeLinguagem.topicId).learningLabel()).toBe("Leigo")
       expect(learning1.topic(fonetica.topicId).learningLabel()).toBe("Leigo")
       expect(learning1.topic(morfologia.topicId).learningLabel()).toBe("Leigo")
-      expect(learning1.topic(nomesCidades.topicId).learningLabel()).toBe(
-        "Leigo",
-      )
+      expect(learning1.topic(nomesCidades.topicId).learningLabel()).toBe("Leigo")
       expect(learning1.topic(obliquos.topicId).learningLabel()).toBe("Leigo")
-      expect(learning1.topic(palavrasMasculinas.topicId).learningLabel()).toBe(
-        "Leigo",
-      )
-      expect(learning1.topic(palavrasRepetidas.topicId).learningLabel()).toBe(
-        "Leigo",
-      )
+      expect(learning1.topic(palavrasMasculinas.topicId).learningLabel()).toBe("Leigo")
+      expect(learning1.topic(palavrasRepetidas.topicId).learningLabel()).toBe("Leigo")
       expect(learning1.topic(pontuacao.topicId).learningLabel()).toBe("Leigo")
-      expect(learning1.topic(regenciaNominal.topicId).learningLabel()).toBe(
-        "Leigo",
-      )
-      expect(learning1.topic(regenciaVerbal.topicId).learningLabel()).toBe(
-        "Leigo",
-      )
+      expect(learning1.topic(regenciaNominal.topicId).learningLabel()).toBe("Leigo")
+      expect(learning1.topic(regenciaVerbal.topicId).learningLabel()).toBe("Leigo")
       expect(learning1.topic(semantica.topicId).learningLabel()).toBe("Leigo")
       expect(learning1.topic(sintaxe.topicId).learningLabel()).toBe("Leigo")
       expect(learning1.topic(tratamento.topicId).learningLabel()).toBe("Leigo")
 
       expect(learning1.topic(crase.topicId).frequencyInDiscipline).toBe(1)
-      expect(learning1.topic(pronomes.topicId).frequencyInDiscipline).toBe(
-        0.7949,
-      )
-      expect(learning1.topic(pessoais.topicId).frequencyInDiscipline).toBe(
-        0.4103,
-      )
-      expect(
-        learning1.topic(palavrasEspeciais.topicId).frequencyInDiscipline,
-      ).toBe(0.359)
+      expect(learning1.topic(pronomes.topicId).frequencyInDiscipline).toBe(0.7949)
+      expect(learning1.topic(pessoais.topicId).frequencyInDiscipline).toBe(0.4103)
+      expect(learning1.topic(palavrasEspeciais.topicId).frequencyInDiscipline).toBe(0.359)
       expect(learning1.topic(terra.topicId).frequencyInDiscipline).toBe(0.2051)
-      expect(learning1.topic(casoReto.topicId).frequencyInDiscipline).toBe(
-        0.1538,
-      )
-      expect(learning1.topic(distancia.topicId).frequencyInDiscipline).toBe(
-        0.1538,
-      )
-      expect(
-        learning1.topic(acentuacaoGrafica.topicId).frequencyInDiscipline,
-      ).toBe(0.1282)
-      expect(
-        learning1.topic(concordanciaNominal.topicId).frequencyInDiscipline,
-      ).toBe(0.1282)
-      expect(
-        learning1.topic(concordanciaVerbal.topicId).frequencyInDiscipline,
-      ).toBe(0.1282)
-      expect(
-        learning1.topic(figurasDeLinguagem.topicId).frequencyInDiscipline,
-      ).toBe(0.1282)
-      expect(learning1.topic(fonetica.topicId).frequencyInDiscipline).toBe(
-        0.1282,
-      )
-      expect(learning1.topic(morfologia.topicId).frequencyInDiscipline).toBe(
-        0.1282,
-      )
-      expect(learning1.topic(nomesCidades.topicId).frequencyInDiscipline).toBe(
-        0.1282,
-      )
-      expect(learning1.topic(obliquos.topicId).frequencyInDiscipline).toBe(
-        0.1282,
-      )
-      expect(
-        learning1.topic(palavrasMasculinas.topicId).frequencyInDiscipline,
-      ).toBe(0.1282)
-      expect(
-        learning1.topic(palavrasRepetidas.topicId).frequencyInDiscipline,
-      ).toBe(0.1282)
-      expect(learning1.topic(pontuacao.topicId).frequencyInDiscipline).toBe(
-        0.1282,
-      )
-      expect(
-        learning1.topic(portuguesClassificar.topicId).frequencyInDiscipline,
-      ).toBe(0.1282)
-      expect(
-        learning1.topic(regenciaNominal.topicId).frequencyInDiscipline,
-      ).toBe(0.1282)
-      expect(
-        learning1.topic(regenciaVerbal.topicId).frequencyInDiscipline,
-      ).toBe(0.1282)
-      expect(learning1.topic(semantica.topicId).frequencyInDiscipline).toBe(
-        0.1282,
-      )
-      expect(learning1.topic(sintaxe.topicId).frequencyInDiscipline).toBe(
-        0.1282,
-      )
-      expect(learning1.topic(tratamento.topicId).frequencyInDiscipline).toBe(
-        0.1282,
-      )
+      expect(learning1.topic(casoReto.topicId).frequencyInDiscipline).toBe(0.1538)
+      expect(learning1.topic(distancia.topicId).frequencyInDiscipline).toBe(0.1538)
+      expect(learning1.topic(acentuacaoGrafica.topicId).frequencyInDiscipline).toBe(0.1282)
+      expect(learning1.topic(concordanciaNominal.topicId).frequencyInDiscipline).toBe(0.1282)
+      expect(learning1.topic(concordanciaVerbal.topicId).frequencyInDiscipline).toBe(0.1282)
+      expect(learning1.topic(figurasDeLinguagem.topicId).frequencyInDiscipline).toBe(0.1282)
+      expect(learning1.topic(fonetica.topicId).frequencyInDiscipline).toBe(0.1282)
+      expect(learning1.topic(morfologia.topicId).frequencyInDiscipline).toBe(0.1282)
+      expect(learning1.topic(nomesCidades.topicId).frequencyInDiscipline).toBe(0.1282)
+      expect(learning1.topic(obliquos.topicId).frequencyInDiscipline).toBe(0.1282)
+      expect(learning1.topic(palavrasMasculinas.topicId).frequencyInDiscipline).toBe(0.1282)
+      expect(learning1.topic(palavrasRepetidas.topicId).frequencyInDiscipline).toBe(0.1282)
+      expect(learning1.topic(pontuacao.topicId).frequencyInDiscipline).toBe(0.1282)
+      expect(learning1.topic(portuguesClassificar.topicId).frequencyInDiscipline).toBe(0.1282)
+      expect(learning1.topic(regenciaNominal.topicId).frequencyInDiscipline).toBe(0.1282)
+      expect(learning1.topic(regenciaVerbal.topicId).frequencyInDiscipline).toBe(0.1282)
+      expect(learning1.topic(semantica.topicId).frequencyInDiscipline).toBe(0.1282)
+      expect(learning1.topic(sintaxe.topicId).frequencyInDiscipline).toBe(0.1282)
+      expect(learning1.topic(tratamento.topicId).frequencyInDiscipline).toBe(0.1282)
 
       // Terceira rodada - Início da fase de aprendizado (Iniciante e Leigo)
       await verifyNextQuestion(crase)
       expect(learning1.topic(crase.topicId).learningLabel()).toBe("Aprendiz")
 
       await verifyNextQuestion(casoReto, false)
-      expect(learning1.topic(casoReto.topicId).learningLabel()).toBe(
-        "Iniciante",
-      )
+      expect(learning1.topic(casoReto.topicId).learningLabel()).toBe("Iniciante")
 
       await verifyNextQuestion(distancia)
       expect(learning1.topic(distancia.topicId).learningLabel()).toBe("Leigo")
 
       await verifyNextQuestion(acentuacaoGrafica, false)
-      expect(learning1.topic(acentuacaoGrafica.topicId).learningLabel()).toBe(
-        "Leigo",
-      )
+      expect(learning1.topic(acentuacaoGrafica.topicId).learningLabel()).toBe("Leigo")
 
       await verifyNextQuestion(concordanciaNominal, false)
-      expect(learning1.topic(concordanciaNominal.topicId).learningLabel()).toBe(
-        "Leigo",
-      )
+      expect(learning1.topic(concordanciaNominal.topicId).learningLabel()).toBe("Leigo")
 
       await verifyNextQuestion(concordanciaVerbal, false)
-      expect(learning1.topic(concordanciaVerbal.topicId).learningLabel()).toBe(
-        "Leigo",
-      )
+      expect(learning1.topic(concordanciaVerbal.topicId).learningLabel()).toBe("Leigo")
 
       await verifyNextQuestion(figurasDeLinguagem, false)
-      expect(learning1.topic(figurasDeLinguagem.topicId).learningLabel()).toBe(
-        "Leigo",
-      )
+      expect(learning1.topic(figurasDeLinguagem.topicId).learningLabel()).toBe("Leigo")
 
       await verifyNextQuestion(casoReto)
       expect(learning1.topic(casoReto.topicId).learningLabel()).toBe("Leigo")
 
       await verifyNextQuestion(distancia)
-      expect(learning1.topic(distancia.topicId).learningLabel()).toBe(
-        "Aprendiz",
-      )
+      expect(learning1.topic(distancia.topicId).learningLabel()).toBe("Aprendiz")
 
       await verifyNextQuestion(fonetica)
       expect(learning1.topic(fonetica.topicId).learningLabel()).toBe("Aprendiz")
 
       await verifyNextQuestion(morfologia)
-      expect(learning1.topic(morfologia.topicId).learningLabel()).toBe(
-        "Aprendiz",
-      )
+      expect(learning1.topic(morfologia.topicId).learningLabel()).toBe("Aprendiz")
 
       await verifyNextQuestion(nomesCidades, false)
-      expect(learning1.topic(nomesCidades.topicId).learningLabel()).toBe(
-        "Leigo",
-      )
+      expect(learning1.topic(nomesCidades.topicId).learningLabel()).toBe("Leigo")
 
       await verifyNextQuestion(obliquos, false)
       expect(learning1.topic(obliquos.topicId).learningLabel()).toBe("Leigo")
@@ -622,37 +473,25 @@ describe("Simulex", () => {
       expect(learning1.topic(casoReto.topicId).learningLabel()).toBe("Leigo")
 
       await verifyNextQuestion(palavrasMasculinas, false)
-      expect(learning1.topic(palavrasMasculinas.topicId).learningLabel()).toBe(
-        "Leigo",
-      )
+      expect(learning1.topic(palavrasMasculinas.topicId).learningLabel()).toBe("Leigo")
 
       await verifyNextQuestion(palavrasRepetidas, false)
-      expect(learning1.topic(palavrasRepetidas.topicId).learningLabel()).toBe(
-        "Leigo",
-      )
+      expect(learning1.topic(palavrasRepetidas.topicId).learningLabel()).toBe("Leigo")
 
       await verifyNextQuestion(pontuacao)
-      expect(learning1.topic(pontuacao.topicId).learningLabel()).toBe(
-        "Aprendiz",
-      )
+      expect(learning1.topic(pontuacao.topicId).learningLabel()).toBe("Aprendiz")
 
       await verifyNextQuestion(regenciaNominal)
-      expect(learning1.topic(regenciaNominal.topicId).learningLabel()).toBe(
-        "Aprendiz",
-      )
+      expect(learning1.topic(regenciaNominal.topicId).learningLabel()).toBe("Aprendiz")
 
       await verifyNextQuestion(regenciaVerbal)
-      expect(learning1.topic(regenciaVerbal.topicId).learningLabel()).toBe(
-        "Aprendiz",
-      )
+      expect(learning1.topic(regenciaVerbal.topicId).learningLabel()).toBe("Aprendiz")
 
       await verifyNextQuestion(casoReto)
       expect(learning1.topic(casoReto.topicId).learningLabel()).toBe("Aprendiz")
 
       await verifyNextQuestion(semantica)
-      expect(learning1.topic(semantica.topicId).learningLabel()).toBe(
-        "Aprendiz",
-      )
+      expect(learning1.topic(semantica.topicId).learningLabel()).toBe("Aprendiz")
 
       await verifyNextQuestion(sintaxe)
       expect(learning1.topic(sintaxe.topicId).learningLabel()).toBe("Aprendiz")
@@ -672,14 +511,10 @@ describe("Simulex", () => {
       expect(learning1.topic(casoReto.topicId).learningLabel()).toBe("Aprendiz")
 
       await verifyNextQuestion(distancia)
-      expect(learning1.topic(distancia.topicId).learningLabel()).toBe(
-        "Bacharel",
-      )
+      expect(learning1.topic(distancia.topicId).learningLabel()).toBe("Bacharel")
 
       await verifyNextQuestion(tratamento)
-      expect(learning1.topic(tratamento.topicId).learningLabel()).toBe(
-        "Aprendiz",
-      )
+      expect(learning1.topic(tratamento.topicId).learningLabel()).toBe("Aprendiz")
 
       await verifyNextQuestion(crase)
       expect(learning1.topic(crase.topicId).learningLabel()).toBe("Aprendiz")
@@ -694,32 +529,22 @@ describe("Simulex", () => {
       expect(learning1.topic(casoReto.topicId).learningLabel()).toBe("Mestre")
 
       await verifyNextQuestion(acentuacaoGrafica)
-      expect(learning1.topic(acentuacaoGrafica.topicId).learningLabel()).toBe(
-        "Aprendiz",
-      )
+      expect(learning1.topic(acentuacaoGrafica.topicId).learningLabel()).toBe("Aprendiz")
 
       await verifyNextQuestion(concordanciaNominal)
-      expect(learning1.topic(concordanciaNominal.topicId).learningLabel()).toBe(
-        "Aprendiz",
-      )
+      expect(learning1.topic(concordanciaNominal.topicId).learningLabel()).toBe("Aprendiz")
 
       await verifyNextQuestion(crase)
       expect(learning1.topic(crase.topicId).learningLabel()).toBe("Aprendiz")
 
       await verifyNextQuestion(concordanciaVerbal)
-      expect(learning1.topic(concordanciaVerbal.topicId).learningLabel()).toBe(
-        "Aprendiz",
-      )
+      expect(learning1.topic(concordanciaVerbal.topicId).learningLabel()).toBe("Aprendiz")
 
       await verifyNextQuestion(figurasDeLinguagem)
-      expect(learning1.topic(figurasDeLinguagem.topicId).learningLabel()).toBe(
-        "Aprendiz",
-      )
+      expect(learning1.topic(figurasDeLinguagem.topicId).learningLabel()).toBe("Aprendiz")
 
       await verifyNextQuestion(nomesCidades)
-      expect(learning1.topic(nomesCidades.topicId).learningLabel()).toBe(
-        "Aprendiz",
-      )
+      expect(learning1.topic(nomesCidades.topicId).learningLabel()).toBe("Aprendiz")
 
       await verifyNextQuestion(obliquos)
       expect(learning1.topic(obliquos.topicId).learningLabel()).toBe("Aprendiz")

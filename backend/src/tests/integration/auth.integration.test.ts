@@ -4,7 +4,7 @@ import { CreateUser, LoginUser, LogoutUser } from "../../application/usecase"
 import { DatabaseConnection, getTestDatabaseAdapter } from "../../infra/database"
 import { UserRepositoryDatabase } from "../../infra/repository"
 import app from "../../main"
-import { faker } from "@faker-js/faker/."
+import { faker } from "@faker-js/faker"
 
 describe("Auth Integration Tests", () => {
   let connection: DatabaseConnection

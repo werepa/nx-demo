@@ -21,7 +21,7 @@ export class QuizAnswer extends Entity<QuizAnswerProps> {
     super(props, "answerId")
   }
 
-  static create(dto: CreateQuizAnswerInput): QuizAnswer {
+  static create(dto: CreateQuizAnswerCommand): QuizAnswer {
     if (!dto.quizId || !dto.questionId || dto.isUserAnswerCorrect === undefined || !dto.topicId) {
       throw new Error("Missing required properties")
     }
@@ -117,7 +117,7 @@ export class QuizAnswer extends Entity<QuizAnswerProps> {
   }
 }
 
-export type CreateQuizAnswerInput = {
+export type CreateQuizAnswerCommand = {
   quizId: string
   questionId: string
   topicId: string

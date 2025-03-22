@@ -55,27 +55,25 @@ describe("TopicLearning", () => {
     })
   })
 
-  const createHistory = (
-    keys: number[],
-    subtractDays = 0,
-    topicLearning: TopicLearning = topicLearning1,
-  ): number => {
+  const createHistory = (keys: number[], subtractDays = 0, topicLearning: TopicLearning = topicLearning1): number => {
     topicLearning.parent.history.clear()
     const lastDate = DateBr.create().subtractDays(subtractDays)
     let counter = keys.length
     for (const key of keys) {
       counter--
+      const correctOptionId = faker.string.uuid()
       topicLearning.parent.history.add(
         QuizAnswer.toDomain({
           quizAnswerId: faker.string.uuid(),
           quizId: faker.string.uuid(),
           topicId: topicLearning.topic.topicId,
           questionId: faker.string.uuid(),
-          optionId: faker.string.uuid(),
-          correctAnswered: key === 1 ? true : false,
+          correctOptionId,
+          userOptionId: key === 1 ? faker.string.uuid() : faker.string.uuid(),
+          isUserAnswerCorrect: key === 1 ? true : false,
           canRepeat: false,
           createdAt: DateBr.create(lastDate).subtractDays(counter).value,
-        }),
+        })
       )
     }
     return topicLearning.learning()
@@ -245,34 +243,18 @@ describe("TopicLearning", () => {
       expect(dto.learningSource).toEqual(expectResult.learningSource)
       expect(dto.learningSourceLabel).toEqual(expectResult.learningSourceLabel)
       expect(dto.qtyQuestions).toEqual(expectResult.qtyQuestions)
-      expect(dto.qtyQuestionsRecursive).toEqual(
-        expectResult.qtyQuestionsRecursive,
-      )
-      expect(dto.qtyAllQuestionsDepth).toEqual(
-        expectResult.qtyAllQuestionsDepth,
-      )
-      expect(dto.maxQtyAllQuestionsDepth).toEqual(
-        expectResult.maxQtyAllQuestionsDepth,
-      )
-      expect(dto.maxQtyAllQuestionsRootRecursive).toEqual(
-        expectResult.maxQtyAllQuestionsRootRecursive,
-      )
+      expect(dto.qtyQuestionsRecursive).toEqual(expectResult.qtyQuestionsRecursive)
+      expect(dto.qtyAllQuestionsDepth).toEqual(expectResult.qtyAllQuestionsDepth)
+      expect(dto.maxQtyAllQuestionsDepth).toEqual(expectResult.maxQtyAllQuestionsDepth)
+      expect(dto.maxQtyAllQuestionsRootRecursive).toEqual(expectResult.maxQtyAllQuestionsRootRecursive)
       expect(dto.frequencyInDepth).toEqual(expectResult.frequencyInDepth)
-      expect(dto.frequencyInDiscipline).toEqual(
-        expectResult.frequencyInDiscipline,
-      )
+      expect(dto.frequencyInDiscipline).toEqual(expectResult.frequencyInDiscipline)
       expect(dto.difficultyRecursive).toEqual(expectResult.difficultyRecursive)
       expect(dto.collectiveAvgGrade).toEqual(expectResult.collectiveAvgGrade)
       expect(dto.collectiveAvgScore).toEqual(expectResult.collectiveAvgScore)
-      expect(dto.qtyQuestionsAnswered).toEqual(
-        expectResult.qtyQuestionsAnswered,
-      )
-      expect(dto.qtyQuestionsCorrectAnswered).toEqual(
-        expectResult.qtyQuestionsCorrectAnswered,
-      )
-      expect(dto.isLastQuestionCorrectAnswered).toEqual(
-        expectResult.isLastQuestionCorrectAnswered,
-      )
+      expect(dto.qtyQuestionsAnswered).toEqual(expectResult.qtyQuestionsAnswered)
+      expect(dto.qtyQuestionsCorrectAnswered).toEqual(expectResult.qtyQuestionsCorrectAnswered)
+      expect(dto.isLastQuestionCorrectAnswered).toEqual(expectResult.isLastQuestionCorrectAnswered)
       expect(dto.avgGrade).toEqual(expectResult.avgGrade)
       expect(dto.srs).toEqual(expectResult.srs)
       expect(dto.history).toEqual(expectResult.history)

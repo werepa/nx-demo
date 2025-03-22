@@ -1,7 +1,7 @@
 import { DateBr } from "../../shared/domain/valueObject/DateBr"
 import { faker } from "@faker-js/faker"
 import { QuestionOption } from "./QuestionOption"
-import { CreateQuestionInput, Question } from "./Question"
+import { CreateQuestionCommand, Question } from "./Question"
 import { questionMock } from "../../tests/mocks/questionMock"
 import { QuestionOptionList } from "./QuestionOptionList"
 
@@ -9,7 +9,7 @@ describe("Entity => Question", () => {
   let question: Question
 
   it("should create a question with the correct parameters", () => {
-    const dto: CreateQuestionInput = {
+    const dto: CreateQuestionCommand = {
       topicId: faker.string.uuid(),
       topicRootId: faker.string.uuid(),
       prompt: "Qual é a capital da França?",
@@ -45,7 +45,7 @@ describe("Entity => Question", () => {
     expect(question.options.getItems()).toHaveLength(4)
     expect(question.options.getItems()[0]).toBeInstanceOf(QuestionOption)
 
-    const dtoSimplificado: CreateQuestionInput = {
+    const dtoSimplificado: CreateQuestionCommand = {
       topicId: faker.string.uuid(),
       topicRootId: faker.string.uuid(),
       options: [
@@ -61,7 +61,7 @@ describe("Entity => Question", () => {
     expect(question.isMultipleChoice).toBe(false)
     expect(question.options.getItems()).toHaveLength(1)
 
-    const dtoWithoutMultipleChoiceProperty: CreateQuestionInput = {
+    const dtoWithoutMultipleChoiceProperty: CreateQuestionCommand = {
       topicId: faker.string.uuid(),
       topicRootId: faker.string.uuid(),
       options: [
@@ -76,7 +76,7 @@ describe("Entity => Question", () => {
   })
 
   it("should throw an error if not key or several keys to multiple choice questions", () => {
-    const dto1: CreateQuestionInput = {
+    const dto1: CreateQuestionCommand = {
       topicId: faker.string.uuid(),
       topicRootId: faker.string.uuid(),
       options: [
@@ -84,11 +84,9 @@ describe("Entity => Question", () => {
         { text: "alternativa 2", key: false },
       ],
     }
-    expect(() => Question.create(dto1)).toThrow(
-      "Questions of type multiple choice must be at least one correct key",
-    )
+    expect(() => Question.create(dto1)).toThrow("Questions of type multiple choice must be at least one correct key")
 
-    const dto2: CreateQuestionInput = {
+    const dto2: CreateQuestionCommand = {
       topicId: faker.string.uuid(),
       topicRootId: faker.string.uuid(),
       options: [
@@ -96,9 +94,7 @@ describe("Entity => Question", () => {
         { text: "alternativa 2", key: true },
       ],
     }
-    expect(() => Question.create(dto2)).toThrow(
-      "Questions of type multiple choice must be only one correct key",
-    )
+    expect(() => Question.create(dto2)).toThrow("Questions of type multiple choice must be only one correct key")
   })
 
   it("should link a question to a subject", async () => {
@@ -136,7 +132,7 @@ describe("Entity => Question", () => {
   })
 
   it("should convert Question to DTO", () => {
-    const dto: CreateQuestionInput = {
+    const dto: CreateQuestionCommand = {
       topicId: faker.string.uuid(),
       topicRootId: faker.string.uuid(),
       prompt: "Qual é a capital da França?",

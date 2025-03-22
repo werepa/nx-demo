@@ -1,4 +1,4 @@
-import { CreateQuizInput, Quiz } from "./Quiz"
+import { CreateQuizCommand, Quiz } from "./Quiz"
 import { DateBr } from "../../shared/domain/valueObject/DateBr"
 import { QuizTopicList } from "./QuizTopicList"
 import { Discipline } from "./Discipline"
@@ -9,7 +9,7 @@ import { Topic } from "./Topic"
 import { User } from "./User"
 import { RoleEnum, QuizTypeEnum } from "../../shared/enum"
 import { UserRole, QuizType } from "../valueObject"
-import { CreateQuizDTO, QuizState } from "@simulex/models"
+import { QuizState } from "../../shared/models"
 
 describe("Entity => Quiz", () => {
   let quiz: Quiz
@@ -79,7 +79,7 @@ describe("Entity => Quiz", () => {
   })
 
   it("should create a quiz with the correct parameters", () => {
-    const dto: CreateQuizInput = {
+    const dto: CreateQuizCommand = {
       user: userFree,
       discipline: portugues,
     }
@@ -113,32 +113,27 @@ describe("Entity => Quiz", () => {
   it("should convert persistence object to Domain correctly", () => {
     const dto: QuizState = {
       quizId: faker.string.uuid(),
-      quizType: QuizTypeEnum.RANDOM,
-      userId: userFree.userId,
-      disciplineId: portugues.disciplineId,
+      quizType: QuizType.create(QuizTypeEnum.RANDOM),
+      user: userFree,
+      discipline: portugues,
       topicsRootId: [pronomes.topicId, crase.topicId],
       answers: [],
       isActive: true,
       createdAt: new Date(),
       updatedAt: new Date(),
     }
-    quiz = Quiz.toDomain(dto, userFree, portugues)
+    quiz = Quiz.toDomain(dto)
     expect(quiz).toBeInstanceOf(Quiz)
     expect(quiz.quizId).toBe(dto.quizId)
     expect(quiz.quizType.value).toBe(dto.quizType)
-    expect(quiz.user.userId).toBe(dto.userId)
-    expect(quiz.discipline.disciplineId).toBe(dto.disciplineId)
+    expect(quiz.user.userId).toBe(dto.user.userId)
+    expect(quiz.discipline.disciplineId).toBe(dto.discipline.disciplineId)
     expect(quiz.topicsRoot).toBeInstanceOf(QuizTopicList)
     expect(quiz.topicsRoot.listId()).toHaveLength(2)
     expect(quiz.answers.getItems()).toEqual(dto.answers)
     expect(quiz.isActive).toBe(dto.isActive)
     expect(quiz.createdAt.value).toBe(dto.createdAt)
     expect(quiz.updatedAt?.value).toBe(dto.updatedAt)
-
-    expect(() => Quiz.toDomain({ ...dto, userId: "any_id" }, userFree, portugues)).toThrow("User not matches with userId")
-    expect(() => Quiz.toDomain({ ...dto, disciplineId: "any_id" }, userFree, portugues)).not.toThrow(
-      "User not matches with userId"
-    )
   })
 
   it("should convert Quiz to DTO", () => {
@@ -160,7 +155,7 @@ describe("Entity => Quiz", () => {
   })
 
   it("should update quizType correctly", () => {
-    const dto: CreateQuizInput = {
+    const dto: CreateQuizCommand = {
       user: userMember,
       discipline: portugues,
     }
@@ -171,7 +166,7 @@ describe("Entity => Quiz", () => {
   })
 
   it("should return a topic by topicId", () => {
-    const dto: CreateQuizInput = {
+    const dto: CreateQuizCommand = {
       user: userFree,
       discipline: portugues,
     }
@@ -186,7 +181,7 @@ describe("Entity => Quiz", () => {
   })
 
   it("should return a topic by name", () => {
-    const dto: CreateQuizInput = {
+    const dto: CreateQuizCommand = {
       user: userFree,
       discipline: portugues,
     }
@@ -199,7 +194,7 @@ describe("Entity => Quiz", () => {
   })
 
   it("should return null if topicId does not exist", () => {
-    const dto: CreateQuizInput = {
+    const dto: CreateQuizCommand = {
       user: userFree,
       discipline: portugues,
     }
@@ -209,7 +204,7 @@ describe("Entity => Quiz", () => {
   })
 
   it("should return null if topic name does not exist", () => {
-    const dto: CreateQuizInput = {
+    const dto: CreateQuizCommand = {
       user: userFree,
       discipline: portugues,
     }
@@ -219,7 +214,7 @@ describe("Entity => Quiz", () => {
   })
 
   it("should return null if topic has no parameters", () => {
-    const dto: CreateQuizInput = {
+    const dto: CreateQuizCommand = {
       user: userFree,
       discipline: portugues,
     }

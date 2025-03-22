@@ -23,7 +23,7 @@ export class User extends Entity<UserProps> {
     super(props, "userId")
   }
 
-  static create(dto: CreateUserInput): User {
+  static create(dto: CreateUserCommand): User {
     if (!dto.email || !dto.password) {
       throw new Error("Missing required properties")
     }
@@ -149,7 +149,7 @@ export class User extends Entity<UserProps> {
   }
 }
 
-export type CreateUserInput = {
+export type CreateUserCommand = {
   name?: string
   email: string
   password: string

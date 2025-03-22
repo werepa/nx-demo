@@ -13,7 +13,7 @@ export class GetNextQuestion implements UseCase {
   constructor(
     private readonly questionRepository: QuestionRepository,
     private readonly quizRepository: QuizRepository,
-    private readonly learningRepository: LearningRepository,
+    private readonly learningRepository: LearningRepository
   ) {}
 
   async execute(dto: Input): Promise<Question> {
@@ -27,25 +27,14 @@ export class GetNextQuestion implements UseCase {
       throw new Error("Invalid quiz: missing user or discipline!")
     }
 
-    const learning = await this.learningRepository.getDisciplineLearning(
-      quiz.user,
-      quiz.discipline,
-    )
+    const learning = await this.learningRepository.getDisciplineLearning(quiz.user, quiz.discipline)
 
     // verify if is leveling phase
     const verifyLeveling = await this.verifyLeveling(learning, quiz)
     if (verifyLeveling.isLeveling) {
-      nextQuestion = await this.getNextQuestionLeveling(
-        verifyLeveling.levelingTopics,
-        quiz,
-        learning,
-      )
+      nextQuestion = await this.getNextQuestionLeveling(verifyLeveling.levelingTopics, quiz, learning)
     } else {
-      nextQuestion = await this.getNextQuestionLearningByFrequency(
-        quiz,
-        learning,
-        dto.randomWait,
-      )
+      nextQuestion = await this.getNextQuestionLearningByFrequency(quiz, learning, dto.randomWait)
     }
     return nextQuestion
   }
@@ -53,7 +42,7 @@ export class GetNextQuestion implements UseCase {
   // leveling = verify if exists topicLearning with qtyQuestionsAnswered < 2 and qtyQuestions >= 2 and topicLearning.topic.topicRootId in quiz.topicsRoot
   private async verifyLeveling(
     learning: Learning,
-    quiz: Quiz,
+    quiz: Quiz
   ): Promise<{ isLeveling: boolean; levelingTopics: TopicLearning[] }> {
     const levelingTopics = learning.topics
       .getItems()
@@ -61,7 +50,7 @@ export class GetNextQuestion implements UseCase {
         (topicLearning: TopicLearning) =>
           topicLearning.qtyQuestionsAnswered() < 2 &&
           topicLearning.qtyQuestions >= 2 &&
-          quiz?.topicsRoot.find(topicLearning.topic.topicRootId),
+          quiz?.topicsRoot.find(topicLearning.topic.topicRootId)
       )
     return {
       isLeveling: levelingTopics.length > 0,
@@ -69,11 +58,7 @@ export class GetNextQuestion implements UseCase {
     }
   }
 
-  private async getNextQuestionLeveling(
-    levelingTopics: TopicLearning[],
-    quiz: Quiz,
-    learning: Learning,
-  ): Promise<Question> {
+  private async getNextQuestionLeveling(levelingTopics: TopicLearning[], quiz: Quiz, learning: Learning): Promise<Question> {
     let nextQuestion = null
     // Order levelingTopics by qtyQuestionsAnswered ASC, score ASC and frequencyInDiscipline DESC
     levelingTopics.sort((a: TopicLearning, b: TopicLearning) => {
@@ -120,11 +105,7 @@ export class GetNextQuestion implements UseCase {
     return nextQuestion
   }
   // Simulado por frequência dos assuntos => Prioriza FrequencyInDiscipline, selecionando questões do menor nível de aprendizado do usuário, incluíndo também do próximo nível, de forma a reforçar os mesmos tópicos até que evoluam para dois níveis acima do nível de aprendizado mais baixo do usuário
-  private async getNextQuestionLearningByFrequency(
-    quiz: Quiz,
-    learning: Learning,
-    randomWait = 10,
-  ): Promise<Question> {
+  private async getNextQuestionLearningByFrequency(quiz: Quiz, learning: Learning, randomWait = 10): Promise<Question> {
     const MIN_QUIZ_TOPICS = 10
     let nextQuestion: Question
 
@@ -149,9 +130,7 @@ export class GetNextQuestion implements UseCase {
 
     // Order by frequencyInDiscipline DESC, learning ASC, score ASC, qtyQuestionAsnwered ASC, name ASC
     selectedLearningTopics = selectedLearningTopics
-      .filter((topicLearning) =>
-        quiz.topicsRoot.find(topicLearning.topic.topicRootId),
-      )
+      .filter((topicLearning) => quiz.topicsRoot.find(topicLearning.topic.topicRootId))
       .sort((a: TopicLearning, b: TopicLearning) => {
         if (a.frequencyInDiscipline > b.frequencyInDiscipline) return -1
         if (a.frequencyInDiscipline < b.frequencyInDiscipline) return 1
@@ -167,19 +146,16 @@ export class GetNextQuestion implements UseCase {
       })
 
     let wait = randomWait >= 0 ? Math.floor(Math.random() * randomWait) + 10 : 5
-    if (wait > selectedLearningTopics.length - 1)
-      wait = selectedLearningTopics.length - 1
+    if (wait > selectedLearningTopics.length - 1) wait = selectedLearningTopics.length - 1
     let learningTopicsAfterRandomWait = [...selectedLearningTopics]
     const historyFiltered = wait ? learning.history.getShortHistory(wait) : []
-    historyFiltered.forEach((quizAnswer: QuizAnswer) => {
+    historyFiltered.forEach((userQuizAnswer: QuizAnswer) => {
       learningTopicsAfterRandomWait = learningTopicsAfterRandomWait.filter(
-        (topicLearning) => topicLearning.topic.topicId !== quizAnswer.topicId,
+        (topicLearning) => topicLearning.topic.topicId !== userQuizAnswer.topicId
       )
     })
 
-    selectedLearningTopics = learningTopicsAfterRandomWait.length
-      ? learningTopicsAfterRandomWait
-      : selectedLearningTopics
+    selectedLearningTopics = learningTopicsAfterRandomWait.length ? learningTopicsAfterRandomWait : selectedLearningTopics
 
     // get next question from selectedLearningTopics
     const lista = []
@@ -199,10 +175,7 @@ export class GetNextQuestion implements UseCase {
       // Should update flag "can_repeat" to true in table quiz_answer
       if (!nextQuestion) {
         // console.log("resetCanRepeat", learning.user.userId, nextTopic.topicId)
-        await this.quizRepository.resetCanRepeat(
-          learning.user.userId,
-          nextTopic.topicId,
-        )
+        await this.quizRepository.resetCanRepeat(learning.user.userId, nextTopic.topicId)
       }
 
       counter++

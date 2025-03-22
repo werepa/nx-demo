@@ -236,7 +236,7 @@ export class QuizController {
      *                 type: string
      *               disciplineId:
      *                 type: string
-     *               quizAnswer:
+     *               userQuizAnswer:
      *                 type: object
      *                 required:
      *                   - quizId
@@ -267,8 +267,8 @@ export class QuizController {
         const { id } = req.params
         const output = await checkQuizAnswer.execute({
           ...req.body,
-          quizAnswer: {
-            ...req.body.quizAnswer,
+          userQuizAnswer: {
+            ...req.body.userQuizAnswer,
             quizId: id,
           },
         })

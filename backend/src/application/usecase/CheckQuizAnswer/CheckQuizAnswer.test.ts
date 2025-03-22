@@ -6,10 +6,7 @@ import { Question } from "../../../domain/entity/Question"
 import { Learning } from "../../../domain/entity/Learning"
 import { CheckQuizAnswer, CreateQuiz, GetQuizById } from ".."
 import { databaseFixture } from "../../../tests/fixtures/databaseFixture"
-import {
-  getCorrectOption,
-  getIncorrectOption,
-} from "../../../tests/mocks/questionMock"
+import { getCorrectOption, getIncorrectOption } from "../../../tests/mocks/questionMock"
 import { DatabaseConnection } from "../../../infra/database/DatabaseConnection"
 import { getTestDatabaseAdapter } from "../../../infra/database/TestDatabaseAdapter"
 import { DisciplineRepository } from "../../repository/DisciplineRepository"
@@ -24,7 +21,7 @@ import { UserRepositoryDatabase } from "../../../infra/repository/UserRepository
 import { LearningRepositoryDatabase } from "../../../infra/repository/LearningRepositoryDatabase"
 import { faker } from "@faker-js/faker"
 
-describe("CorrectQuizAnswer", () => {
+describe("CheckQuizAnswer", () => {
   let connection: DatabaseConnection
   let disciplineRepository: DisciplineRepository
   let userRepository: UserRepository
@@ -52,11 +49,7 @@ describe("CorrectQuizAnswer", () => {
     userRepository = new UserRepositoryDatabase(connection)
     disciplineRepository = new DisciplineRepositoryDatabase(connection)
     questionRepository = new QuestionRepositoryDatabase(connection)
-    quizRepository = new QuizRepositoryDatabase(
-      connection,
-      userRepository,
-      disciplineRepository,
-    )
+    quizRepository = new QuizRepositoryDatabase(connection, userRepository, disciplineRepository)
     learningRepository = new LearningRepositoryDatabase(connection)
 
     await learningRepository.clear()
@@ -66,11 +59,7 @@ describe("CorrectQuizAnswer", () => {
     await userRepository.clear()
 
     // useCases
-    createQuiz = new CreateQuiz(
-      quizRepository,
-      userRepository,
-      disciplineRepository,
-    )
+    createQuiz = new CreateQuiz(quizRepository, userRepository, disciplineRepository)
 
     getQuizById = new GetQuizById(quizRepository)
 
@@ -79,7 +68,7 @@ describe("CorrectQuizAnswer", () => {
       disciplineRepository,
       questionRepository,
       quizRepository,
-      learningRepository,
+      learningRepository
     )
   })
 
@@ -114,10 +103,7 @@ describe("CorrectQuizAnswer", () => {
     })
     quiz1 = await getQuizById.execute(quizId)
 
-    learning1 = await learningRepository.getDisciplineLearning(
-      userMember1,
-      portugues,
-    )
+    learning1 = await learningRepository.getDisciplineLearning(userMember1, portugues)
   })
 
   afterAll(() => {
@@ -126,19 +112,9 @@ describe("CorrectQuizAnswer", () => {
 
   test("should execute the correct quiz answer", async () => {
     expect(learning1.topics.getCount()).toBe(13)
-    expect(
-      learning1.topics.findByTopicId(crase.topicId)?.qtyQuestionsAnswered(),
-    ).toBe(0)
-    expect(
-      learning1.topics
-        .findByTopicId(crase.topicId)
-        ?.qtyQuestionsCorrectAnswered(),
-    ).toBe(0)
-    expect(
-      learning1.topics
-        .findByTopicId(crase.topicId)
-        ?.isLastQuestionCorrectAnswered(),
-    ).toBe(null)
+    expect(learning1.topics.findByTopicId(crase.topicId)?.qtyQuestionsAnswered()).toBe(0)
+    expect(learning1.topics.findByTopicId(crase.topicId)?.qtyQuestionsCorrectAnswered()).toBe(0)
+    expect(learning1.topics.findByTopicId(crase.topicId)?.isLastQuestionCorrectAnswered()).toBe(null)
     expect(learning1.topics.findByTopicId(crase.topicId)?.avgGrade()).toBe(null)
     expect(questions[0].topicId).toBe(crase.topicId)
 
@@ -146,7 +122,7 @@ describe("CorrectQuizAnswer", () => {
     let dto = {
       disciplineId: portugues?.disciplineId,
       userId: userMember1.userId,
-      quizAnswer: {
+      userQuizAnswer: {
         quizId: quiz1.quizId,
         questionId: questions[0].questionId,
         optionId: getCorrectOption(questions[0]),
@@ -154,29 +130,14 @@ describe("CorrectQuizAnswer", () => {
       },
     }
     await correctQuizAnswer.execute(dto)
-    learning1 = await learningRepository.getDisciplineLearning(
-      userMember1,
-      portugues,
-    )
+    learning1 = await learningRepository.getDisciplineLearning(userMember1, portugues)
 
     expect(learning1.topics.getCount()).toBe(13)
-    expect(
-      learning1.topics
-        .findByTopicId(crase.topicId)
-        ?.qtyQuestionsCorrectAnswered(),
-    ).toBe(1)
-    expect(
-      learning1.topics.findByTopicId(crase.topicId)?.qtyQuestionsAnswered(),
-    ).toBe(1)
-    expect(
-      learning1.topics
-        .findByTopicId(crase.topicId)
-        ?.isLastQuestionCorrectAnswered(),
-    ).toBe(true)
+    expect(learning1.topics.findByTopicId(crase.topicId)?.qtyQuestionsCorrectAnswered()).toBe(1)
+    expect(learning1.topics.findByTopicId(crase.topicId)?.qtyQuestionsAnswered()).toBe(1)
+    expect(learning1.topics.findByTopicId(crase.topicId)?.isLastQuestionCorrectAnswered()).toBe(true)
     expect(learning1.topics.findByTopicId(crase.topicId)?.avgGrade()).toBe(100)
-    expect(
-      learning1.topics.findByTopicId(crase.topicId)?.collectiveAvgGrade,
-    ).toBe(null)
+    expect(learning1.topics.findByTopicId(crase.topicId)?.collectiveAvgGrade).toBe(null)
 
     // UserMember 2
     const { quizId } = await createQuiz.execute({
@@ -185,14 +146,11 @@ describe("CorrectQuizAnswer", () => {
       topicsRoot: [crase.topicId],
     })
     quiz2 = await getQuizById.execute(quizId)
-    learning2 = await learningRepository.getDisciplineLearning(
-      userMember2,
-      portugues,
-    )
+    learning2 = await learningRepository.getDisciplineLearning(userMember2, portugues)
     dto = {
       disciplineId: portugues?.disciplineId,
       userId: userMember2.userId,
-      quizAnswer: {
+      userQuizAnswer: {
         quizId: quiz2.quizId,
         questionId: questions[0].questionId,
         optionId: getCorrectOption(questions[0]),
@@ -200,17 +158,14 @@ describe("CorrectQuizAnswer", () => {
       },
     }
     await correctQuizAnswer.execute(dto)
-    learning2 = await learningRepository.getDisciplineLearning(
-      userMember2,
-      portugues,
-    )
+    learning2 = await learningRepository.getDisciplineLearning(userMember2, portugues)
     expect(learning2.topics.findByTopicId(crase.topicId)?.avgGrade()).toBe(100)
 
     // UserMember 1
     dto = {
       disciplineId: portugues?.disciplineId,
       userId: userMember1.userId,
-      quizAnswer: {
+      userQuizAnswer: {
         quizId: quiz1.quizId,
         questionId: questions[1].questionId,
         optionId: getIncorrectOption(questions[1]),
@@ -218,29 +173,14 @@ describe("CorrectQuizAnswer", () => {
       },
     }
     await correctQuizAnswer.execute(dto)
-    learning1 = await learningRepository.getDisciplineLearning(
-      userMember1,
-      portugues,
-    )
+    learning1 = await learningRepository.getDisciplineLearning(userMember1, portugues)
 
     expect(learning1.topics.getCount()).toBe(13)
-    expect(
-      learning1.topics
-        .findByTopicId(crase.topicId)
-        ?.qtyQuestionsCorrectAnswered(),
-    ).toBe(1)
-    expect(
-      learning1.topics.findByTopicId(crase.topicId)?.qtyQuestionsAnswered(),
-    ).toBe(2)
+    expect(learning1.topics.findByTopicId(crase.topicId)?.qtyQuestionsCorrectAnswered()).toBe(1)
+    expect(learning1.topics.findByTopicId(crase.topicId)?.qtyQuestionsAnswered()).toBe(2)
     expect(learning1.topics.findByTopicId(crase.topicId)?.avgGrade()).toBe(50)
-    expect(
-      learning1.topics.findByTopicId(crase.topicId)?.collectiveAvgGrade,
-    ).toBe(null)
-    expect(
-      learning1.topics
-        .findByTopicId(crase.topicId)
-        ?.isLastQuestionCorrectAnswered(),
-    ).toBe(false)
+    expect(learning1.topics.findByTopicId(crase.topicId)?.collectiveAvgGrade).toBe(null)
+    expect(learning1.topics.findByTopicId(crase.topicId)?.isLastQuestionCorrectAnswered()).toBe(false)
     expect(learning1.toDTO()).toBeTruthy()
   })
 
@@ -249,7 +189,7 @@ describe("CorrectQuizAnswer", () => {
     const dto = {
       disciplineId: portugues?.disciplineId,
       userId: nonExistentUserId,
-      quizAnswer: {
+      userQuizAnswer: {
         quizId: quiz1.quizId,
         questionId: questions[0].questionId,
         optionId: questions[0].options.getItems()[0].optionId,
@@ -257,9 +197,7 @@ describe("CorrectQuizAnswer", () => {
       },
     }
 
-    await expect(correctQuizAnswer.execute(dto)).rejects.toThrow(
-      `User ID:${dto.userId} does not exist!`,
-    )
+    await expect(correctQuizAnswer.execute(dto)).rejects.toThrow(`User ID:${dto.userId} does not exist!`)
   })
 
   test("should throw an error when discipline does not exist", async () => {
@@ -267,7 +205,7 @@ describe("CorrectQuizAnswer", () => {
     const dto = {
       disciplineId: nonExistentDisciplineId,
       userId: userMember1.userId,
-      quizAnswer: {
+      userQuizAnswer: {
         quizId: quiz1.quizId,
         questionId: questions[0].questionId,
         optionId: questions[0].options.getItems()[0].optionId,
@@ -275,8 +213,6 @@ describe("CorrectQuizAnswer", () => {
       },
     }
 
-    await expect(correctQuizAnswer.execute(dto)).rejects.toThrow(
-      `Discipline ID:${dto.disciplineId} does not exist!`,
-    )
+    await expect(correctQuizAnswer.execute(dto)).rejects.toThrow(`Discipline ID:${dto.disciplineId} does not exist!`)
   })
 })

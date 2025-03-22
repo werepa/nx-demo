@@ -6,10 +6,7 @@ import { QuizAnswer } from "../../../domain/entity/QuizAnswer"
 import { QuestionOption } from "../../../domain/entity/QuestionOption"
 
 export class CreateQuizAnswer {
-  constructor(
-    private quizRepository: QuizRepository,
-    private questionRepository: QuestionRepository,
-  ) {}
+  constructor(private quizRepository: QuizRepository, private questionRepository: QuestionRepository) {}
 
   async execute(dto: Input): Promise<QuizAnswer> {
     if (!dto.quizId) {
@@ -22,13 +19,9 @@ export class CreateQuizAnswer {
     const question = await this.validateQuestion(dto.questionId)
     const option = this.validateOption(dto.userOptionId, question)
 
-    const correctAnswered = this.isUserAnswerCorrect(
-      question,
-      option,
-      dto.userOptionId,
-    )
+    const correctAnswered = this.isUserAnswerCorrect(question, option, dto.userOptionId)
 
-    const quizAnswer = QuizAnswer.create({
+    const userQuizAnswer = QuizAnswer.create({
       quizId: dto.quizId,
       questionId: dto.questionId,
       topicId: question.topicId,
@@ -36,8 +29,8 @@ export class CreateQuizAnswer {
       userOptionId: dto.userOptionId,
       isUserAnswerCorrect: correctAnswered,
     })
-    await this.quizRepository.saveAnswer(quizAnswer)
-    return quizAnswer
+    await this.quizRepository.saveAnswer(userQuizAnswer)
+    return userQuizAnswer
   }
 
   private async validateQuiz(quizId: string): Promise<Quiz> {
@@ -65,11 +58,7 @@ export class CreateQuizAnswer {
     return option
   }
 
-  private isUserAnswerCorrect(
-    question: Question,
-    option: QuestionOption,
-    optionId: string,
-  ): boolean {
+  private isUserAnswerCorrect(question: Question, option: QuestionOption, optionId: string): boolean {
     if (question.isMultipleChoice) {
       return option?.key ?? false
     } else {

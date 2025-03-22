@@ -1,4 +1,4 @@
-import { CreateQuizAnswerInput, QuizAnswer } from "./QuizAnswer"
+import { CreateQuizAnswerCommand, QuizAnswer } from "./QuizAnswer"
 import { DateBr } from "../../shared/domain/valueObject/DateBr"
 import { faker } from "@faker-js/faker"
 import { QuizAnswerState } from "../../shared/models"
@@ -6,32 +6,36 @@ import { QuizAnswerState } from "../../shared/models"
 describe("QuizAnswer", () => {
   describe("create", () => {
     it("should create a new QuizAnswer instance", () => {
-      const dto: CreateQuizAnswerInput = {
+      const correctOptionId = faker.string.uuid()
+      const dto: CreateQuizAnswerCommand = {
         quizId: "quizId",
         questionId: "questionId",
         topicId: "topicId",
-        optionId: "optionId",
-        correctAnswered: true,
+        correctOptionId,
+        userOptionId: correctOptionId,
+        isUserAnswerCorrect: true,
       }
       const quizAnswer = QuizAnswer.create(dto)
       expect(quizAnswer).toBeInstanceOf(QuizAnswer)
       expect(quizAnswer.quizId).toBe(dto.quizId)
       expect(quizAnswer.questionId).toBe(dto.questionId)
-      expect(quizAnswer.optionId).toBe(dto.optionId)
-      expect(quizAnswer.correctAnswered).toBe(dto.correctAnswered)
+      expect(quizAnswer.userOptionId).toBe(dto.userOptionId)
+      expect(quizAnswer.isUserAnswerCorrect).toBe(dto.isUserAnswerCorrect)
       expect(quizAnswer.createdAt).toBeInstanceOf(DateBr)
     })
   })
 
   describe("toDomain", () => {
     it("should create a QuizAnswer instance", () => {
+      const correctOptionId = faker.string.uuid()
       const state: QuizAnswerState = {
         quizAnswerId: "quizAnswerId",
         quizId: "quizId",
         questionId: "questionId",
         topicId: "topicId",
-        optionId: "optionId",
-        correctAnswered: true,
+        correctOptionId,
+        userOptionId: correctOptionId,
+        isUserAnswerCorrect: true,
         canRepeat: false,
         createdAt: faker.date.recent(),
       }
@@ -40,8 +44,8 @@ describe("QuizAnswer", () => {
       expect(quizAnswer.quizAnswerId).toBe(state.quizAnswerId)
       expect(quizAnswer.quizId).toBe(state.quizId)
       expect(quizAnswer.questionId).toBe(state.questionId)
-      expect(quizAnswer.optionId).toBe(state.optionId)
-      expect(quizAnswer.correctAnswered).toBe(state.correctAnswered)
+      expect(quizAnswer.userOptionId).toBe(state.userOptionId)
+      expect(quizAnswer.isUserAnswerCorrect).toBe(state.isUserAnswerCorrect)
       expect(quizAnswer.createdAt).toBeInstanceOf(DateBr)
     })
 
@@ -52,8 +56,8 @@ describe("QuizAnswer", () => {
         quizId: "quizId",
         questionId: "questionId",
         topicId: "topicId",
-        optionId: "optionId",
-        correctAnswered: true,
+        userOptionId: "optionId",
+        isUserAnswerCorrect: true,
         canRepeat: false,
       }
       expect(() => QuizAnswer.toDomain(state)).toThrow("Missing required properties")

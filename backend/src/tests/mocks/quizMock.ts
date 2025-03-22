@@ -11,6 +11,7 @@ interface QuizMockOptions {
   disciplineId?: string
   quizType?: string
   isActive?: boolean
+  topicsRootId?: string[]
 }
 
 interface QuizAnswerMockOptions {
@@ -34,7 +35,7 @@ export const quizMockState = (options: QuizMockOptions = {}): QuizState => {
     quizId,
     user: userMock({ userId }),
     discipline: disciplineMock({ disciplineId }),
-    topicsRootId: [],
+    topicsRootId: options.topicsRootId || [],
     quizType: QuizType.create(options.quizType || "random"),
     answers: [],
     isActive: options.isActive !== undefined ? options.isActive : true,

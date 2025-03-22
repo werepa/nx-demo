@@ -1,13 +1,13 @@
 import { faker } from "@faker-js/faker"
 import { userMockDTO } from "../../tests/mocks"
-import { CreateUserInput, User } from "."
+import { CreateUserCommand, User } from "."
 import { UserPassword, UserRole } from "../valueObject"
 import { UserState } from "../../shared/models"
 
 describe("Entity => User", () => {
   describe("User properties", () => {
     test("should create a User instance with valid properties", () => {
-      const props1: CreateUserInput = {
+      const props1: CreateUserCommand = {
         name: faker.person.fullName(),
         email: faker.internet.email(),
         password: faker.internet.password({ length: 6 }),
@@ -17,7 +17,7 @@ describe("Entity => User", () => {
       expect(user1.role).toBe("Free")
       expect(user1.isActive).toBe(true)
 
-      const props2: CreateUserInput = {
+      const props2: CreateUserCommand = {
         name: faker.person.fullName(),
         email: faker.internet.email(),
         password: faker.internet.password({ length: 6 }),
@@ -31,7 +31,7 @@ describe("Entity => User", () => {
     })
 
     test("should create a User instance with persistence data", () => {
-      const userState: UserState = userMockDTO()
+      const userState: UserState = userSateMock()
       const user = User.toDomain(userState)
       expect(user).toBeInstanceOf(User)
       expect(user.userId).toBe(userState.userId)
@@ -112,3 +112,6 @@ describe("Entity => User", () => {
     })
   })
 })
+function userSateMock(): UserState {
+  throw new Error("Function not implemented.")
+}
