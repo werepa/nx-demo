@@ -57,7 +57,7 @@ export class DisciplineRepositoryDatabase implements DisciplineRepository {
     const queryDiscipline = queryDisciplineParts.join(" ")
 
     const disciplinesFromSqlite = search?.trim()
-      ? await this.connection.all(queryDiscipline, `%${search?.trim().toLowerCase()}%`)
+      ? await this.connection.all(queryDiscipline, [`%${search?.trim().toLowerCase()}%`])
       : await this.connection.all(queryDiscipline)
 
     const disciplinesState: DisciplineState[] = await Promise.all(

@@ -17,7 +17,7 @@
     "name": "models",
     "targets": {
       "build": {
-        "executor": "@nx/js:swc",
+        "executor": "@nx/js:tsc",
         "outputs": [
           "{options.outputPath}"
         ],
@@ -26,12 +26,13 @@
           "tsConfig": "models/tsconfig.lib.json",
           "packageJson": "models/package.json",
           "main": "models/src/index.ts",
-          "stripLeadingPaths": true
+          "stripLeadingPaths": true,
+          "sourceMap": true
         }
       }
     }
   },
   "dependencies": {
-    "@swc/helpers": "~0.5.11"
+    "tslib": "^2.3.0"
   }
 }

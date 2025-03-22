@@ -57,6 +57,23 @@
           "targetName": "typecheck"
         }
       }
+    },
+    {
+      "plugin": "@nx/js/typescript",
+      "options": {
+        "compiler": "tsc",
+        "buildTarget": "build",
+        "testTarget": "test",
+        "typecheck": {
+          "targetName": "typecheck"
+        },
+        "build": {
+          "targetName": "build",
+          "configName": "tsconfig.lib.json",
+          "buildDepsName": "build-deps",
+          "watchDepsName": "watch-deps"
+        }
+      }
     }
   ],
   "targetDefaults": {
@@ -75,7 +92,7 @@
         "^build"
       ]
     },
-    "@nx/js:swc": {
+    "@nx/js:tsc": {
       "cache": true,
       "dependsOn": [
         "^build"
