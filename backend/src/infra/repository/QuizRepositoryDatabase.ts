@@ -131,7 +131,7 @@ export class QuizRepositoryDatabase implements QuizRepository {
 
   async getById(quizId: string): Promise<Quiz | null> {
     const query = "SELECT * FROM quiz WHERE quiz_id = ?"
-    const quizFromDB = (await this.connection.get(query, quizId)) as QuizRow
+    const quizFromDB = (await this.connection.get(query, [quizId])) as QuizRow
     if (!quizFromDB) return null
     const user = await this.userRepository.getById(quizFromDB.user_id)
     const discipline = await this.disciplineRepository.getById(quizFromDB.discipline_id)

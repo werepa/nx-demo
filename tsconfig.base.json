@@ -1,7 +1,10 @@
 {
   "compilerOptions": {
+    // Required compiler options
     "composite": true,
+    "declaration": true,
     "declarationMap": true,
+    // Other options...
     "emitDeclarationOnly": true,
     "importHelpers": true,
     "isolatedModules": true,

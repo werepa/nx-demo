@@ -95,7 +95,7 @@ export class QuestionRepositoryDatabase implements QuestionRepository {
   async getById(questionId: string): Promise<Question | null> {
     if (!questionId) return null
     const query = "SELECT * FROM question WHERE question_id = ?"
-    const questionFromDB = await this.connection.get(query, questionId)
+    const questionFromDB = await this.connection.get(query, [questionId])
     return questionFromDB ? Question.toDomain(this.convertDatabaseQuestion(questionFromDB)) : null
   }
 
@@ -154,7 +154,7 @@ export class QuestionRepositoryDatabase implements QuestionRepository {
   async getByHash(simulexHash: string): Promise<Question | null> {
     if (!simulexHash) return null
     const query = "SELECT * FROM question WHERE simulex_hash = ?"
-    const questionFromDB = await this.connection.get(query, simulexHash)
+    const questionFromDB = await this.connection.get(query, [simulexHash])
     return questionFromDB ? Question.toDomain(this.convertDatabaseQuestion(questionFromDB)) : null
   }
 
@@ -169,7 +169,7 @@ export class QuestionRepositoryDatabase implements QuestionRepository {
     WHERE t.discipline_id = ? AND q.is_active = ${this.dbType(1)}
     GROUP BY q.topic_id
   `
-    const result = await this.connection.all(query, disciplineId)
+    const result = await this.connection.all(query, [disciplineId])
     const topicStatistics: TopicStatistics[] = []
     result.forEach((topic: { topic_id: string; qty_questions: number }) => {
       topicStatistics.push({

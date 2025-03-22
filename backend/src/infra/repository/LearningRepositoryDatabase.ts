@@ -128,7 +128,7 @@ export class LearningRepositoryDatabase implements LearningRepository {
       WHERE t.discipline_id = ? AND q.is_active = ${this.dbType(1)}
       GROUP BY q.topic_id
       `
-    return this.connection.all(query, disciplineId)
+    return this.connection.all(query, [disciplineId])
   }
 
   private async existTopicLearning(dto: { userId: string; topicId: string }): Promise<boolean> {
@@ -156,7 +156,7 @@ export class LearningRepositoryDatabase implements LearningRepository {
       WHERE t.discipline_id = ? AND utl.qty_questions_answered > 2
       GROUP BY utl.topic_id
       `
-    return this.connection.all(query, dto.disciplineId)
+    return this.connection.all(query, [dto.disciplineId])
   }
 
   private async fetchDisciplineHistory(dto: { userId: string; disciplineId: string }): Promise<any> {

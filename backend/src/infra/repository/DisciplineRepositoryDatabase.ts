@@ -146,12 +146,12 @@ export class DisciplineRepositoryDatabase implements DisciplineRepository {
 
   private async fetchDisciplineById(disciplineId: string): Promise<any> {
     const query = "SELECT * FROM discipline WHERE discipline_id = ?"
-    return this.connection.get(query, disciplineId)
+    return this.connection.get(query, [disciplineId])
   }
 
   private async fetchTopicsByDisciplineId(disciplineId: string): Promise<any[]> {
     const query = "SELECT * FROM topic WHERE discipline_id = ? ORDER BY name"
-    return this.connection.all(query, disciplineId)
+    return this.connection.all(query, [disciplineId])
   }
 
   private async fetchDisciplineByName(name: string): Promise<any> {
@@ -162,7 +162,7 @@ export class DisciplineRepositoryDatabase implements DisciplineRepository {
       queryDisciplineParts.push("AND LOWER(name) LIKE ?")
     }
     const query = queryDisciplineParts.join(" ")
-    return this.connection.get(query, `%${name?.trim().toLowerCase()}%`)
+    return this.connection.get(query, [`%${name?.trim().toLowerCase()}%`])
   }
 
   private convertDatabaseDiscipline(disciplineFromDB: any, topicsFromDB: any): DisciplineState {

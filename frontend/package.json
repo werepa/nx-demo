@@ -19,7 +19,7 @@
           ],
           "bundle": false,
           "main": "frontend/src/main.ts",
-          "tsConfig": "frontend/tsconfig.app.json",
+          "tsConfig": "frontend/tsconfig.lib.json",
           "assets": [
             "frontend/src/assets"
           ],
@@ -74,5 +74,8 @@
         "command": "docker build -f frontend/Dockerfile . -t frontend"
       }
     }
+  },
+  "devDependencies": {
+    "@simulex/models": "*"
   }
 }

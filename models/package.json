@@ -13,25 +13,6 @@
       "default": "./dist/index.js"
     }
   },
-  "nx": {
-    "name": "models",
-    "targets": {
-      "build": {
-        "executor": "@nx/js:tsc",
-        "outputs": [
-          "{options.outputPath}"
-        ],
-        "options": {
-          "outputPath": "models/dist",
-          "tsConfig": "models/tsconfig.lib.json",
-          "packageJson": "models/package.json",
-          "main": "models/src/index.ts",
-          "stripLeadingPaths": true,
-          "sourceMap": true
-        }
-      }
-    }
-  },
   "dependencies": {
     "tslib": "^2.3.0"
   }
