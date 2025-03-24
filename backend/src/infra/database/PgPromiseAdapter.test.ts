@@ -12,6 +12,7 @@ describe("PgPromiseAdapter", () => {
       await pgp.run("CREATE DATABASE simulex_test")
     } catch (error: unknown) {
       // Database may already exist, intentionally ignore error
+      console.log("Database simulex_test may already exist, ignoring error:", error)
     } finally {
       await pgp.close()
     }
@@ -24,6 +25,7 @@ describe("PgPromiseAdapter", () => {
       await adapter.run("DROP TABLE IF EXISTS test")
     } catch (error: unknown) {
       // Ignore errors from non-existent tables, intentionally ignored
+      console.log("Error dropping test table, may not exist:", error)
     }
   })
 

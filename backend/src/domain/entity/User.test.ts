@@ -1,8 +1,8 @@
 import { faker } from "@faker-js/faker"
-import { userMockDTO } from "../../tests/mocks"
 import { CreateUserCommand, User } from "."
 import { UserPassword, UserRole } from "../valueObject"
 import { UserState } from "../../shared/models"
+import { userMockState } from "../../tests/mocks"
 
 describe("Entity => User", () => {
   describe("User properties", () => {
@@ -31,7 +31,7 @@ describe("Entity => User", () => {
     })
 
     test("should create a User instance with persistence data", () => {
-      const userState: UserState = userSateMock()
+      const userState: UserState = userMockState()
       const user = User.toDomain(userState)
       expect(user).toBeInstanceOf(User)
       expect(user.userId).toBe(userState.userId)
@@ -112,6 +112,3 @@ describe("Entity => User", () => {
     })
   })
 })
-function userSateMock(): UserState {
-  throw new Error("Function not implemented.")
-}

@@ -3,6 +3,7 @@ import { Discipline } from "../../domain/entity/Discipline"
 import { User } from "../../domain/entity/User"
 import { disciplineMock } from "."
 import { UserDTO } from "@simulex/models"
+import { UserState } from "../../shared/models"
 
 interface IUserMockDto {
   userId?: string
@@ -46,11 +47,12 @@ export const userMock = (dto: IUserMockWithDisciplineDto = {}): User => {
   })
 }
 
-export const userState = (user: User): UserDTO => {
+export const userMockState = (user: User = userMock()): UserState => {
   return {
     userId: user.userId,
     name: user.name,
     email: user.email,
+    password: faker.internet.password(),
     role: user.role,
     image: user.image,
     isActive: user.isActive,

@@ -7,11 +7,14 @@ describe("InMemoryAdapter", () => {
   let adapter: InMemoryAdapter
 
   beforeEach(() => {
+    process.env.NODE_ENV = "test"
     adapter = new InMemoryAdapter()
   })
 
   afterEach(async () => {
-    await adapter.close()
+    if (adapter) {
+      await adapter.close()
+    }
   })
 
   describe("databaseType", () => {
@@ -236,7 +239,9 @@ describe("InMemoryAdapter", () => {
       await adapter.close()
 
       // Assert - After closing, any operation should throw
-      await expect(adapter.run("SELECT 1")).rejects.toThrow()
+      await expect(adapter.run("SELECT 1")).rejects.toThrow("Database connection is not open")
+
+      adapter = new InMemoryAdapter()
     })
   })
 })

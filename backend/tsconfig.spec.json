@@ -4,7 +4,8 @@
     "outDir": "./out-tsc/jest",
     "types": [
       "jest",
-      "node"
+      "node",
+      "better-sqlite3",
     ]
   },
   "include": [

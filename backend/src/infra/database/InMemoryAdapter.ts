@@ -1,22 +1,35 @@
 import { DatabaseConnection, DatabaseType, QueryResult, SqlParameter } from "./DatabaseConnection"
-import Database from "better-sqlite3"
+import BetterSqlite3 from "better-sqlite3"
 import { Logger } from "../../shared/utils/Logger"
 
 export class InMemoryAdapter implements DatabaseConnection {
-  private connection: Database.Database
+  private connection: BetterSqlite3.Database
   private logger: Logger
+  private isOpen = false
 
   constructor() {
-    this.connection = new Database(":memory:")
+    this.connection = new BetterSqlite3(":memory:")
     this.logger = new Logger()
+    this.isOpen = true
   }
 
-  databaseType(): DatabaseType {
-    return "sqlite"
+  private checkConnection() {
+    if (!this.isOpen) {
+      throw new Error("Database connection is not open")
+    }
+  }
+
+  private handleError(error: unknown): never {
+    this.logger.error(error)
+    if (error instanceof Error) {
+      throw error
+    }
+    throw new Error("Unknown database error occurred")
   }
 
   async run(statement: string, params?: SqlParameter[]): Promise<void> {
     try {
+      this.checkConnection()
       const stmt = this.connection.prepare(statement)
       if (params) {
         stmt.run(...params)
@@ -24,73 +37,83 @@ export class InMemoryAdapter implements DatabaseConnection {
         stmt.run()
       }
     } catch (error) {
-      this.logger.error(error)
-      throw error
+      this.handleError(error)
     }
   }
 
-  async get<T>(statement: string, params?: SqlParameter[]): Promise<T> {
+  async get<T>(statement: string, params?: SqlParameter[]): Promise<T | undefined> {
     try {
+      this.checkConnection()
       const stmt = this.connection.prepare(statement)
-      return params ? (stmt.get(...params) as T) : (stmt.get() as T)
+      const result = params ? stmt.get(...params) : stmt.get()
+      return result as T | undefined
     } catch (error) {
-      this.logger.error(error)
-      throw error
+      this.handleError(error)
     }
   }
 
   async all<T>(statement: string, params?: SqlParameter[]): Promise<T[]> {
     try {
+      this.checkConnection()
       const stmt = this.connection.prepare(statement)
-      return params ? (stmt.all(...params) as T[]) : (stmt.all() as T[])
+      const results = params ? stmt.all(...params) : stmt.all()
+      return results as T[]
     } catch (error) {
-      this.logger.error(error)
-      throw error
+      this.handleError(error)
     }
   }
 
-  async close(): Promise<void> {
+  async query<T>(statement: string, params?: SqlParameter[]): Promise<QueryResult<T>> {
     try {
-      this.connection.close()
-    } catch (error) {
-      this.logger.error(error)
-      throw error
-    }
-  }
-
-  async query<T>(query: string): Promise<QueryResult<T>> {
-    try {
-      const rows = this.connection.prepare(query).all() as T[]
+      this.checkConnection()
+      const stmt = this.connection.prepare(statement)
+      const rows = params ? stmt.all(...params) : stmt.all()
       return {
-        rows,
+        rows: rows as T[],
         rowCount: rows.length,
       }
     } catch (error) {
-      this.logger.error(error)
-      throw error
+      this.handleError(error)
     }
   }
 
-  async one<T>(query: string): Promise<T> {
+  async one<T>(statement: string, params?: SqlParameter[]): Promise<T | undefined> {
     try {
-      return this.connection.prepare(query).get() as T
+      this.checkConnection()
+      const stmt = this.connection.prepare(statement)
+      const result = params ? stmt.get(...params) : stmt.get()
+      return result as T | undefined
     } catch (error) {
-      this.logger.error(error)
-      throw error
+      this.handleError(error)
     }
   }
 
-  async none(query: string, params?: SqlParameter[]): Promise<void> {
+  async none(statement: string, params?: SqlParameter[]): Promise<void> {
     try {
-      const stmt = this.connection.prepare(query)
+      this.checkConnection()
+      const stmt = this.connection.prepare(statement)
       if (params) {
         stmt.run(...params)
       } else {
         stmt.run()
       }
     } catch (error) {
-      this.logger.error(error)
-      throw error
+      this.handleError(error)
     }
+  }
+
+  async close(): Promise<void> {
+    try {
+      if (this.isOpen) {
+        this.connection.close()
+        this.isOpen = false
+      }
+    } catch (error) {
+      this.handleError(error)
+    }
+  }
+
+  databaseType(): DatabaseType {
+    return "sqlite"
   }
 }

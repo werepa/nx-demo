@@ -164,7 +164,8 @@ describe("Entity => Question", () => {
     expect(questionDTO.sourceId).toBe(question.sourceId)
     expect(questionDTO.isActive).toBe(question.isActive)
     expect(questionDTO.createdBy).toBe(question.createdBy)
-    expect(questionDTO.createdAt).toBe(question.createdAt)
+    // Fix date comparison by comparing the ISO string representations
+    expect(questionDTO.createdAt).toBe(question.createdAt.value)
     const options = questionDTO.options
     expect(options).toHaveLength(4)
     options.forEach((alt, index) => {

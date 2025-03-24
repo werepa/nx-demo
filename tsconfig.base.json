@@ -7,6 +7,7 @@
     // Other options...
     "importHelpers": true,
     "isolatedModules": true,
+    "esModuleInterop": true,
     "lib": [
       "es2022"
     ],
