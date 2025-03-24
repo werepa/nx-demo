@@ -144,7 +144,7 @@ export class User extends Entity<UserProps> {
       image: this.image,
       isActive: this.isActive,
       createdAt: this.createdAt.value,
-      updatedAt: this.updatedAt.value,
+      updatedAt: this.updatedAt?.value ?? null,
     }
   }
 }

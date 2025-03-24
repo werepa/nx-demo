@@ -44,15 +44,57 @@ export class TopicLearningList extends List<TopicLearning> {
     const replaceSpecialChars = (text: string): string => {
       return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
     }
+
+    const getDepth = (topicLearning: TopicLearning): number => {
+      let depth = 0
+      let currentTopic = topicLearning.topic
+      while (currentTopic.topicParentId && depth < 10) {
+        depth++
+        const parentTopicLearning = this.findByTopicId(currentTopic.topicParentId)
+        if (!parentTopicLearning) break
+        currentTopic = parentTopicLearning.topic
+      }
+      return depth
+    }
+
+    const isChildOf = (child: TopicLearning, potentialParent: TopicLearning): boolean => {
+      let current = child
+      let depth = 0
+      while (current.topic.topicParentId && depth < 10) {
+        depth++
+        const parent = this.findByTopicId(current.topic.topicParentId)
+        if (!parent) return false
+        if (parent.topicLearningId === potentialParent.topicLearningId) return true
+        current = parent
+      }
+      return false
+    }
+
     return [...super.getItems()].sort((a: TopicLearning, b: TopicLearning) => {
-      const name1 = replaceSpecialChars(a.topic.name)
-      const name2 = replaceSpecialChars(b.topic.name)
-      return name1.localeCompare(name2)
+      const depthA = getDepth(a)
+      const depthB = getDepth(b)
+
+      // If one is a descendant of the other, maintain hierarchy
+      if (isChildOf(a, b)) return 1
+      if (isChildOf(b, a)) return -1
+
+      // If at same depth, sort alphabetically
+      if (depthA === depthB) {
+        const nameA = replaceSpecialChars(a.topic.name)
+        const nameB = replaceSpecialChars(b.topic.name)
+        return nameA.localeCompare(nameB)
+      }
+
+      // Sort by depth
+      return depthA - depthB
     })
   }
 
   topicsChildren(topicLearning: TopicLearning): TopicLearning[] {
-    return this.getItems().filter((t: TopicLearning) => t.topic.topicParentId === topicLearning.topic.topicId)
+    return this.getItems().filter(
+      (t: TopicLearning) =>
+        t.topic.topicParentId === topicLearning.topic.topicId && t.topic.topicId !== topicLearning.topic.topicId
+    )
   }
 
   topicsChildrenRecursive(topicLearning: TopicLearning): TopicLearning[] {

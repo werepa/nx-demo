@@ -2,6 +2,7 @@ import { faker } from "@faker-js/faker"
 import { disciplineMock, topicMock, userMock } from "../../tests/mocks"
 import { Discipline, Learning, User, TopicLearningList, QuizAnswerList, QuizAnswer, Topic, TopicLearning } from "."
 import { DateBr } from "../../shared/domain/valueObject"
+import { LearningDTO } from "@simulex/models"
 
 describe("Entity => Learning", () => {
   let user: User
@@ -192,13 +193,20 @@ describe("Entity => Learning", () => {
     })
 
     it("should correctly convert Learning to LearningDTO", () => {
-      expect(learning.toDTO()).toEqual({
+      const learningDTO: LearningDTO = learning.toDTO()
+      const expectedResult: LearningDTO = {
         learningId: learning.learningId,
         discipline: discipline.toDTO(),
         user: user.toDTO(),
         topics: learning.topics.toDTO(),
         history: [],
-      })
+      }
+      expect(learningDTO.discipline).toEqual(expectedResult.discipline)
+      expect(learningDTO.user).toEqual(expectedResult.user)
+      expect(learningDTO.topics).toEqual(expectedResult.topics)
+      expect(learningDTO.history).toEqual(expectedResult.history)
+      expect(learningDTO.learningId).toEqual(expectedResult.learningId)
+      expect(learningDTO.topics[0].topic).toEqual(expectedResult.topics[0].topic)
     })
   })
 })

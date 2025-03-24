@@ -125,7 +125,7 @@ describe("Entity => Quiz", () => {
     quiz = Quiz.toDomain(dto)
     expect(quiz).toBeInstanceOf(Quiz)
     expect(quiz.quizId).toBe(dto.quizId)
-    expect(quiz.quizType.value).toBe(dto.quizType)
+    expect(quiz.quizType).toEqual(dto.quizType)
     expect(quiz.user.userId).toBe(dto.user.userId)
     expect(quiz.discipline.disciplineId).toBe(dto.discipline.disciplineId)
     expect(quiz.topicsRoot).toBeInstanceOf(QuizTopicList)
@@ -150,7 +150,7 @@ describe("Entity => Quiz", () => {
     expect(quizDTO.topicsRoot).toEqual(quiz.topicsRoot.listId())
     expect(quizDTO.answers).toEqual(quiz.answers.getItems())
     expect(quizDTO.isActive).toBe(quiz.isActive)
-    expect(quizDTO.createdAt).toBe(quiz.createdAt.formatoBr)
+    expect(quizDTO.createdAt).toBe(quiz.createdAt.value)
     expect(quizDTO.updatedAt).toBe(null)
   })
 
