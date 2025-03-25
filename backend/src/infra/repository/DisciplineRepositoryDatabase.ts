@@ -44,7 +44,7 @@ export class DisciplineRepositoryDatabase implements DisciplineRepository {
       showAll: false,
     }
   ): Promise<Discipline[]> {
-    const queryDisciplineParts = [`SELECT * FROM discipline WHERE ${this.dbType(1)}`]
+    const queryDisciplineParts = [`SELECT * FROM disciplines WHERE ${this.dbType(1)}`]
     if (!showAll) queryDisciplineParts.push(`AND is_active = ${this.dbType(1)}`)
     if (search) {
       if (this.connection.databaseType() === "postgres") {
@@ -71,28 +71,28 @@ export class DisciplineRepositoryDatabase implements DisciplineRepository {
   }
 
   async delete(disciplineId: string): Promise<void> {
-    return this.connection.run(`UPDATE discipline SET is_active = ${this.dbType(0)}, updated_at=? WHERE discipline_id = ?`, [
-      DateBr.create().formatoISO,
-      disciplineId,
-    ])
+    return this.connection.run(
+      `UPDATE disciplines SET is_active = ${this.dbType(0)}, updated_at=? WHERE discipline_id = ?`,
+      [DateBr.create().formatoISO, disciplineId]
+    )
   }
 
   async clear(): Promise<void> {
     if (process.env["NODE_ENV"] === "production") return
 
     if (this.connection.databaseType() === "postgres") {
-      const tables = ["topic", "discipline"]
+      const tables = ["topics", "disciplines"]
       const truncateQuery = `TRUNCATE TABLE ${tables.map((table) => `public.${table}`).join(", ")} CASCADE`
       await this.connection.run(truncateQuery)
     } else {
-      await this.connection.run("DELETE FROM topic")
-      await this.connection.run("DELETE FROM discipline")
+      await this.connection.run("DELETE FROM topics")
+      await this.connection.run("DELETE FROM disciplines")
     }
   }
 
   private async updateDiscipline(discipline: Discipline): Promise<void> {
     const query =
-      "UPDATE discipline SET name = ?, image = ?, is_active = ?, created_at = ?, updated_at = ? WHERE discipline_id = ?"
+      "UPDATE disciplines SET name = ?, image = ?, is_active = ?, created_at = ?, updated_at = ? WHERE discipline_id = ?"
     const params = [
       discipline.name,
       discipline.image,
@@ -106,7 +106,7 @@ export class DisciplineRepositoryDatabase implements DisciplineRepository {
 
   private async insertDiscipline(discipline: Discipline): Promise<void> {
     const query =
-      "INSERT INTO discipline (discipline_id, name, image, is_active, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)"
+      "INSERT INTO disciplines (discipline_id, name, image, is_active, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)"
     const params = [
       discipline.disciplineId,
       discipline.name,
@@ -126,7 +126,7 @@ export class DisciplineRepositoryDatabase implements DisciplineRepository {
 
   private async insertOrUpdateTopic(topic: Topic): Promise<void> {
     const query =
-      "INSERT INTO topic (topic_id, topic_root_id, discipline_id, name, is_classify, parent_id, dependencies, obs, is_active, created_at, updated_at) VALUES (?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?) " +
+      "INSERT INTO topics (topic_id, topic_root_id, discipline_id, name, is_classify, parent_id, dependencies, obs, is_active, created_at, updated_at) VALUES (?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?) " +
       "ON CONFLICT(topic_id) DO UPDATE SET topic_root_id = excluded.topic_root_id, name = excluded.name, is_classify = excluded.is_classify, parent_id = excluded.parent_id, dependencies = excluded.dependencies, obs = excluded.obs, is_active = excluded.is_active, updated_at = excluded.updated_at"
     const params = [
       topic.topicId,
@@ -145,17 +145,17 @@ export class DisciplineRepositoryDatabase implements DisciplineRepository {
   }
 
   private async fetchDisciplineById(disciplineId: string): Promise<any> {
-    const query = "SELECT * FROM discipline WHERE discipline_id = ?"
+    const query = "SELECT * FROM disciplines WHERE discipline_id = ?"
     return this.connection.get(query, [disciplineId])
   }
 
   private async fetchTopicsByDisciplineId(disciplineId: string): Promise<any[]> {
-    const query = "SELECT * FROM topic WHERE discipline_id = ? ORDER BY name"
+    const query = "SELECT * FROM topics WHERE discipline_id = ? ORDER BY name"
     return this.connection.all(query, [disciplineId])
   }
 
   private async fetchDisciplineByName(name: string): Promise<any> {
-    const queryDisciplineParts = [`SELECT * FROM discipline WHERE ${this.dbType(1)}`]
+    const queryDisciplineParts = [`SELECT * FROM disciplines WHERE ${this.dbType(1)}`]
     if (this.connection.databaseType() === "postgres") {
       queryDisciplineParts.push("AND name ILIKE ?")
     } else {
