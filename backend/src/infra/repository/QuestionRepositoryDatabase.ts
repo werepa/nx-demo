@@ -34,7 +34,7 @@ export class QuestionRepositoryDatabase implements QuestionRepository {
 
   private async updateQuestion(question: Question): Promise<void> {
     const query = `
-      UPDATE question SET
+      UPDATE questions SET
         topic_id = ?,
         prompt = ?,
         options = ?,
@@ -59,7 +59,7 @@ export class QuestionRepositoryDatabase implements QuestionRepository {
 
   private async insertQuestion(question: Question): Promise<void> {
     const query = `
-      INSERT INTO question (
+      INSERT INTO questions (
         question_id,
         topic_id,
         prompt,
@@ -94,7 +94,7 @@ export class QuestionRepositoryDatabase implements QuestionRepository {
 
   async getById(questionId: string): Promise<Question | null> {
     if (!questionId) return null
-    const query = "SELECT * FROM question WHERE question_id = ?"
+    const query = "SELECT * FROM questions WHERE question_id = ?"
     const questionFromDB = await this.connection.get(query, [questionId])
     return questionFromDB ? Question.toDomain(this.convertDatabaseQuestion(questionFromDB)) : null
   }
@@ -105,7 +105,7 @@ export class QuestionRepositoryDatabase implements QuestionRepository {
       showAll: false,
     }
   ): Promise<Question[]> {
-    const queryParts = [`SELECT * FROM question WHERE ${this.dbType(1)}`]
+    const queryParts = [`SELECT * FROM questions WHERE ${this.dbType(1)}`]
     if (!showAll) queryParts.push(`AND is_active = ${this.dbType(1)}`)
     if (topicId) queryParts.push(`AND topic_id = '${topicId}'`)
     queryParts.push("ORDER BY created_at DESC LIMIT 100")
@@ -126,15 +126,15 @@ export class QuestionRepositoryDatabase implements QuestionRepository {
     const topicsRootParam = topicsRoot.map(() => "?").join(", ")
     const query = `
       SELECT q.*
-      FROM question q
-      JOIN topic t ON q.topic_id = t.topic_id
+      FROM questions q
+      JOIN topics t ON q.topic_id = t.topic_id
       WHERE t.topic_id = ?
       AND q.is_active = ${this.dbType(1)}
       AND question_id NOT IN (
         SELECT qa.question_id
-        FROM quiz_answer qa
-        JOIN quiz qz ON qa.quiz_id = qz.quiz_id
-        JOIN question q ON qa.question_id = q.question_id
+        FROM quiz_answers qa
+        JOIN quizzes qz ON qa.quiz_id = qz.quiz_id
+        JOIN questions q ON qa.question_id = q.question_id
         WHERE q.topic_id = ? AND qz.user_id = ? AND qa.can_repeat = ${this.dbType(0)}
       )
       AND t.topic_root_id IN (${topicsRootParam})
@@ -153,7 +153,7 @@ export class QuestionRepositoryDatabase implements QuestionRepository {
 
   async getByHash(simulexHash: string): Promise<Question | null> {
     if (!simulexHash) return null
-    const query = "SELECT * FROM question WHERE simulex_hash = ?"
+    const query = "SELECT * FROM questions WHERE simulex_hash = ?"
     const questionFromDB = await this.connection.get(query, [simulexHash])
     return questionFromDB ? Question.toDomain(this.convertDatabaseQuestion(questionFromDB)) : null
   }
@@ -164,8 +164,8 @@ export class QuestionRepositoryDatabase implements QuestionRepository {
     SELECT
       q.topic_id,
       COUNT(q.question_id) as qty_questions
-    FROM question q
-    JOIN topic t ON q.topic_id = t.topic_id
+    FROM questions q
+    JOIN topics t ON q.topic_id = t.topic_id
     WHERE t.discipline_id = ? AND q.is_active = ${this.dbType(1)}
     GROUP BY q.topic_id
   `
@@ -188,11 +188,11 @@ export class QuestionRepositoryDatabase implements QuestionRepository {
     if (process.env["NODE_ENV"] === "production") return
 
     if (this.connection.databaseType() === "postgres") {
-      const tables = ["question"]
+      const tables = ["questions"]
       const truncateQuery = `TRUNCATE TABLE ${tables.map((table) => `public.${table}`).join(", ")} CASCADE`
       return this.connection.run(truncateQuery)
     } else {
-      return this.connection.run("DELETE FROM question")
+      return this.connection.run("DELETE FROM questions")
     }
   }
 

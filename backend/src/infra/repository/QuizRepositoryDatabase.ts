@@ -39,7 +39,7 @@ export class QuizRepositoryDatabase implements QuizRepository {
     const existingQuiz = await this.getById(quiz.quizId)
     if (existingQuiz) {
       const query =
-        "UPDATE quiz SET quiz_type = ?, user_id = ?, discipline_id = ?, topics_id = ?, is_active = ?, updated_at = ? WHERE quiz_id = ?"
+        "UPDATE quizzes SET quiz_type = ?, user_id = ?, discipline_id = ?, topics_id = ?, is_active = ?, updated_at = ? WHERE quiz_id = ?"
       const params = [
         quiz.quizType.value,
         quiz.user.userId,
@@ -54,7 +54,7 @@ export class QuizRepositoryDatabase implements QuizRepository {
     }
 
     const query =
-      "INSERT INTO quiz (quiz_id, quiz_type, user_id, discipline_id, topics_id, is_active, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+      "INSERT INTO quizzes (quiz_id, quiz_type, user_id, discipline_id, topics_id, is_active, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
     const params = [
       quiz.quizId,
       quiz.quizType.value,
@@ -69,7 +69,7 @@ export class QuizRepositoryDatabase implements QuizRepository {
   }
 
   async saveAnswer(userQuizAnswer: QuizAnswer): Promise<void> {
-    const query = `INSERT INTO quiz_answer (
+    const query = `INSERT INTO quiz_answers (
       quiz_answer_id,
       quiz_id,
       question_id,
@@ -100,7 +100,7 @@ export class QuizRepositoryDatabase implements QuizRepository {
       showAll: false,
     }
   ): Promise<Quiz[]> {
-    const queryParts = [`SELECT * FROM quiz WHERE ${this.dbType(1)}`]
+    const queryParts = [`SELECT * FROM quizzes WHERE ${this.dbType(1)}`]
     if (userId) queryParts.push(`AND user_id = '${userId}'`)
     if (disciplineId) queryParts.push(`AND discipline_id = '${disciplineId}'`)
     if (!showAll) queryParts.push(`AND is_active = ${this.dbType(1)}`)
@@ -130,7 +130,7 @@ export class QuizRepositoryDatabase implements QuizRepository {
   }
 
   async getById(quizId: string): Promise<Quiz | null> {
-    const query = "SELECT * FROM quiz WHERE quiz_id = ?"
+    const query = "SELECT * FROM quizzes WHERE quiz_id = ?"
     const quizFromDB = (await this.connection.get(query, [quizId])) as QuizRow
     if (!quizFromDB) return null
     const user = await this.userRepository.getById(quizFromDB.user_id)
@@ -151,7 +151,7 @@ export class QuizRepositoryDatabase implements QuizRepository {
   }
 
   async getAnswers(quizId: string): Promise<QuizAnswer[]> {
-    const query = "SELECT * FROM quiz_answer WHERE quiz_id = ? ORDER BY created_at ASC"
+    const query = "SELECT * FROM quiz_answers WHERE quiz_id = ? ORDER BY created_at ASC"
     const answersFromDB = (await this.connection.all(query, [quizId])) as QuizAnswerRow[]
     return answersFromDB.map((answerFromDB) => {
       return QuizAnswer.toDomain({
@@ -169,9 +169,9 @@ export class QuizRepositoryDatabase implements QuizRepository {
   }
 
   async resetCanRepeat(userId: string, topicId: string): Promise<void> {
-    const query = `UPDATE quiz_answer SET can_repeat = ${this.dbType(
+    const query = `UPDATE quiz_answers SET can_repeat = ${this.dbType(
       1
-    )} WHERE quiz_id IN (SELECT quiz_id FROM quiz WHERE user_id = ?) AND question_id IN (SELECT question_id FROM question WHERE topic_id = ?)`
+    )} WHERE quiz_id IN (SELECT quiz_id FROM quizzes WHERE user_id = ?) AND question_id IN (SELECT question_id FROM questions WHERE topic_id = ?)`
     return this.connection.run(query, [userId, topicId])
   }
 
@@ -179,12 +179,12 @@ export class QuizRepositoryDatabase implements QuizRepository {
     if (process.env["NODE_ENV"] === "production") return
 
     if (this.connection.databaseType() === "postgres") {
-      const tables = ["quiz_answer,quiz"]
+      const tables = ["quiz_answers,quizzes"]
       const truncateQuery = `TRUNCATE TABLE ${tables.map((table) => `public.${table}`).join(", ")} CASCADE`
       return this.connection.run(truncateQuery)
     } else {
-      await this.connection.run("DELETE FROM quiz_answer")
-      return this.connection.run("DELETE FROM quiz")
+      await this.connection.run("DELETE FROM quiz_answers")
+      return this.connection.run("DELETE FROM quizzes")
     }
   }
 

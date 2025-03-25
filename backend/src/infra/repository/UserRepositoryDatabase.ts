@@ -21,103 +21,71 @@ export class UserRepositoryDatabase implements UserRepository {
 
   constructor(private readonly connection: DatabaseConnection) {}
 
-  private prepareUserParams(user: User): any[] {
+  private prepareUserParams(user: User): (string | boolean | number)[] {
     return [user.name, user.email, user.password, user.role, user.image, user.isActive ? this.dbType(1) : this.dbType(0)]
-  }
-
-  private async updateUser(user: User): Promise<void> {
-    await this.connection.none(
-      `
-      UPDATE users 
-      SET name = $1, email = $2, password = $3, role = $4, image = $5, is_active = $6, updated_at = $7 
-      WHERE user_id = $8
-    `,
-      [
-        user.name,
-        user.email,
-        user.password,
-        user.role,
-        user.image,
-        this.dbType(user.isActive),
-        user.updatedAt?.formatoBr || null,
-        user.userId,
-      ]
-    )
-  }
-
-  private async insertUser(user: User): Promise<void> {
-    await this.connection.none(
-      `
-      INSERT INTO users (user_id, name, email, password, role, image, is_active, created_at, updated_at)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-    `,
-      [
-        user.userId,
-        user.name,
-        user.email,
-        user.password,
-        user.role,
-        user.image,
-        this.dbType(user.isActive),
-        user.createdAt.formatoBr,
-        user.updatedAt?.formatoBr || null,
-      ]
-    )
   }
 
   async save(user: User): Promise<void> {
     const existingUser = await this.getById(user.userId)
     if (existingUser) {
-      await this.updateUser(user)
-    } else {
-      await this.insertUser(user)
+      const query =
+        "UPDATE users SET name = ?, email = ?, password = ?, role = ?, image = ?, is_active = ? WHERE user_id = ?"
+      const params = [
+        user.name,
+        user.email,
+        user.password,
+        user.role,
+        user.image,
+        user.isActive ? this.dbType(1) : this.dbType(0),
+        user.userId,
+      ]
+      await this.connection.run(query, params)
+      return
     }
+
+    const query = "INSERT INTO users (user_id, name, email, password, role, image, is_active) VALUES (?, ?, ?, ?, ?, ?, ?)"
+    const params = [
+      user.userId,
+      user.name,
+      user.email,
+      user.password,
+      user.role,
+      user.image,
+      user.isActive ? this.dbType(1) : this.dbType(0),
+    ]
+    await this.connection.run(query, params)
   }
 
   async getById(userId: string): Promise<User | null> {
-    const userFromDB = await this.connection.one<RawUserData>(
-      `
-      SELECT user_id, name, email, password, role, image, is_active, created_at, updated_at 
-      FROM users 
-      WHERE user_id = $1
-    `,
-      [userId]
-    )
-
-    if (!userFromDB) return null
-    return this.mapToDomain(this.convertDatabaseUser(userFromDB))
+    const query = "SELECT * FROM users WHERE user_id = ?"
+    const userFromDB = await this.connection.get<RawUserData>(query, [userId])
+    return userFromDB ? User.toDomain(this.convertDatabaseUser(userFromDB)) : null
   }
 
   async getByEmail(email: string): Promise<User | null> {
-    const userFromDB = await this.connection.one<RawUserData>(
-      `
-      SELECT user_id, name, email, password, role, image, is_active, created_at, updated_at 
-      FROM users 
-      WHERE email = $1
-    `,
-      [email]
-    )
-
-    if (!userFromDB) return null
-    return this.mapToDomain(this.convertDatabaseUser(userFromDB))
+    const query = "SELECT * FROM users WHERE email = ?"
+    const userFromDB = await this.connection.get<RawUserData>(query, [email])
+    return userFromDB ? User.toDomain(this.convertDatabaseUser(userFromDB)) : null
   }
 
   async getAll({ showAll }: { showAll?: boolean } = { showAll: false }): Promise<User[]> {
-    const queryUserParts = ["SELECT * FROM user"]
+    const queryUserParts = ["SELECT * FROM users"]
     if (!showAll) queryUserParts.push(`WHERE is_active = ${this.dbType(1)}`)
     queryUserParts.push("ORDER BY name")
     const queryUser = queryUserParts.join(" ")
     const usersFromDB = await this.connection.all(queryUser)
-    return usersFromDB.map((userFromDB: any) => User.toDomain(this.convertDatabaseUser(userFromDB)))
+    return usersFromDB.map((userFromDB: RawUserData) => User.toDomain(this.convertDatabaseUser(userFromDB)))
   }
 
   async clear(): Promise<void> {
+    if (process.env["NODE_ENV"] === "production") return
+
     if (this.connection.databaseType() === "postgres") {
-      const tables = ["user"]
+      const tables = ["users"]
       const truncateQuery = `TRUNCATE TABLE ${tables.map((table) => `public.${table}`).join(", ")} CASCADE`
       return this.connection.run(truncateQuery)
     } else {
-      return this.connection.run("DELETE FROM user")
+      return this.connection.run("DELETE FROM users")
     }
   }
 

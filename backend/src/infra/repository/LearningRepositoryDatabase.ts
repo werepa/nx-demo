@@ -76,17 +76,17 @@ export class LearningRepositoryDatabase implements LearningRepository {
 
   async clear(): Promise<void> {
     if (this.connection.databaseType() === "postgres") {
-      const tables = ["user_topic_learning"]
+      const tables = ["user_topic_learnings"]
       const truncateQuery = `TRUNCATE TABLE ${tables.map((table) => `public.${table}`).join(", ")} CASCADE`
       return this.connection.run(truncateQuery)
     } else {
-      return this.connection.run("DELETE FROM user_topic_learning")
+      return this.connection.run("DELETE FROM user_topic_learnings")
     }
   }
 
   private async insertTopicLearning(topicLearning: TopicLearning): Promise<void> {
     const query = `
-      INSERT INTO user_topic_learning (
+      INSERT INTO user_topic_learnings (
         user_topic_learning_id, user_id, topic_id, score, avg_grade, level_in_topic, qty_questions_answered
       ) VALUES (?, ?, ?, ?, ?, ?, ?)
     `
@@ -104,7 +104,7 @@ export class LearningRepositoryDatabase implements LearningRepository {
 
   private async updateTopicLearning(topicLearning: TopicLearning): Promise<void> {
     const query = `
-      UPDATE user_topic_learning SET
+      UPDATE user_topic_learnings SET
         user_id = ?, topic_id = ?, score = ?, avg_grade = ?, level_in_topic = ?, qty_questions_answered = ?
       WHERE user_topic_learning_id = ?
     `
