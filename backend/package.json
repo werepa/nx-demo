@@ -63,8 +63,12 @@
         }
       },
       "test": {
+        "executor": "@nx/jest:jest",
         "options": {
-          "passWithNoTests": true
+          "jestConfig": "backend/jest.config.ts",
+          "processEnv": {
+            "NODE_ENV": "test"
+          }
         }
       },
       "docker-build": {
