@@ -1,14 +1,14 @@
 import { DatabaseConnection, DatabaseType, QueryResult, SqlParameter } from "./DatabaseConnection"
-import BetterSqlite3 from "better-sqlite3"
 import { Logger } from "../../shared/utils/Logger"
+import { SqliteInMemory } from "../repository/inMemory"
 
 export class InMemoryAdapter implements DatabaseConnection {
-  private connection: BetterSqlite3.Database
+  private connection: SqliteInMemory
   private logger: Logger
   private isOpen = false
 
   constructor() {
-    this.connection = new BetterSqlite3(":memory:")
+    this.connection = new SqliteInMemory()
     this.logger = new Logger()
     this.isOpen = true
   }
@@ -30,7 +30,7 @@ export class InMemoryAdapter implements DatabaseConnection {
   async run(statement: string, params?: SqlParameter[]): Promise<void> {
     try {
       this.checkConnection()
-      const stmt = this.connection.prepare(statement)
+      const stmt = this.connection.db.prepare(statement)
       if (params) {
         stmt.run(...params)
       } else {
@@ -44,7 +44,7 @@ export class InMemoryAdapter implements DatabaseConnection {
   async get<T>(statement: string, params?: SqlParameter[]): Promise<T | undefined> {
     try {
       this.checkConnection()
-      const stmt = this.connection.prepare(statement)
+      const stmt = this.connection.db.prepare(statement)
       const result = params ? stmt.get(...params) : stmt.get()
       return result as T | undefined
     } catch (error) {
@@ -55,7 +55,7 @@ export class InMemoryAdapter implements DatabaseConnection {
   async all<T>(statement: string, params?: SqlParameter[]): Promise<T[]> {
     try {
       this.checkConnection()
-      const stmt = this.connection.prepare(statement)
+      const stmt = this.connection.db.prepare(statement)
       const results = params ? stmt.all(...params) : stmt.all()
       return results as T[]
     } catch (error) {
@@ -66,7 +66,7 @@ export class InMemoryAdapter implements DatabaseConnection {
   async query<T>(statement: string, params?: SqlParameter[]): Promise<QueryResult<T>> {
     try {
       this.checkConnection()
-      const stmt = this.connection.prepare(statement)
+      const stmt = this.connection.db.prepare(statement)
       const rows = params ? stmt.all(...params) : stmt.all()
       return {
         rows: rows as T[],
@@ -80,7 +80,7 @@ export class InMemoryAdapter implements DatabaseConnection {
   async one<T>(statement: string, params?: SqlParameter[]): Promise<T | undefined> {
     try {
       this.checkConnection()
-      const stmt = this.connection.prepare(statement)
+      const stmt = this.connection.db.prepare(statement)
       const result = params ? stmt.get(...params) : stmt.get()
       return result as T | undefined
     } catch (error) {
@@ -91,7 +91,7 @@ export class InMemoryAdapter implements DatabaseConnection {
   async none(statement: string, params?: SqlParameter[]): Promise<void> {
     try {
       this.checkConnection()
-      const stmt = this.connection.prepare(statement)
+      const stmt = this.connection.db.prepare(statement)
       if (params) {
         stmt.run(...params)
       } else {
@@ -105,7 +105,7 @@ export class InMemoryAdapter implements DatabaseConnection {
   async close(): Promise<void> {
     try {
       if (this.isOpen) {
-        this.connection.close()
+        this.connection.db.close()
         this.isOpen = false
       }
     } catch (error) {

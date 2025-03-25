@@ -1,19 +1,19 @@
-import Database from "better-sqlite3"
+import BetterSqlite3 from "better-sqlite3"
 
 export class SqliteInMemory {
-  public db: any
+  public db: BetterSqlite3.Database
 
   constructor() {
     this.initialize()
   }
 
   private async initialize() {
-    this.db = new Database(":memory:")
+    this.db = new BetterSqlite3(":memory:")
     this.db.pragma("journal_mode = WAL")
     this.db.pragma("synchronous = normal")
 
     this.db.exec(`
-      CREATE TABLE IF NOT EXISTS user (
+      CREATE TABLE IF NOT EXISTS users (
         user_id TEXT NOT NULL,
         name TEXT NULL,
         email TEXT NOT NULL,
@@ -28,7 +28,7 @@ export class SqliteInMemory {
     `)
 
     this.db.exec(`
-      CREATE TABLE IF NOT EXISTS discipline (
+      CREATE TABLE IF NOT EXISTS disciplines (
         discipline_id TEXT NOT NULL,
         name TEXT NOT NULL,
         image TEXT DEFAULT NULL,
@@ -40,7 +40,7 @@ export class SqliteInMemory {
     `)
 
     this.db.exec(`
-      CREATE TABLE IF NOT EXISTS topic (
+      CREATE TABLE IF NOT EXISTS topics (
         topic_id TEXT NOT NULL,
         topic_root_id TEXT NOT NULL,
         discipline_id TEXT NOT NULL,
@@ -53,12 +53,12 @@ export class SqliteInMemory {
         created_at TIMESTAMP,
         updated_at TIMESTAMP,
         PRIMARY KEY (topic_id),
-        FOREIGN KEY (discipline_id) REFERENCES discipline(discipline_id)
+        FOREIGN KEY (discipline_id) REFERENCES disciplines(discipline_id)
       )
     `)
 
     this.db.exec(`
-      CREATE TABLE IF NOT EXISTS question (
+      CREATE TABLE IF NOT EXISTS questions (
         question_id TEXT NOT NULL,
         topic_id TEXT NOT NULL,
         prompt TEXT NOT NULL,
@@ -77,12 +77,12 @@ export class SqliteInMemory {
         created_by TEXT NULL,
         created_at TIMESTAMP,
         PRIMARY KEY (question_id),
-        FOREIGN KEY (topic_id) REFERENCES topic(topic_id)
+        FOREIGN KEY (topic_id) REFERENCES topics(topic_id)
       )
     `)
 
     this.db.exec(`
-      CREATE TABLE IF NOT EXISTS quiz (
+      CREATE TABLE IF NOT EXISTS quizzes (
         quiz_id TEXT NOT NULL,
         quiz_type TEXT NOT NULL,
         user_id TEXT NOT NULL,
@@ -92,13 +92,13 @@ export class SqliteInMemory {
         created_at TIMESTAMP,
         updated_at TIMESTAMP,
         PRIMARY KEY (quiz_id),
-        FOREIGN KEY (user_id) REFERENCES user(user_id),
-        FOREIGN KEY (discipline_id) REFERENCES discipline(discipline_id)
+        FOREIGN KEY (user_id) REFERENCES users(user_id),
+        FOREIGN KEY (discipline_id) REFERENCES disciplines(discipline_id)
       )
     `)
 
     this.db.exec(`
-      CREATE TABLE IF NOT EXISTS quiz_answer (
+      CREATE TABLE IF NOT EXISTS quiz_answers (
         quiz_answer_id TEXT NOT NULL,
         quiz_id TEXT NOT NULL,
         question_id TEXT NOT NULL,
@@ -109,14 +109,14 @@ export class SqliteInMemory {
         can_repeat INTEGER NOT NULL,
         created_at TIMESTAMP,
         PRIMARY KEY (quiz_answer_id),
-        FOREIGN KEY (quiz_id) REFERENCES quiz(quiz_id),
-        FOREIGN KEY (question_id) REFERENCES question(question_id),
-        FOREIGN KEY (topic_id) REFERENCES topic(topic_id)
+        FOREIGN KEY (quiz_id) REFERENCES quizzes(quiz_id),
+        FOREIGN KEY (question_id) REFERENCES questions(question_id),
+        FOREIGN KEY (topic_id) REFERENCES topics(topic_id)
       )
     `)
 
     this.db.exec(`
-      CREATE TABLE IF NOT EXISTS user_topic_learning (
+      CREATE TABLE IF NOT EXISTS user_topic_learnings (
         user_topic_learning_id TEXT NOT NULL,
         user_id TEXT NOT NULL,
         topic_id TEXT NOT NULL,
@@ -125,8 +125,8 @@ export class SqliteInMemory {
         level_in_topic REAL NOT NULL,
         qty_questions_answered INTEGER NOT NULL,
         PRIMARY KEY (user_topic_learning_id),
-        FOREIGN KEY (user_id) REFERENCES user(user_id),
-        FOREIGN KEY (topic_id) REFERENCES topic(topic_id)
+        FOREIGN KEY (user_id) REFERENCES users(user_id),
+        FOREIGN KEY (topic_id) REFERENCES topics(topic_id)
       )
     `)
   }
