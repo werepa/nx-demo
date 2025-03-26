@@ -15,9 +15,6 @@
   "include": [
     "src/**/*"
   ],
-  "exclude": [
-    "jest.config.ts"
-  ],
   "references": [
     {
       "path": "../models"

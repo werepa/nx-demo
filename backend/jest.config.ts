@@ -3,9 +3,12 @@ export default {
   preset: "../jest.preset.js",
   testEnvironment: "node",
   transform: {
-    "^.+\\.[tj]s$": "ts-jest",
+    "^.+\\.[tj]s$": ["ts-jest", { tsconfig: "<rootDir>/tsconfig.spec.json" }],
   },
   moduleFileExtensions: ["ts", "js", "html"],
-  coverageDirectory: "test-output/jest/coverage",
-  setupFiles: ["<rootDir>/jest.setup.ts"],
+  coverageDirectory: "../coverage/backend",
+  moduleNameMapper: {
+    "@simulex/models": "<rootDir>/../models/src/index.ts",
+  },
+  setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
 }
