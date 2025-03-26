@@ -5,7 +5,10 @@
   "scripts": {
     "check": "nx run-many --target=typecheck --all",
     "test:backend": "nx test backend",
-    "test:backend:watch": "nx test backend --watch"
+    "test:backend:watch": "nx test backend --watch",
+    "build:backend": "nx build backend --with-deps",
+    "build:backend:watch": "nx build backend --watch",
+    "build:clean": "rm -rf backend/dist backend/tsconfig.tsbuildinfo"
   },
   "private": true,
   "devDependencies": {

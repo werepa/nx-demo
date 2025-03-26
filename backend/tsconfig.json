@@ -1,7 +1,23 @@
 {
   "extends": "../tsconfig.base.json",
   "files": [],
-  "include": [],
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src",
+    "declaration": true,
+    "composite": true,
+    "declarationMap": true,
+    "types": [
+      "node",
+      "jest"
+    ]
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "jest.config.ts"
+  ],
   "references": [
     {
       "path": "../models"

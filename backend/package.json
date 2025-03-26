@@ -1,45 +1,34 @@
 {
-  "name": "@nx-demo/backend",
+  "name": "backend",
+  "$schema": "../node_modules/nx/schemas/project-schema.json",
   "version": "0.0.1",
   "private": true,
   "nx": {
     "name": "backend",
     "targets": {
       "build": {
-        "executor": "@nx/esbuild:esbuild",
+        "executor": "@nx/js:tsc",
         "outputs": [
           "{options.outputPath}"
         ],
         "defaultConfiguration": "production",
         "options": {
-          "platform": "node",
           "outputPath": "backend/dist",
-          "format": [
-            "cjs"
-          ],
-          "bundle": false,
           "main": "backend/src/main.ts",
-          "tsConfig": "backend/tsconfig.lib.json",
+          "tsConfig": "backend/tsconfig.json",
           "assets": [
             "backend/src/assets"
           ],
-          "esbuildOptions": {
-            "sourcemap": true,
-            "outExtension": {
-              ".js": ".js"
-            }
-          }
+          "clean": true,
+          "transformers": []
         },
         "configurations": {
-          "development": {},
+          "development": {
+            "sourcemap": true
+          },
           "production": {
-            "generateLockfile": true,
-            "esbuildOptions": {
-              "sourcemap": false,
-              "outExtension": {
-                ".js": ".js"
-              }
-            }
+            "sourcemap": false,
+            "optimization": true
           }
         }
       },

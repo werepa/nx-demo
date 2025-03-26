@@ -8,6 +8,7 @@
     "importHelpers": true,
     "isolatedModules": true,
     "esModuleInterop": true,
+    "baseUrl": "./",
     "lib": [
       "es2022"
     ],
