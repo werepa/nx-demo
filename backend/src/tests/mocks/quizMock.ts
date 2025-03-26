@@ -1,7 +1,7 @@
 import { faker } from "@faker-js/faker"
 import { Discipline, Quiz, QuizAnswer, User } from "../../domain/entity"
 import { QuizAnswerDTO } from "@simulex/models"
-import { userMock, disciplineMock } from "."
+import { userMock, disciplineMock, topicMock } from "."
 import { QuizState } from "../../shared/models"
 import { QuizType } from "../../domain/valueObject"
 
@@ -44,9 +44,23 @@ export const quizMockState = (options: QuizMockOptions = {}): QuizState => {
   }
 }
 
+// quiz mock with a discipline and 3 topicRoot
 export const quizMock = (options: QuizMockOptions = {}): Quiz => {
-  const quizDTO: QuizState = quizMockState(options)
-  return Quiz.toDomain(quizDTO)
+  const quizState: QuizState = quizMockState(options)
+  if (quizState.discipline.topics.getCount() === 0) {
+    const topic1 = topicMock({ name: "topic 1" })
+    const topic2 = topicMock({ name: "topic 2" })
+    const topic3 = topicMock({ name: "topic 3" })
+    quizState.discipline.topics.add(topic1)
+    quizState.discipline.topics.add(topic2)
+    quizState.discipline.topics.add(topic3)
+  }
+  if (quizState.topicsRootId.length === 0) {
+    quizState.discipline.topicsRoot().forEach((topic) => {
+      quizState.topicsRootId.push(topic.topicId)
+    })
+  }
+  return Quiz.toDomain(quizState)
 }
 
 export const quizAnswerMockState = (options: QuizAnswerMockOptions = {}): QuizAnswerDTO => {

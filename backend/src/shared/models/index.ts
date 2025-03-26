@@ -55,18 +55,18 @@ export type QuestionState = {
   prompt: string
   isMultipleChoice: boolean
   options: QuestionOption[]
-  difficulty: number
-  qtyAnswered: number
-  qtyCorrectAnswers: number
-  difficultyRecursive: number
-  simulexHash: string
   topicRootId: string
-  linkedTopics: string[]
-  year: string
-  sourceId: string
-  isActive: boolean
-  createdBy: string
-  createdAt: Date
+  difficulty?: number
+  qtyAnswered?: number
+  qtyCorrectAnswers?: number
+  difficultyRecursive?: number
+  simulexHash?: string
+  linkedTopics?: string[]
+  year?: string
+  sourceId?: string
+  isActive?: boolean
+  createdBy?: string
+  createdAt?: Date
 }
 
 export type QuestionOptionState = {

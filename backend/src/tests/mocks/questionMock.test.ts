@@ -4,7 +4,6 @@ import { faker } from "@faker-js/faker"
 import { DateBr } from "../../shared/domain/valueObject/DateBr"
 import { QuestionOption } from "../../domain/entity/QuestionOption"
 import { getCorrectOption } from "./questionMock"
-import { QuestionDTO } from "@simulex/models"
 
 describe("mockQuestion", () => {
   it("should return a Question object", () => {
@@ -30,13 +29,27 @@ describe("mockQuestion", () => {
   })
 
   it("should populate options array correctly", () => {
-    const question = questionMock()
-    expect(question.options.getItems().length).toBeGreaterThan(0)
-    question.options.getItems().forEach((option: QuestionOption) => {
-      expect(option.questionId).toBe(question.questionId)
-      expect(option.optionId).toBeDefined()
-      expect(option.text).toContain(`Question ${question.questionId}`)
-    })
+    const question1 = questionMock()
+    expect(question1.options.getItems().length).toBe(1)
+    const optionQuestion1 = question1.options.getItems()[0]
+    expect(optionQuestion1.questionId).toBe(question1.questionId)
+    expect(optionQuestion1.optionId).toBeDefined()
+    expect(optionQuestion1.text).toContain("Sample option")
+    const question2Command = {
+      questionId: faker.string.uuid(),
+      topicId: faker.string.uuid(),
+      topicRootId: faker.string.uuid(),
+      prompt: "Qual capital do Brasil?",
+      isCorrectAnswer: true,
+      optionText: "Brasília",
+    }
+    const question2 = questionMock(question2Command)
+    expect(question2.options.getItems().length).toBe(1)
+    const optionQuestion2 = question2.options.getItems()[0]
+    expect(optionQuestion2.questionId).toBe(question2.questionId)
+    expect(optionQuestion2.optionId).toBeDefined()
+    expect(optionQuestion2.text).toContain("Brasília")
+    expect(optionQuestion2.isCorrectAnswer).toBe(true)
   })
 
   it("should have at least one option with key set to true", () => {
@@ -78,12 +91,8 @@ describe("Question Mock Utils", () => {
         topicRootId: faker.string.uuid(),
         options: [{ text: "Option 1", isCorrectAnswer: true }],
       })
-
-      let correctOption = getCorrectOption(question)
+      const correctOption = getCorrectOption(question)
       expect(correctOption).toBe(question.options.getItems()[0].optionId)
-
-      correctOption = getCorrectOption(question)
-      expect(correctOption).toBe(question.options[0].optionId)
     })
 
     it("should return null for single choice question with fir+st option incorrect", () => {
@@ -92,16 +101,12 @@ describe("Question Mock Utils", () => {
         topicRootId: faker.string.uuid(),
         options: [{ text: "Option 1", isCorrectAnswer: false }],
       })
-
-      let correctOption = getCorrectOption(question)
-      expect(correctOption).toBeNull()
-
-      correctOption = getCorrectOption(question)
+      const correctOption = getCorrectOption(question)
       expect(correctOption).toBeNull()
     })
 
     it("should throw error if question is not provided", () => {
-      expect(() => getCorrectOption(null as any)).toThrow("Question is required")
+      expect(() => getCorrectOption(null)).toThrow("Question is required")
     })
   })
 

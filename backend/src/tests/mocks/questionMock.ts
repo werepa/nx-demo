@@ -2,13 +2,15 @@ import { faker } from "@faker-js/faker"
 import { Question, QuestionOption } from "../../domain/entity"
 import { QuestionOptionDTO, QuestionDTO } from "@simulex/models"
 import { QuestionState } from "../../shared/models"
+import { DateBr } from "backend/src/shared/domain/valueObject"
 
 interface IQuestionMockDto {
   questionId?: string
   topicId?: string
 }
 
-interface QuestionMockOptions {
+interface QuestionMockCommand {
+  questionId?: string
   topicId?: string
   topicRootId?: string
   prompt?: string
@@ -27,7 +29,13 @@ export const questionMockState = (dto: IQuestionMockDto = {}): QuestionState => 
     questionId: questionId,
     topicId: topicId,
     prompt: "Question " + questionId,
-    options: [],
+    options: [
+      QuestionOption.create({
+        questionId: questionId,
+        text: "Sample option 1",
+        isCorrectAnswer: Math.random() > 0.5,
+      }),
+    ],
     isMultipleChoice: Math.random() > 0.5,
     difficulty: Math.floor(Math.random() * 5 + 1),
     qtyAnswered: qtyAnswered,
@@ -45,24 +53,41 @@ export const questionMockState = (dto: IQuestionMockDto = {}): QuestionState => 
   return questionState
 }
 
-export const questionMock = (dto: IQuestionMockDto = {}): Question => {
-  const questionState = questionMockState(dto)
-  return Question.toDomain(questionState)
+export const questionMock = (dto: QuestionMockCommand = {}): Question => {
+  const {
+    questionId = faker.string.uuid(),
+    topicId = faker.string.uuid(),
+    topicRootId = faker.string.uuid(),
+    prompt = "Sample question",
+    isCorrectAnswer = true,
+    optionText = "Sample option",
+  } = dto
+
+  const questionOption = QuestionOption.create({
+    text: optionText,
+    questionId,
+    isCorrectAnswer: isCorrectAnswer,
+  })
+
+  return Question.toDomain({
+    questionId,
+    topicId,
+    topicRootId,
+    prompt,
+    options: [questionOption],
+    isMultipleChoice: false,
+  })
 }
 
-export const questionState = (question: Question): QuestionDTO => {
+export const questionState = (question: Question): QuestionState => {
+  if (!question) {
+    throw new Error("Question is required")
+  }
   return {
     questionId: question.id,
     topicId: question.topicId,
-    prompt: question.prompt,
-    options: question.options.getItems().map((option) => ({
-      optionId: option.optionId,
-      text: option.text,
-      isCorrectAnswer: option.isCorrectAnswer,
-      item: option.item || 0,
-      obs: option.obs || "",
-      questionId: option.questionId,
-    })),
+    prompt: question.prompt || "Julgue o item a seguir:",
+    options: question.options.getItems().map((option) => option),
     isMultipleChoice: question.isMultipleChoice,
     difficulty: question.difficulty,
     qtyAnswered: question.qtyAnswered,
@@ -79,37 +104,20 @@ export const questionState = (question: Question): QuestionDTO => {
   }
 }
 
-export const getQuestionMock = (options: QuestionMockOptions = {}): Question => {
-  const {
-    topicId = "1",
-    topicRootId = "1",
-    prompt = "Sample question",
-    isCorrectAnswer = true,
-    optionText = "Sample option",
-  } = options
-
-  const questionOption = QuestionOption.create({
-    text: optionText,
-    questionId: "1",
-    isCorrectAnswer: isCorrectAnswer,
-  })
-
-  return Question.create({
-    topicId,
-    topicRootId,
-    prompt,
-    options: [questionOption],
-  })
-}
-
 export const getCorrectOption = (question: Question): string => {
+  if (!question) {
+    throw new Error("Question is required")
+  }
+  if (!question.options) {
+    throw new Error("Questions must have at least one option")
+  }
   const correctOption = question.options.getItems().find((option) => option.isCorrectAnswer)
-  return correctOption?.optionId || ""
+  return correctOption?.optionId || null
 }
 
 export const getIncorrectOption = (question: Question): string => {
   const incorrectOption = question.options.getItems().find((option) => !option.isCorrectAnswer)
-  return incorrectOption?.optionId || ""
+  return incorrectOption?.optionId || null
 }
 
 export const isCorrectAnswer = (question: Question | QuestionDTO, option: QuestionOptionDTO): boolean => {

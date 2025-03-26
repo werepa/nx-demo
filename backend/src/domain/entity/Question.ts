@@ -2,7 +2,7 @@ import { DateBr } from "../../shared/domain/valueObject"
 import { QuestionOption, QuestionOptionList } from "."
 import { Entity } from "../../shared/domain/entity"
 import { Md5 } from "ts-md5"
-import { QuestionDTO, QuestionOptionDTO } from "@simulex/models"
+import { QuestionDTO } from "@simulex/models"
 import { QuestionState } from "../../shared/models"
 import { randomUUID } from "crypto"
 
@@ -95,21 +95,24 @@ export class Question extends Entity<QuestionProps> {
     if (!dto.questionId || !dto.topicId || !dto.topicRootId || !dto.options) {
       throw new Error("Missing required properties")
     }
+    if (dto.options.length === 0) {
+      throw new Error("Questions must be at least one option")
+    }
 
     const props: QuestionProps = {
       questionId: dto.questionId,
       topicId: dto.topicId,
-      prompt: dto.prompt,
+      prompt: dto.prompt ?? "Julgue o item a seguir:",
       options: QuestionOptionList.create(dto.questionId, dto.options),
       isMultipleChoice: !!dto.isMultipleChoice,
-      difficulty: dto.difficulty,
-      qtyCorrectAnswered: dto.qtyCorrectAnswers,
-      qtyAnswered: dto.qtyAnswered,
-      difficultyRecursive: dto.difficultyRecursive,
-      simulexHash: dto.simulexHash,
       topicRootId: dto.topicRootId,
-      linkedTopics: dto.linkedTopics,
-      year: dto.year,
+      difficulty: dto.difficulty ?? 0.5,
+      qtyCorrectAnswered: dto.qtyCorrectAnswers ?? 0,
+      qtyAnswered: dto.qtyAnswered ?? 0,
+      difficultyRecursive: dto.difficultyRecursive ?? 0.5,
+      simulexHash: dto.simulexHash ?? "",
+      linkedTopics: dto.linkedTopics ?? [],
+      year: dto.year ?? new Date().getFullYear().toString(),
       sourceId: dto.sourceId ?? null,
       isActive: !!dto.isActive,
       createdBy: dto.createdBy ?? null,
