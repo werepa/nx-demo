@@ -43,7 +43,8 @@ export class UserRepositoryDatabase implements UserRepository {
       return
     }
 
-    const query = "INSERT INTO users (user_id, name, email, password, role, image, is_active) VALUES (?, ?, ?, ?, ?, ?, ?)"
+    const query =
+      "INSERT INTO users (user_id, name, email, password, role, image, is_active, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
     const params = [
       user.userId,
       user.name,
@@ -52,6 +53,7 @@ export class UserRepositoryDatabase implements UserRepository {
       user.role,
       user.image,
       user.isActive ? this.dbType(1) : this.dbType(0),
+      user.createdAt.value.toISOString(),
     ]
     await this.connection.run(query, params)
   }

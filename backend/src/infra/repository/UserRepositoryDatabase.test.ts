@@ -19,12 +19,10 @@ describe("UserRepositoryDatabase", () => {
   })
 
   describe("User", () => {
-    test.only("should save a new user", async () => {
+    test("should save a new user", async () => {
       const user = userMock()
-      console.log("user", user)
       await userRepository.save(user)
       const savedUser: User = await userRepository.getById(user.userId)
-      console.log("savedUser", savedUser)
       expect(savedUser).toEqual(user)
     })
 
