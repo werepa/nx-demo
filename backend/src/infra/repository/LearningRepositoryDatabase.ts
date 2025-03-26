@@ -123,8 +123,8 @@ export class LearningRepositoryDatabase implements LearningRepository {
   private async fetchDisciplineStats(disciplineId: string): Promise<any> {
     const query = `
       SELECT q.topic_id, count(q.question_id) as qty_questions
-      FROM question q
-      JOIN topic t ON q.topic_id = t.topic_id
+      FROM questions q
+      JOIN topics t ON q.topic_id = t.topic_id
       WHERE t.discipline_id = ? AND q.is_active = ${this.dbType(1)}
       GROUP BY q.topic_id
       `
@@ -133,7 +133,7 @@ export class LearningRepositoryDatabase implements LearningRepository {
 
   private async existTopicLearning(dto: { userId: string; topicId: string }): Promise<boolean> {
     const query = `
-    SELECT * FROM user_topic_learning WHERE user_id = ? AND topic_id = ?
+    SELECT * FROM user_topic_learnings WHERE user_id = ? AND topic_id = ?
     `
     const result = await this.connection.all(query, [dto.userId, dto.topicId])
     return result.length > 0
@@ -141,8 +141,8 @@ export class LearningRepositoryDatabase implements LearningRepository {
 
   private async fetchDisciplineLearning(dto: { userId: string; disciplineId: string }): Promise<any> {
     const query = `
-      SELECT utl.* FROM user_topic_learning utl
-      JOIN topic t ON utl.topic_id = t.topic_id
+      SELECT utl.* FROM user_topic_learnings utl
+      JOIN topics t ON utl.topic_id = t.topic_id
       WHERE utl.user_id = ? AND t.discipline_id = ?
       `
     return this.connection.all(query, [dto.userId, dto.disciplineId])
@@ -151,8 +151,8 @@ export class LearningRepositoryDatabase implements LearningRepository {
   private async fetchCollectiveDisciplineLearning(dto: { disciplineId: string }): Promise<any> {
     const query = `
       SELECT utl.topic_id, AVG(utl.avg_grade) as collective_avg_grade, AVG(utl.score) as collective_avg_score
-      FROM user_topic_learning utl
-      JOIN topic t ON utl.topic_id = t.topic_id
+      FROM user_topic_learnings utl
+      JOIN topics t ON utl.topic_id = t.topic_id
       WHERE t.discipline_id = ? AND utl.qty_questions_answered > 2
       GROUP BY utl.topic_id
       `
@@ -161,10 +161,10 @@ export class LearningRepositoryDatabase implements LearningRepository {
 
   private async fetchDisciplineHistory(dto: { userId: string; disciplineId: string }): Promise<any> {
     const query = `
-      SELECT t.topic_id, qa.* FROM quiz_answer qa
-      JOIN question q ON qa.question_id = q.question_id
-      JOIN quiz qz ON qa.quiz_id = qz.quiz_id
-      JOIN topic t ON q.topic_id = t.topic_id
+      SELECT t.topic_id, qa.* FROM quiz_answers qa
+      JOIN questions q ON qa.question_id = q.question_id
+      JOIN quizzes qz ON qa.quiz_id = qz.quiz_id
+      JOIN topics t ON q.topic_id = t.topic_id
       WHERE qz.user_id = ? AND t.discipline_id = ?
       `
     return this.connection.all(query, [dto.userId, dto.disciplineId])

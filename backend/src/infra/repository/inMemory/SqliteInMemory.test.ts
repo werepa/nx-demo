@@ -24,17 +24,17 @@ describe("SqliteInMemory", () => {
     const tables = result.map((table) => table.name)
 
     // Verify all required tables exist
-    expect(tables).toContain("user")
-    expect(tables).toContain("discipline")
-    expect(tables).toContain("topic")
-    expect(tables).toContain("question")
-    expect(tables).toContain("quiz")
-    expect(tables).toContain("quiz_answer")
-    expect(tables).toContain("user_topic_learning")
+    expect(tables).toContain("users")
+    expect(tables).toContain("disciplines")
+    expect(tables).toContain("topics")
+    expect(tables).toContain("questions")
+    expect(tables).toContain("quizzes")
+    expect(tables).toContain("quiz_answers")
+    expect(tables).toContain("user_topic_learnings")
   })
 
-  test("should have correct schema for user table", () => {
-    const tableInfo = sqliteInMemory.db.prepare("PRAGMA table_info(user)").all()
+  test("should have correct schema for users table", () => {
+    const tableInfo = sqliteInMemory.db.prepare("PRAGMA table_info(users)").all()
 
     expect(tableInfo).toEqual(
       expect.arrayContaining([
@@ -51,8 +51,8 @@ describe("SqliteInMemory", () => {
     )
   })
 
-  test("should have correct schema for discipline table", () => {
-    const tableInfo = sqliteInMemory.db.prepare("PRAGMA table_info(discipline)").all()
+  test("should have correct schema for disciplines table", () => {
+    const tableInfo = sqliteInMemory.db.prepare("PRAGMA table_info(disciplines)").all()
 
     expect(tableInfo).toEqual(
       expect.arrayContaining([
@@ -66,8 +66,8 @@ describe("SqliteInMemory", () => {
     )
   })
 
-  test("should have correct schema for topic table", () => {
-    const tableInfo = sqliteInMemory.db.prepare("PRAGMA table_info(topic)").all()
+  test("should have correct schema for topics table", () => {
+    const tableInfo = sqliteInMemory.db.prepare("PRAGMA table_info(topics)").all()
 
     expect(tableInfo).toEqual(
       expect.arrayContaining([
@@ -86,8 +86,8 @@ describe("SqliteInMemory", () => {
     )
   })
 
-  test("should have correct schema for question table", () => {
-    const tableInfo = sqliteInMemory.db.prepare("PRAGMA table_info(question)").all()
+  test("should have correct schema for questions table", () => {
+    const tableInfo = sqliteInMemory.db.prepare("PRAGMA table_info(questions)").all()
 
     expect(tableInfo).toEqual(
       expect.arrayContaining([
@@ -112,8 +112,8 @@ describe("SqliteInMemory", () => {
     )
   })
 
-  test("should have correct schema for quiz table", () => {
-    const tableInfo = sqliteInMemory.db.prepare("PRAGMA table_info(quiz)").all()
+  test("should have correct schema for quizzes table", () => {
+    const tableInfo = sqliteInMemory.db.prepare("PRAGMA table_info(quizzes)").all()
 
     expect(tableInfo).toEqual(
       expect.arrayContaining([
@@ -129,8 +129,8 @@ describe("SqliteInMemory", () => {
     )
   })
 
-  test("should have correct schema for quiz_answer table", () => {
-    const tableInfo = sqliteInMemory.db.prepare("PRAGMA table_info(quiz_answer)").all()
+  test("should have correct schema for quiz_answers table", () => {
+    const tableInfo = sqliteInMemory.db.prepare("PRAGMA table_info(quiz_answers)").all()
 
     expect(tableInfo).toEqual(
       expect.arrayContaining([
@@ -147,8 +147,8 @@ describe("SqliteInMemory", () => {
     )
   })
 
-  test("should have correct schema for user_topic_learning table", () => {
-    const tableInfo = sqliteInMemory.db.prepare("PRAGMA table_info(user_topic_learning)").all()
+  test("should have correct schema for user_topic_learnings table", () => {
+    const tableInfo = sqliteInMemory.db.prepare("PRAGMA table_info(user_topic_learnings)").all()
 
     expect(tableInfo).toEqual(
       expect.arrayContaining([

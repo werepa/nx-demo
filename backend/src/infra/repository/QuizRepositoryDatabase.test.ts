@@ -42,7 +42,6 @@ describe("QuizRepositoryDatabase", () => {
   test("should save a quiz", async () => {
     const user = userMock()
     await userRepository.save(user)
-
     const discipline = disciplineMock()
     const topic1 = topicMock({ name: "topic 1" })
     const topic2 = topicMock({ name: "topic 2" })

@@ -87,7 +87,7 @@ export class Discipline extends Entity<DisciplineProps> {
 
     // Adiciona o assunto filho se o pai já foi adicionado e remove de dto.topics
     let contador = 0
-    while (dto.topics.length > 0 || contador > 100) {
+    while (dto.topics.length > 0 && contador < 100) {
       dto.topics
         .filter((topicState) => topicState.topicParentId)
         .map((topicState) => {

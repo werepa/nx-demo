@@ -93,7 +93,7 @@ describe("UseCase => CreateQuiz", () => {
     connection.close()
   })
 
-  test.only("should create a quiz of the correct type", async () => {
+  test("should create a quiz of the correct type", async () => {
     expect(portugues.topics.getCount()).toBe(13)
     expect(portugues.topics.getItems()[0].isActive).toBe(true)
 
@@ -105,12 +105,15 @@ describe("UseCase => CreateQuiz", () => {
     let { quizId } = await createQuiz.execute(dto)
     let quiz = await getQuizById.execute(quizId)
 
+    const expectedTopicIds = [crase.topicId, pronomes.topicId].sort()
+    const actualTopicIds = quiz.topicsRoot.listId().sort()
+
     expect(quiz).toBeInstanceOf(Quiz)
     expect(quiz.quizId).toHaveLength(36)
     expect(quiz.quizType.value).toBe(QuizTypeEnum.RANDOM)
     expect(quiz.user.userId).toBe(userMember.userId)
     expect(quiz.discipline.disciplineId).toBe(portugues.disciplineId)
-    expect(quiz.topicsRoot.listId()).toEqual([crase.topicId, pronomes.topicId].sort())
+    expect(actualTopicIds).toEqual(expectedTopicIds)
     expect(quiz.answers.getItems()).toEqual([])
     expect(quiz.isActive).toBe(true)
     expect(quiz.createdAt).toBeInstanceOf(DateBr)

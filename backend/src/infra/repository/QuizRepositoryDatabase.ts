@@ -145,7 +145,7 @@ export class QuizRepositoryDatabase implements QuizRepository {
       isActive: !!quizFromDB.is_active,
       createdAt: DateBr.create(quizFromDB.created_at).value,
       updatedAt: quizFromDB.updated_at ? DateBr.create(quizFromDB.updated_at).value : null,
-      topicsRootId: [],
+      topicsRootId: JSON.parse(quizFromDB.topics_id),
     }
     return Quiz.toDomain(quizState)
   }

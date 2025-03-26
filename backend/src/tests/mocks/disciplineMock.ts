@@ -40,7 +40,7 @@ export const topicMockState = (options: TopicMockOptions = {}): TopicState => {
     disciplineId,
     name: options.name || "Topic " + topicId,
     isTopicClassify: false,
-    topicParentId: options.topicParentId || topicId,
+    topicParentId: options.topicParentId || null,
     topicRootId: options.topicRootId || topicId,
     depth: options.depth || 1,
     dependencies: [],

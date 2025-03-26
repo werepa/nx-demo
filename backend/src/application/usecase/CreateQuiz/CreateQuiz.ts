@@ -11,13 +11,15 @@ export class CreateQuiz {
   constructor(
     private quizRepository: QuizRepository,
     private userRepository: UserRepository,
-    private disciplineRepository: DisciplineRepository,
+    private disciplineRepository: DisciplineRepository
   ) {}
 
   async execute(dto: Input): Promise<Output> {
     const user = await this.validateUser(dto.userId)
     const discipline = await this.validateDiscipline(dto.disciplineId)
+
     const topics = this.filterAndValidateTopics(discipline, dto.topicsRoot)
+
     if (!dto.quizType) dto.quizType = "random"
     const quizType = QuizType.create(dto.quizType)
     const oldQuiz = await this.quizRepository.getAll({
@@ -56,23 +58,19 @@ export class CreateQuiz {
     return discipline
   }
 
-  private filterAndValidateTopics(
-    discipline: Discipline,
-    topicIds: string[],
-  ): Topic[] {
-    const topics = discipline.topics
-      .getItems()
-      .filter(
-        (topic: Topic) =>
-          topicIds.includes(topic.topicId) &&
-          topic.isActive &&
-          !topic.topicParentId,
-      )
-    if (topics.length === 0) {
-      if (topicIds.length > 0) throw new Error("No root topics provided")
+  private filterAndValidateTopics(discipline: Discipline, topicIds: string[]): Topic[] {
+    // If no topics provided, return all root topics
+    if (topicIds.length === 0) {
       return discipline.topicsRoot()
     }
-    return topics ?? []
+
+    const topics = discipline.topics.getItems().filter((topic: Topic) => topicIds.includes(topic.topicId) && topic.isActive)
+
+    if (topics.length === 0) {
+      throw new Error("No root topics provided")
+    }
+
+    return topics
   }
 }
 

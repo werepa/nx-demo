@@ -30,4 +30,10 @@ export abstract class Entity<T> {
 
     return this.props === entity.props
   }
+
+  /**
+   * Convert entity to DTO format for API responses
+   * @returns Object ready for API response
+   */
+  abstract toDTO(): unknown
 }

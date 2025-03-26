@@ -1,7 +1,7 @@
 import { faker } from "@faker-js/faker"
 import { Quiz, QuizAnswer } from "../../domain/entity"
-import { QuizDTO, QuizAnswerDTO } from "@simulex/models"
-import { userMock, disciplineMockState, disciplineMock } from "."
+import { QuizAnswerDTO } from "@simulex/models"
+import { userMock, disciplineMock } from "."
 import { QuizState } from "../../shared/models"
 import { QuizType } from "../../domain/valueObject"
 
@@ -45,8 +45,7 @@ export const quizMockState = (options: QuizMockOptions = {}): QuizState => {
 }
 
 export const quizMock = (options: QuizMockOptions = {}): Quiz => {
-  const user = userMock()
-  const quizDTO: QuizState = quizMockState({ ...options, userId: user.userId })
+  const quizDTO: QuizState = quizMockState(options)
   return Quiz.toDomain(quizDTO)
 }
 

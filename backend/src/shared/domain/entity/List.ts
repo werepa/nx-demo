@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Entity } from "./Entity"
+
 export class List<T> {
   public items: T[]
   private idField = ""
@@ -27,7 +30,7 @@ export class List<T> {
   }
 
   remove(item: T) {
-    this.items = this.items.filter((i: any) => i[this.idField] !== (item as any)[this.idField])
+    this.items = this.items.filter((i: T) => i[this.idField] !== (item as T)[this.idField])
   }
 
   update(item: T) {
@@ -37,50 +40,50 @@ export class List<T> {
   }
 
   find(id: string): T | null {
-    const item = this.items.find((i: any) => i[this.idField] === id)
+    const item = this.items.find((i: T) => i[this.idField] === id)
     return item ?? null
   }
 
   exists(item: T): boolean {
-    const existe = this.items.find((i: any) => i[this.idField] === (item as any)[this.idField])
+    const existe = this.items.find((i: T) => i[this.idField] === (item as T)[this.idField])
     return existe ? true : false
   }
 
   listId(): string[] {
-    return this.items.map((item: any) => item[this.idField]).sort()
+    return this.items.map((item: T) => item[this.idField]).sort()
   }
 
   listname(): string[] {
-    const names = this.orderByName(this.items.map((item: any) => item["name"]))
+    const names = this.orderByName(this.items.map((item: T) => item["name"]))
     return names as string[]
   }
 
-  toPersistence(): T[] {
-    const lista: any[] = []
-    this.items.map((item: any) => {
-      lista.push(item.toPersistence())
-    })
-    return lista
-  }
+  // toPersistence(): T[] {
+  //   const lista: T[] = []
+  //   this.items.map((item: T) => {
+  //     lista.push((item as Entity<T>).toPersistence())
+  //   })
+  //   return lista
+  // }
 
   toDTO(): any[] {
-    const lista: any[] = []
-    this.items.map((item: any) => {
-      lista.push(item.toDTO())
+    const lista: T[] = []
+    this.items.map((item: T) => {
+      lista.push((item as any).toDTO())
     })
     return lista
   }
 
   private orderByName(items: T[]) {
-    return [...items].sort((a: any, b: any) => {
-      const name1 = this.replaceSpecialChars(a.name)
-      const name2 = this.replaceSpecialChars(b.name)
+    return [...items].sort((a: T, b: T) => {
+      const name1 = this.replaceSpecialChars((a as any).name)
+      const name2 = this.replaceSpecialChars((b as any).name)
       return name1.localeCompare(name2)
     })
   }
 
   private orderById(items: T[]) {
-    return [...items].sort((a: any, b: any) => {
+    return [...items].sort((a: T, b: T) => {
       const id1 = a[this.idField]
       const id2 = b[this.idField]
       return id1.localeCompare(id2)
