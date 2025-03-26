@@ -57,10 +57,10 @@ describe("QuestionRepositoryDatabase", () => {
     const question: Question = Question.create({
       prompt: "What is your favorite color?",
       options: [
-        { text: "Blue", key: true },
-        { text: "Red", key: false },
-        { text: "Green", key: false },
-        { text: "Yellow", key: false },
+        { text: "Blue", isCorrectAnswer: true },
+        { text: "Red", isCorrectAnswer: false },
+        { text: "Green", isCorrectAnswer: false },
+        { text: "Yellow", isCorrectAnswer: false },
       ],
       topicId: crase.topicId,
       topicRootId: crase.topicRootId,
@@ -74,10 +74,10 @@ describe("QuestionRepositoryDatabase", () => {
     const question: Question = Question.create({
       prompt: "What is your favorite color?",
       options: [
-        { text: "Blue", key: true },
-        { text: "Red", key: false },
-        { text: "Green", key: false },
-        { text: "Yellow", key: false },
+        { text: "Blue", isCorrectAnswer: true },
+        { text: "Red", isCorrectAnswer: false },
+        { text: "Green", isCorrectAnswer: false },
+        { text: "Yellow", isCorrectAnswer: false },
       ],
       topicId: crase.topicId,
       topicRootId: crase.topicRootId,
@@ -93,10 +93,10 @@ describe("QuestionRepositoryDatabase", () => {
     const question1: Question = Question.create({
       prompt: "What is your favorite color?",
       options: [
-        { text: "Blue", key: true },
-        { text: "Red", key: false },
-        { text: "Green", key: false },
-        { text: "Yellow", key: false },
+        { text: "Blue", isCorrectAnswer: true },
+        { text: "Red", isCorrectAnswer: false },
+        { text: "Green", isCorrectAnswer: false },
+        { text: "Yellow", isCorrectAnswer: false },
       ],
       topicId: crase.topicId,
       topicRootId: crase.topicRootId,
@@ -105,10 +105,10 @@ describe("QuestionRepositoryDatabase", () => {
     const question2: Question = Question.create({
       prompt: "What is your favorite food?",
       options: [
-        { text: "Pizza", key: true },
-        { text: "Hamburger", key: false },
-        { text: "Sushi", key: false },
-        { text: "Hot Dog", key: false },
+        { text: "Pizza", isCorrectAnswer: true },
+        { text: "Hamburger", isCorrectAnswer: false },
+        { text: "Sushi", isCorrectAnswer: false },
+        { text: "Hot Dog", isCorrectAnswer: false },
       ],
       topicId: pronomes.topicId,
       topicRootId: pronomes.topicRootId,
@@ -117,10 +117,10 @@ describe("QuestionRepositoryDatabase", () => {
     const question3: Question = Question.create({
       prompt: "What is your favorite drink?",
       options: [
-        { text: "Water", key: true },
-        { text: "Soda", key: false },
-        { text: "Juice", key: false },
-        { text: "Beer", key: false },
+        { text: "Water", isCorrectAnswer: true },
+        { text: "Soda", isCorrectAnswer: false },
+        { text: "Juice", isCorrectAnswer: false },
+        { text: "Beer", isCorrectAnswer: false },
       ],
       topicId: crase.topicId,
       topicRootId: crase.topicRootId,
@@ -151,10 +151,10 @@ describe("QuestionRepositoryDatabase", () => {
     const question: Question = Question.create({
       prompt: "What is your favorite color?",
       options: [
-        { text: "Blue", key: true },
-        { text: "Red", key: false },
-        { text: "Green", key: false },
-        { text: "Yellow", key: false },
+        { text: "Blue", isCorrectAnswer: true },
+        { text: "Red", isCorrectAnswer: false },
+        { text: "Green", isCorrectAnswer: false },
+        { text: "Yellow", isCorrectAnswer: false },
       ],
       topicId: crase.topicId,
       topicRootId: crase.topicRootId,
@@ -168,10 +168,10 @@ describe("QuestionRepositoryDatabase", () => {
     const question: Question = Question.create({
       prompt: "What is your favorite color?",
       options: [
-        { text: "Blue", key: true },
-        { text: "Red", key: false },
-        { text: "Green", key: false },
-        { text: "Yellow", key: false },
+        { text: "Blue", isCorrectAnswer: true },
+        { text: "Red", isCorrectAnswer: false },
+        { text: "Green", isCorrectAnswer: false },
+        { text: "Yellow", isCorrectAnswer: false },
       ],
       topicId: crase.topicId,
       topicRootId: crase.topicRootId,
@@ -207,21 +207,21 @@ describe("QuestionRepositoryDatabase", () => {
 
     const question1: Question = Question.create({
       prompt: "Pergunta 1 - Crase",
-      options: [{ text: "Correta", key: true }],
+      options: [{ text: "Correta", isCorrectAnswer: true }],
       topicId: crase.topicId,
       topicRootId: crase.topicRootId,
     })
 
     const question2: Question = Question.create({
       prompt: "Pergunta 2 - Crase",
-      options: [{ text: "Correta", key: true }],
+      options: [{ text: "Correta", isCorrectAnswer: true }],
       topicId: crase.topicId,
       topicRootId: crase.topicRootId,
     })
 
     const question3: Question = Question.create({
       prompt: "Pergunta 3 - Crase",
-      options: [{ text: "Correta", key: true }],
+      options: [{ text: "Correta", isCorrectAnswer: true }],
       topicId: crase.topicId,
       topicRootId: crase.topicRootId,
     })
@@ -229,14 +229,14 @@ describe("QuestionRepositoryDatabase", () => {
 
     const question4: Question = Question.create({
       prompt: "Pergunta 1 - Pronomes",
-      options: [{ text: "Correta", key: true }],
+      options: [{ text: "Correta", isCorrectAnswer: true }],
       topicId: pronomes.topicId,
       topicRootId: pronomes.topicRootId,
     })
 
     const question5: Question = Question.create({
       prompt: "Pergunta 1 - Crimes",
-      options: [{ text: "Correta", key: true }],
+      options: [{ text: "Correta", isCorrectAnswer: true }],
       topicId: crimes.topicId,
       topicRootId: crimes.topicRootId,
     })

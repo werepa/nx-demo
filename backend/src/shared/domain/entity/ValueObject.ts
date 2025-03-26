@@ -1,8 +1,4 @@
-interface ValueObjectProps {
-  [key: string]: unknown
-}
-
-export abstract class ValueObject<T extends ValueObjectProps> {
+export abstract class ValueObject<T> {
   protected props: T
 
   constructor(props: T) {

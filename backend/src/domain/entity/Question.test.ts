@@ -14,10 +14,10 @@ describe("Entity => Question", () => {
       topicRootId: faker.string.uuid(),
       prompt: "Qual é a capital da França?",
       options: [
-        { text: "Paris", key: true },
-        { text: "Londres", key: false },
-        { text: "Berlim", key: false },
-        { text: "Madrid", key: false },
+        { text: "Paris", isCorrectAnswer: true },
+        { text: "Londres", isCorrectAnswer: false },
+        { text: "Berlim", isCorrectAnswer: false },
+        { text: "Madrid", isCorrectAnswer: false },
       ],
       year: "2023",
       sourceId: "fonte-123",
@@ -51,7 +51,7 @@ describe("Entity => Question", () => {
       options: [
         {
           text: "42 é a resposta para a vida, o universo e tudo mais",
-          key: true,
+          isCorrectAnswer: true,
         },
       ],
     }
@@ -65,8 +65,8 @@ describe("Entity => Question", () => {
       topicId: faker.string.uuid(),
       topicRootId: faker.string.uuid(),
       options: [
-        { text: "alternativa 1", key: true },
-        { text: "alternativa 1", key: false },
+        { text: "alternativa 1", isCorrectAnswer: true },
+        { text: "alternativa 1", isCorrectAnswer: false },
       ],
     }
     question = Question.create(dtoWithoutMultipleChoiceProperty)
@@ -80,21 +80,21 @@ describe("Entity => Question", () => {
       topicId: faker.string.uuid(),
       topicRootId: faker.string.uuid(),
       options: [
-        { text: "alternativa 1", key: false },
-        { text: "alternativa 2", key: false },
+        { text: "alternativa 1", isCorrectAnswer: false },
+        { text: "alternativa 2", isCorrectAnswer: false },
       ],
     }
-    expect(() => Question.create(dto1)).toThrow("Questions of type multiple choice must be at least one correct key")
+    expect(() => Question.create(dto1)).toThrow("Questions of type multiple choice must be at least one correct answer")
 
     const dto2: CreateQuestionCommand = {
       topicId: faker.string.uuid(),
       topicRootId: faker.string.uuid(),
       options: [
-        { text: "alternativa 1", key: true },
-        { text: "alternativa 2", key: true },
+        { text: "alternativa 1", isCorrectAnswer: true },
+        { text: "alternativa 2", isCorrectAnswer: true },
       ],
     }
-    expect(() => Question.create(dto2)).toThrow("Questions of type multiple choice must be only one correct key")
+    expect(() => Question.create(dto2)).toThrow("Questions of type multiple choice must be only one correct answer")
   })
 
   it("should link a question to a subject", async () => {
@@ -104,10 +104,10 @@ describe("Entity => Question", () => {
       topicRootId: faker.string.uuid(),
       prompt: "Qual é a capital da França?",
       options: [
-        { text: "Paris", key: true },
-        { text: "Londres", key: false },
-        { text: "Berlim", key: false },
-        { text: "Madrid", key: false },
+        { text: "Paris", isCorrectAnswer: true },
+        { text: "Londres", isCorrectAnswer: false },
+        { text: "Berlim", isCorrectAnswer: false },
+        { text: "Madrid", isCorrectAnswer: false },
       ],
       year: "2023",
       sourceId: "fonte-123",
@@ -137,10 +137,10 @@ describe("Entity => Question", () => {
       topicRootId: faker.string.uuid(),
       prompt: "Qual é a capital da França?",
       options: [
-        { text: "Paris", key: true },
-        { text: "Londres", key: false },
-        { text: "Berlim", key: false },
-        { text: "Madrid", key: false },
+        { text: "Paris", isCorrectAnswer: true },
+        { text: "Londres", isCorrectAnswer: false },
+        { text: "Berlim", isCorrectAnswer: false },
+        { text: "Madrid", isCorrectAnswer: false },
       ],
       year: "2023",
       sourceId: "fonte-123",

@@ -54,7 +54,7 @@ export class CheckQuizAnswer {
     const output: CheckQuizAnswerOutputDTO = {
       questionId: question.id,
       userOptionId: dto.userQuizAnswer.userOptionId || null,
-      correctOptionId: question.options.getItems().find((o) => o.key)?.optionId || null,
+      correctOptionId: question.options.getItems().find((o: QuestionOption) => o.isCorrectAnswer)?.optionId || null,
       isUserAnswerCorrect: isUserAnswerCorrect,
       topic: {
         topicId: question.topicId,
@@ -78,14 +78,17 @@ export class CheckQuizAnswer {
   }
 
   private isCorrectQuizAnswer = (question: Question, optionId: string): boolean => {
+    if (question.options.getItems().length === 0) {
+      throw new Error("Questions must be at least one option")
+    }
     if (question.isMultipleChoice) {
       const option = question.options.getItems().find((option: QuestionOption) => option.id === optionId)
-      return option?.key ?? false
+      return option?.isCorrectAnswer ?? false
     } else {
       const firstOption = question.options.getItems()[0]
-      if (!optionId && !firstOption.key) {
+      if (!optionId && !firstOption.isCorrectAnswer) {
         return true
-      } else if (optionId === firstOption.id && firstOption.key) {
+      } else if (optionId === firstOption.id && firstOption.isCorrectAnswer) {
         return true
       }
       return false

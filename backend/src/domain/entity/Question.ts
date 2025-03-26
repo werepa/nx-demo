@@ -54,18 +54,18 @@ export class Question extends Entity<QuestionProps> {
         QuestionOption.create({
           questionId,
           text: option.text,
-          key: option.key,
+          isCorrectAnswer: option.isCorrectAnswer,
         })
       )
     })
 
     const isMultipleChoice = dto.options.length > 1
-    if (isMultipleChoice && dto.options.filter((option) => option.key).length === 0) {
-      throw new Error("Questions of type multiple choice must be at least one correct key")
+    if (isMultipleChoice && dto.options.filter((option) => option.isCorrectAnswer).length === 0) {
+      throw new Error("Questions of type multiple choice must be at least one correct answer")
     }
 
-    if (isMultipleChoice && dto.options.filter((option) => option.key).length > 1) {
-      throw new Error("Questions of type multiple choice must be only one correct key")
+    if (isMultipleChoice && dto.options.filter((option) => option.isCorrectAnswer).length > 1) {
+      throw new Error("Questions of type multiple choice must be only one correct answer")
     }
 
     const currentYear = new Date().getFullYear().toString()
@@ -188,7 +188,7 @@ export class Question extends Entity<QuestionProps> {
   }
 
   getCorrectOption(): QuestionOption {
-    return this.props.options.getItems().find((option) => option.key)
+    return this.props.options.getItems().find((option) => option.isCorrectAnswer)
   }
 
   updatePrompt(prompt: string): void {
@@ -283,7 +283,7 @@ export type CreateQuestionCommand = {
   topicId: string
   topicRootId: string
   prompt?: string
-  options: { text: string; key?: boolean }[]
+  options: { text: string; isCorrectAnswer?: boolean }[]
   year?: string
   sourceId?: string
   createdBy?: string

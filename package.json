@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
+    "check": "nx run-many --target=typecheck --all",
     "test:backend": "nx test backend",
     "test:backend:watch": "nx test backend --watch"
   },

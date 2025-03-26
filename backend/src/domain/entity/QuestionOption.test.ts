@@ -7,7 +7,7 @@ describe("Entity => QuestionOption", () => {
   beforeEach(() => {
     const dto = {
       text: "Paris",
-      key: true,
+      isCorrectAnswer: true,
       questionId: "question-123",
     }
     questionOption = QuestionOption.create(dto)
@@ -17,7 +17,7 @@ describe("Entity => QuestionOption", () => {
     expect(questionOption).toBeInstanceOf(QuestionOption)
     expect(questionOption.optionId).toHaveLength(36)
     expect(questionOption.text).toBe("Paris")
-    expect(questionOption.key).toBe(true)
+    expect(questionOption.isCorrectAnswer).toBe(true)
     expect(questionOption.item).toBe(1)
     expect(questionOption.questionId).toBe("question-123")
   })
@@ -29,7 +29,7 @@ describe("Entity => QuestionOption", () => {
 
   it("should update the key of the question option", () => {
     questionOption.updateKey(false)
-    expect(questionOption.key).toBe(false)
+    expect(questionOption.isCorrectAnswer).toBe(false)
   })
 
   it("should update the item of the question option", () => {
@@ -66,14 +66,14 @@ describe("Entity => QuestionOption", () => {
     expect(DomainOption).toBeInstanceOf(QuestionOption)
     expect(DomainOption.optionId).toBe("option-123")
     expect(DomainOption.text).toBe("Paris")
-    expect(DomainOption.key).toBe(true)
+    expect(DomainOption.isCorrectAnswer).toBe(true)
     expect(DomainOption.item).toBe(1)
     expect(DomainOption.questionId).toBe("question-123")
   })
 
   it("should throw an error when creating an option without required fields", () => {
     const createOptionWithoutText = () => {
-      QuestionOption.create({ text: "", key: true, questionId: "question-123" })
+      QuestionOption.create({ text: "", isCorrectAnswer: true, questionId: "question-123" })
     }
     expect(createOptionWithoutText).toThrow("Text of option is required")
   })

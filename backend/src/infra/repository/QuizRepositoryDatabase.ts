@@ -73,17 +73,19 @@ export class QuizRepositoryDatabase implements QuizRepository {
       quiz_answer_id,
       quiz_id,
       question_id,
+      topic_id,
       correct_option_id,
       user_option_id,
       is_user_answer_correct,
       can_repeat,
       created_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
     const params = [
       userQuizAnswer.quizAnswerId,
       userQuizAnswer.quizId,
       userQuizAnswer.questionId,
+      userQuizAnswer.topicId,
       userQuizAnswer.correctOptionId,
       userQuizAnswer.userOptionId,
       userQuizAnswer.isUserAnswerCorrect ? this.dbType(1) : this.dbType(0),

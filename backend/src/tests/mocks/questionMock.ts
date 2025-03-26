@@ -58,7 +58,7 @@ export const questionState = (question: Question): QuestionDTO => {
     options: question.options.getItems().map((option) => ({
       optionId: option.optionId,
       text: option.text,
-      isCorrectAnswer: option.key,
+      isCorrectAnswer: option.isCorrectAnswer,
       item: option.item || 0,
       obs: option.obs || "",
       questionId: option.questionId,
@@ -91,7 +91,7 @@ export const getQuestionMock = (options: QuestionMockOptions = {}): Question => 
   const questionOption = QuestionOption.create({
     text: optionText,
     questionId: "1",
-    key: isCorrectAnswer,
+    isCorrectAnswer: isCorrectAnswer,
   })
 
   return Question.create({
@@ -103,12 +103,12 @@ export const getQuestionMock = (options: QuestionMockOptions = {}): Question => 
 }
 
 export const getCorrectOption = (question: Question): string => {
-  const correctOption = question.options.getItems().find((option) => option.key)
+  const correctOption = question.options.getItems().find((option) => option.isCorrectAnswer)
   return correctOption?.optionId || ""
 }
 
 export const getIncorrectOption = (question: Question): string => {
-  const incorrectOption = question.options.getItems().find((option) => !option.key)
+  const incorrectOption = question.options.getItems().find((option) => !option.isCorrectAnswer)
   return incorrectOption?.optionId || ""
 }
 

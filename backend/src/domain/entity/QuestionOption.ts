@@ -25,7 +25,7 @@ export class QuestionOption extends Entity<QuestionOptionProps> {
     const props: QuestionOptionProps = {
       optionId,
       text: dto.text,
-      isCorrectAnswer: dto.key ?? false,
+      isCorrectAnswer: dto.isCorrectAnswer ?? false,
       item: 1,
       obs: "",
       questionId: dto.questionId,
@@ -41,7 +41,7 @@ export class QuestionOption extends Entity<QuestionOptionProps> {
     return this.props.text
   }
 
-  get key() {
+  get isCorrectAnswer() {
     return this.props.isCorrectAnswer
   }
 
@@ -61,8 +61,8 @@ export class QuestionOption extends Entity<QuestionOptionProps> {
     this.props.text = text
   }
 
-  updateKey(key: boolean) {
-    this.props.isCorrectAnswer = key
+  updateKey(isCorrectAnswer: boolean) {
+    this.props.isCorrectAnswer = isCorrectAnswer
   }
 
   updateItem(item: number) {
@@ -114,5 +114,5 @@ export class QuestionOption extends Entity<QuestionOptionProps> {
 export type CreateOptionCommand = {
   questionId: string
   text: string
-  key?: boolean
+  isCorrectAnswer?: boolean
 }

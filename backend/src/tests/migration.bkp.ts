@@ -342,7 +342,7 @@
 //             optionId: option.option_id,
 //             item: item++,
 //             text: option.text,
-//             key: option.key,
+//             isCorrectAnswer: option.isCorrectAnswer,
 //             obs: option.obs,
 //           })
 //         })

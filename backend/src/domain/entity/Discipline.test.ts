@@ -194,7 +194,7 @@ describe("Entity => Discipline", () => {
   })
 
   it("should throw an error when creating an instance without the required properties", () => {
-    // @ts-ignore
+    // @ts-expect-error without name
     expect(() => Discipline.create({})).toThrow("Discipline - Missing required property: name")
   })
 

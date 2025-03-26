@@ -7,7 +7,10 @@ export class QuestionOptionList extends List<QuestionOption> {
     super(questionOptions, "optionId")
   }
 
-  static create(questionId: string, questionOptions: QuestionOption[]) {
+  static create(questionId: string, questionOptions: QuestionOption[] = []) {
+    if (!Array.isArray(questionOptions)) {
+      questionOptions = []
+    }
     questionOptions.map((questionOption) => {
       questionOption.updateQuestionId(questionId)
       questionOption.updateItem(questionOptions.indexOf(questionOption))

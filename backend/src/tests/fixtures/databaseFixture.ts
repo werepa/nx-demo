@@ -308,14 +308,14 @@ export const databaseFixture = async ({
     for (let i = 0; i < qtde; i++) {
       if (Math.random() > 0.5) {
         const options = [
-          { text: "alternativa 1", key: false },
-          { text: "alternativa 2", key: false },
-          { text: "alternativa 3", key: false },
-          { text: "alternativa 4", key: false },
-          { text: "alternativa 5", key: false },
+          { text: "alternativa 1", isCorrectAnswer: false },
+          { text: "alternativa 2", isCorrectAnswer: false },
+          { text: "alternativa 3", isCorrectAnswer: false },
+          { text: "alternativa 4", isCorrectAnswer: false },
+          { text: "alternativa 5", isCorrectAnswer: false },
         ]
-        const key = Math.floor(Math.random() * 5)
-        options[key].key = true
+        const isCorrectAnswer = Math.floor(Math.random() * 5)
+        options[isCorrectAnswer].isCorrectAnswer = true
 
         const question = Question.create({
           topicId: topic.topicId,
@@ -329,7 +329,7 @@ export const databaseFixture = async ({
           topicId: topic.topicId,
           topicRootId: topic.topicRootId,
           prompt: `Questão ${i + 1} - ${topic.name}`,
-          options: [{ text: "alternativa verdadeira", key: true }],
+          options: [{ text: "alternativa verdadeira", isCorrectAnswer: true }],
         })
         await questionRepository.save(question)
       }

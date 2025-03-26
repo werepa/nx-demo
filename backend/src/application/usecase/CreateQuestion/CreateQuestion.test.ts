@@ -38,10 +38,10 @@ describe("CreateQuestion", () => {
     const dto: CreateQuestionDTO = {
       prompt: "What is the capital of France?",
       options: [
-        { text: "Paris", key: true },
-        { text: "London", key: false },
-        { text: "Berlin", key: false },
-        { text: "Madrid", key: false },
+        { text: "Paris", isCorrectAnswer: true },
+        { text: "London", isCorrectAnswer: false },
+        { text: "Berlin", isCorrectAnswer: false },
+        { text: "Madrid", isCorrectAnswer: false },
       ],
       topicId: crase.topicId,
       topicRootId: crase.topicRootId,
@@ -52,7 +52,7 @@ describe("CreateQuestion", () => {
     expect(questionSaved.prompt).toBe(dto.prompt)
     expect(questionSaved.options.getCount()).toEqual(dto.options.length)
     expect(questionSaved.options.getItems()[0].text).toBe(dto.options[0].text)
-    expect(questionSaved.options.getItems()[0].key).toBe(dto.options[0].key)
+    expect(questionSaved.options.getItems()[0].isCorrectAnswer).toBe(dto.options[0].isCorrectAnswer)
     expect(questionSaved.topicId).toBe(dto.topicId)
     expect(questionSaved.topicRootId).toBe(dto.topicRootId)
     expect(questionSaved.createdAt).toBeDefined()

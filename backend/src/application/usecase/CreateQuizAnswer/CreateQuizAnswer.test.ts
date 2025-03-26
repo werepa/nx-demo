@@ -61,8 +61,8 @@ describe("CreateQuizAnswer", () => {
 
       prompt: "Question 1",
       options: [
-        { text: "Option 1", key: true },
-        { text: "Option 2", key: false },
+        { text: "Option 1", isCorrectAnswer: true },
+        { text: "Option 2", isCorrectAnswer: false },
       ],
     })
     question2 = Question.create({
@@ -70,21 +70,21 @@ describe("CreateQuizAnswer", () => {
       topicRootId: crase.topicId,
       prompt: "Question 2",
       options: [
-        { text: "Option 1", key: true },
-        { text: "Option 2", key: false },
+        { text: "Option 1", isCorrectAnswer: true },
+        { text: "Option 2", isCorrectAnswer: false },
       ],
     })
     question3 = Question.create({
       topicId: crase.topicId,
       topicRootId: crase.topicId,
       prompt: "Question 3",
-      options: [{ text: "Option 1", key: true }],
+      options: [{ text: "Option 1", isCorrectAnswer: true }],
     })
     question4 = Question.create({
       topicId: crase.topicId,
       topicRootId: crase.topicId,
       prompt: "Question 4",
-      options: [{ text: "Option 1", key: false }],
+      options: [{ text: "Option 1", isCorrectAnswer: false }],
     })
     await questionRepository.save(question1)
     await questionRepository.save(question2)

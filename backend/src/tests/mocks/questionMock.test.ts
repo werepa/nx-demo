@@ -41,7 +41,7 @@ describe("mockQuestion", () => {
 
   it("should have at least one option with key set to true", () => {
     const question = questionMock()
-    const hasKeyOption = question.options.getItems().some((option: QuestionOption) => option.key)
+    const hasKeyOption = question.options.getItems().some((option: QuestionOption) => option.isCorrectAnswer)
     expect(hasKeyOption).toBe(true)
   })
 
@@ -58,9 +58,9 @@ describe("Question Mock Utils", () => {
         topicId: faker.string.uuid(),
         topicRootId: faker.string.uuid(),
         options: [
-          { text: "Option 1", key: false },
-          { text: "Option 2", key: true },
-          { text: "Option 3", key: false },
+          { text: "Option 1", isCorrectAnswer: false },
+          { text: "Option 2", isCorrectAnswer: true },
+          { text: "Option 3", isCorrectAnswer: false },
         ],
       })
 
@@ -76,7 +76,7 @@ describe("Question Mock Utils", () => {
       const question: Question = Question.create({
         topicId: faker.string.uuid(),
         topicRootId: faker.string.uuid(),
-        options: [{ text: "Option 1", key: true }],
+        options: [{ text: "Option 1", isCorrectAnswer: true }],
       })
 
       let correctOption = getCorrectOption(question)
@@ -90,7 +90,7 @@ describe("Question Mock Utils", () => {
       const question: Question = Question.create({
         topicId: faker.string.uuid(),
         topicRootId: faker.string.uuid(),
-        options: [{ text: "Option 1", key: false }],
+        options: [{ text: "Option 1", isCorrectAnswer: false }],
       })
 
       let correctOption = getCorrectOption(question)

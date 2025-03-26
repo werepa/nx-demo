@@ -3,7 +3,6 @@ import { List } from "./List"
 
 class WeekdayItem {
   constructor(public readonly value: WeekdayEnum) {}
-  [key: string]: unknown
   toDTO?: () => unknown
   toPersistence?: () => unknown
 

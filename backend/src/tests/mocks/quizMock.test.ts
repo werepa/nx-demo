@@ -34,8 +34,8 @@ describe("quizMock", () => {
     discipline.topics.add(topic2)
     const quiz = quizMock({
       quizId: "any_id",
-      user: user.userId,
-      discipline: discipline.disciplineId,
+      user: user,
+      discipline: discipline,
       topicsRootId: [topic1.topicId, topic2.topicId],
     })
     expect(quiz.quizId).toBe("any_id")

@@ -8,14 +8,14 @@ describe("Entity => QuestionOptionList", () => {
   beforeEach(() => {
     questionId = "anyQuestionId"
     questionOptionList = QuestionOptionList.create(questionId, [
-      QuestionOption.create({ questionId, text: "Option 1", key: true }),
-      QuestionOption.create({ questionId, text: "Option 2", key: false }),
-      QuestionOption.create({ questionId, text: "Option 3", key: false }),
-      QuestionOption.create({ questionId, text: "Option 4", key: false }),
+      QuestionOption.create({ questionId, text: "Option 1", isCorrectAnswer: true }),
+      QuestionOption.create({ questionId, text: "Option 2", isCorrectAnswer: false }),
+      QuestionOption.create({ questionId, text: "Option 3", isCorrectAnswer: false }),
+      QuestionOption.create({ questionId, text: "Option 4", isCorrectAnswer: false }),
       QuestionOption.create({
         questionId,
         text: "Nenhuma das anteriores",
-        key: false,
+        isCorrectAnswer: false,
       }),
     ])
   })
@@ -40,7 +40,7 @@ describe("Entity => QuestionOptionList", () => {
     const newQuestionOption = QuestionOption.create({
       questionId,
       text: "New Option",
-      key: false,
+      isCorrectAnswer: false,
     })
     questionOptionList.add(newQuestionOption)
     expect(questionOptionList.getItems()).toHaveLength(6)
@@ -74,19 +74,10 @@ describe("Entity => QuestionOptionList", () => {
     const randomItems1 = questionOptionList.getRandomItems()
     const randomItems2 = questionOptionList.getRandomItems()
     const randomItems3 = questionOptionList.getRandomItems()
-    const isRandom =
-      randomItems1 !== randomItems2 ||
-      randomItems1 !== randomItems3 ||
-      randomItems2 !== randomItems3
+    const isRandom = randomItems1 !== randomItems2 || randomItems1 !== randomItems3 || randomItems2 !== randomItems3
     expect(isRandom).toBeTruthy()
-    expect(randomItems1[4].text).toMatch(
-      /(Nenhuma das anteriores|Todas as anteriores|Todas as alternativas estão corretas)/,
-    )
-    expect(randomItems2[4].text).toMatch(
-      /(Nenhuma das anteriores|Todas as anteriores|Todas as alternativas estão corretas)/,
-    )
-    expect(randomItems3[4].text).toMatch(
-      /(Nenhuma das anteriores|Todas as anteriores|Todas as alternativas estão corretas)/,
-    )
+    expect(randomItems1[4].text).toMatch(/(Nenhuma das anteriores|Todas as anteriores|Todas as alternativas estão corretas)/)
+    expect(randomItems2[4].text).toMatch(/(Nenhuma das anteriores|Todas as anteriores|Todas as alternativas estão corretas)/)
+    expect(randomItems3[4].text).toMatch(/(Nenhuma das anteriores|Todas as anteriores|Todas as alternativas estão corretas)/)
   })
 })

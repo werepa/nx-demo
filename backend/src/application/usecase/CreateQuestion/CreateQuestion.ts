@@ -15,7 +15,7 @@ export type CreateQuestionDTO = {
   topicId: string
   topicRootId: string
   prompt?: string
-  options: { text: string; key?: boolean }[]
+  options: { text: string; isCorrectAnswer?: boolean }[]
   year?: string
   sourceId?: string
   createdBy?: string
