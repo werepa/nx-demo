@@ -1,0 +1,18 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "nx",
+      "label": "build-backend",
+      "command": "build",
+      "project": "backend",
+      "problemMatcher": [
+        "$tsc"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    }
+  ]
+}
