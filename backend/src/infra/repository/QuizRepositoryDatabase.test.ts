@@ -42,6 +42,8 @@ describe("QuizRepositoryDatabase", () => {
   test("should save a quiz", async () => {
     const user = userMock()
     await userRepository.save(user)
+    await userRepository.getById(user.userId)
+
     const discipline = disciplineMock()
     const topic1 = topicMock({ name: "topic 1" })
     const topic2 = topicMock({ name: "topic 2" })
@@ -53,10 +55,12 @@ describe("QuizRepositoryDatabase", () => {
     discipline.topic({ topicId: topic3.topicId })?.deactivate()
     await disciplineRepository.save(discipline)
     const disciplineSaved = await disciplineRepository.getById(discipline.disciplineId)
-    const quiz = quizMock({ userId: user.userId, disciplineId: disciplineSaved.disciplineId })
+
+    const quiz = quizMock({ user: user, discipline: disciplineSaved })
+    quiz.topicsRoot.add(topic1)
     await quizRepository.save(quiz)
     const savedQuiz = await quizRepository.getById(quiz.quizId)
-    expect(savedQuiz?.toDTO()).toEqual(quiz.toDTO())
+    expect(savedQuiz.toDTO()).toEqual(quiz.toDTO())
   })
 
   test("should get all quizzes for a user", async () => {
@@ -77,9 +81,9 @@ describe("QuizRepositoryDatabase", () => {
     discipline2.topics.add(topic3)
     await disciplineRepository.save(discipline2)
 
-    const quiz1 = quizMock({ userId: user1.userId, disciplineId: discipline1.disciplineId })
-    const quiz2 = quizMock({ userId: user1.userId, disciplineId: discipline2.disciplineId })
-    const quiz3 = quizMock({ userId: user2.userId, disciplineId: discipline1.disciplineId })
+    const quiz1 = quizMock({ user: user1, discipline: discipline1 })
+    const quiz2 = quizMock({ user: user1, discipline: discipline2 })
+    const quiz3 = quizMock({ user: user2, discipline: discipline1 })
     await quizRepository.save(quiz1)
     await quizRepository.save(quiz2)
     await quizRepository.save(quiz3)

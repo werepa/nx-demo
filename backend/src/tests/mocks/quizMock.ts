@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker"
-import { Quiz, QuizAnswer } from "../../domain/entity"
+import { Discipline, Quiz, QuizAnswer, User } from "../../domain/entity"
 import { QuizAnswerDTO } from "@simulex/models"
 import { userMock, disciplineMock } from "."
 import { QuizState } from "../../shared/models"
@@ -7,8 +7,8 @@ import { QuizType } from "../../domain/valueObject"
 
 interface QuizMockOptions {
   quizId?: string
-  userId?: string
-  disciplineId?: string
+  user?: User
+  discipline?: Discipline
   quizType?: string
   isActive?: boolean
   topicsRootId?: string[]
@@ -27,14 +27,14 @@ interface QuizAnswerMockOptions {
 
 export const quizMockState = (options: QuizMockOptions = {}): QuizState => {
   const quizId = options.quizId || faker.string.uuid()
-  const userId = options.userId || faker.string.uuid()
-  const disciplineId = options.disciplineId || faker.string.uuid()
+  const user = options.user || userMock()
+  const discipline = options.discipline || disciplineMock()
   const createdAt = faker.date.recent()
 
   return {
     quizId,
-    user: userMock({ userId }),
-    discipline: disciplineMock({ disciplineId }),
+    user,
+    discipline,
     topicsRootId: options.topicsRootId || [],
     quizType: QuizType.create(options.quizType || "random"),
     answers: [],
