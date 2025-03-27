@@ -327,7 +327,8 @@ describe("QuestionRepositoryDatabase", () => {
       learning1 = await learningRepository.getDisciplineLearning(userMember1, portugues)
     })
 
-    test.only("should get a random question from a topic that the user has not answered yet", async () => {
+    test("should get a random question from a topic that the user has not answered yet", async () => {
+      connection.clear(["quiz_answers"])
       // Crase
       let nextQuestion = await questionRepository.getRandom({
         topicId: crase.topicId,
