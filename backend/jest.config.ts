@@ -10,4 +10,7 @@ export default {
   testMatch: ["**/*.test.ts"],
   testPathIgnorePatterns: ["/node_modules/", "/dist/"],
   roots: ["<rootDir>/src"],
+  maxWorkers: 1,
+  cache: false,
+  runInBand: true,
 }

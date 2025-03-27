@@ -14,7 +14,7 @@
         "defaultConfiguration": "production",
         "options": {
           "outputPath": "backend/dist",
-          "main": "backend/src/main.ts",
+          "main": "backend/src/server.ts",
           "tsConfig": "backend/tsconfig.json",
           "assets": [
             "backend/src/assets"
@@ -55,6 +55,7 @@
         "executor": "@nx/jest:jest",
         "options": {
           "jestConfig": "backend/jest.config.ts",
+          "runInBand": true,
           "processEnv": {
             "NODE_ENV": "test"
           }
