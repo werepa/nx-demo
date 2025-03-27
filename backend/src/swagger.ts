@@ -145,7 +145,12 @@ const options: swaggerJsdoc.OAS3Options = {
       },
     ],
   },
-  apis: ["./infra/http/controller/*.ts", "./infra/http/controller/**/*.ts"],
+  apis: [
+    path.resolve(__dirname, "infra/http/controller/*.js"), // Note: .js instead of .ts
+    path.resolve(__dirname, "infra/http/controller/**/*.js"),
+    path.resolve(__dirname, "../src/infra/http/controller/*.ts"),
+    path.resolve(__dirname, "../src/infra/http/controller/**/*.ts"),
+  ],
 }
 
 const swaggerSpec = swaggerJsdoc(options)
@@ -173,6 +178,6 @@ export function setupSwagger(app: Express): void {
         filter: true,
         showExtensions: true,
       },
-    }),
+    })
   )
 }
