@@ -29,10 +29,7 @@ describe("QuizRepositoryDatabase", () => {
   })
 
   beforeEach(async () => {
-    await quizRepository.clear()
-    await questionRepository.clear()
-    await disciplineRepository.clear()
-    await userRepository.clear()
+    await connection.clear(["quiz_answers", "quizzes", "questions", "topics", "disciplines", "users"])
   })
 
   afterAll(() => {

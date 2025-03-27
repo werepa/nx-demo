@@ -39,10 +39,7 @@ describe("CreateQuizAnswer", () => {
     questionRepository = new QuestionRepositoryDatabase(connection)
     quizRepository = new QuizRepositoryDatabase(connection, userRepository, disciplineRepository)
 
-    await quizRepository.clear()
-    await questionRepository.clear()
-    await disciplineRepository.clear()
-    await userRepository.clear()
+    await connection.clear(["quiz_answers", "quizzes", "questions", "topics", "disciplines", "users"])
 
     createQuizAnswer = new CreateQuizAnswer(quizRepository, questionRepository)
 

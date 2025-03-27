@@ -105,13 +105,18 @@ describe("Simulex", () => {
     )
   })
   beforeEach(async () => {
-    await learningRepository.clear()
-    await quizRepository.clear()
-    await questionRepository.clear()
-    await disciplineRepository.clear()
-    await userRepository.clear()
+    await connection.clear([
+      "user_topic_learnings",
+      "quiz_answers",
+      "quizzes",
+      "questions",
+      "topics",
+      "disciplines",
+      "users",
+    ])
 
     const fixture = await databaseFixture({
+      connection,
       userRepository,
       disciplineRepository,
       questionRepository,

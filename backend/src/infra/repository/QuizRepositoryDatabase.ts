@@ -1,5 +1,5 @@
 import { DisciplineRepository, QuizRepository, UserRepository } from "../../application/repository"
-import { Quiz, QuizAnswer } from "../../domain/entity"
+import { Discipline, Quiz, QuizAnswer, User } from "../../domain/entity"
 import { QuizType } from "../../domain/valueObject"
 import { DateBr } from "../../shared/domain/valueObject"
 import { QuizState } from "../../shared/models"
@@ -69,28 +69,16 @@ export class QuizRepositoryDatabase implements QuizRepository {
   }
 
   async saveAnswer(userQuizAnswer: QuizAnswer): Promise<void> {
-    const query = `INSERT INTO quiz_answers (
-      quiz_answer_id,
-      quiz_id,
-      question_id,
-      topic_id,
-      correct_option_id,
-      user_option_id,
-      is_user_answer_correct,
-      can_repeat,
-      created_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
-
+    const query =
+      "INSERT INTO quiz_answers (quiz_answer_id, quiz_id, question_id, selected_option_id, is_correct_answer, can_repeat, answered_at) VALUES (?, ?, ?, ?, ?, ?, ?)"
     const params = [
       userQuizAnswer.quizAnswerId,
       userQuizAnswer.quizId,
       userQuizAnswer.questionId,
-      userQuizAnswer.topicId,
-      userQuizAnswer.correctOptionId,
       userQuizAnswer.userOptionId,
       userQuizAnswer.isUserAnswerCorrect ? this.dbType(1) : this.dbType(0),
       userQuizAnswer.canRepeat ? this.dbType(1) : this.dbType(0),
-      userQuizAnswer.createdAt ? userQuizAnswer.createdAt.value.toISOString() : DateBr.create().value.toISOString(),
+      userQuizAnswer.createdAt.value.toISOString(),
     ]
     await this.connection.run(query, params)
   }
@@ -121,32 +109,13 @@ export class QuizRepositoryDatabase implements QuizRepository {
 
   async getById(quizId: string): Promise<Quiz | null> {
     const query = "SELECT * FROM quizzes WHERE quiz_id = ?"
-    const quizFromDB = (await this.connection.get(query, [quizId])) as QuizRow
+    const quizFromDB = await this.connection.get<QuizRow>(query, [quizId])
     if (!quizFromDB) return null
     const user = await this.userRepository.getById(quizFromDB.user_id)
     const discipline = await this.disciplineRepository.getById(quizFromDB.discipline_id)
     const answers = await this.getAnswers(quizId)
-    if (!discipline) return null
     const quizState = this.convertDatabaseQuestion(quizFromDB, answers, user, discipline)
     return Quiz.toDomain(quizState)
-  }
-
-  async getAnswers(quizId: string): Promise<QuizAnswer[]> {
-    const query = "SELECT * FROM quiz_answers WHERE quiz_id = ? ORDER BY created_at ASC"
-    const answersFromDB = (await this.connection.all(query, [quizId])) as QuizAnswerRow[]
-    return answersFromDB.map((answerFromDB) => {
-      return QuizAnswer.toDomain({
-        quizAnswerId: answerFromDB.quiz_answer_id,
-        quizId: answerFromDB.quiz_id,
-        questionId: answerFromDB.question_id,
-        topicId: answerFromDB.topic_id,
-        correctOptionId: answerFromDB.correct_option_id,
-        userOptionId: answerFromDB.user_option_id,
-        isUserAnswerCorrect: !!answerFromDB.is_user_answer_correct,
-        canRepeat: !!answerFromDB.can_repeat,
-        createdAt: DateBr.create(answerFromDB.created_at).value,
-      })
-    })
   }
 
   async resetCanRepeat(userId: string, topicId: string): Promise<void> {
@@ -156,39 +125,39 @@ export class QuizRepositoryDatabase implements QuizRepository {
     return this.connection.run(query, [userId, topicId])
   }
 
-  async clear(): Promise<void> {
-    if (process.env["NODE_ENV"] === "production") return
-
-    if (this.connection.databaseType() === "postgres") {
-      const tables = ["quiz_answers,quizzes"]
-      const truncateQuery = `TRUNCATE TABLE ${tables.map((table) => `public.${table}`).join(", ")} CASCADE`
-      return this.connection.run(truncateQuery)
-    } else {
-      await this.connection.run("DELETE FROM quiz_answers")
-      return this.connection.run("DELETE FROM quizzes")
-    }
+  private async getAnswers(quizId: string): Promise<QuizAnswer[]> {
+    const query = "SELECT * FROM quiz_answers WHERE quiz_id = ?"
+    const answersFromDB = await this.connection.all<QuizAnswerRow>(query, [quizId])
+    return answersFromDB.map((answer) =>
+      QuizAnswer.toDomain({
+        quizAnswerId: answer.quiz_answer_id,
+        quizId: answer.quiz_id,
+        questionId: answer.question_id,
+        topicId: answer.topic_id,
+        correctOptionId: answer.correct_option_id,
+        userOptionId: answer.user_option_id,
+        isUserAnswerCorrect: !!answer.is_user_answer_correct,
+        canRepeat: !!answer.can_repeat,
+        createdAt: DateBr.create(answer.created_at).value,
+      })
+    )
   }
 
-  private convertDatabaseQuestion(
-    quizFromDB: QuizRow,
-    answers: QuizAnswer[] = [],
-    user = null,
-    discipline = null
-  ): QuizState {
+  private convertDatabaseQuestion(quiz: QuizRow, answers: QuizAnswer[], user: User, discipline: Discipline): QuizState {
     return {
-      quizId: quizFromDB.quiz_id,
-      quizType: QuizType.create(quizFromDB.quiz_type),
+      quizId: quiz.quiz_id,
+      quizType: QuizType.create(quiz.quiz_type),
       user,
       discipline,
-      answers,
-      isActive: !!quizFromDB.is_active,
-      createdAt: DateBr.create(quizFromDB.created_at).value,
-      updatedAt: quizFromDB.updated_at ? DateBr.create(quizFromDB.updated_at).value : null,
-      topicsRootId: JSON.parse(quizFromDB.topics_id),
+      topicsRootId: JSON.parse(quiz.topics_id),
+      answers: answers.map((answer) => QuizAnswer.create(answer)),
+      isActive: !!quiz.is_active,
+      createdAt: DateBr.create(quiz.created_at).value,
+      updatedAt: quiz.updated_at ? DateBr.create(quiz.updated_at).value : null,
     }
   }
 
-  private dbType(value: number): any {
+  private dbType(value: number): boolean | number {
     return this.connection.databaseType() === "postgres" ? Boolean(value) : value
   }
 }

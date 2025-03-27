@@ -66,11 +66,15 @@ describe("QuizRepository", () => {
     quizRepository = new QuizRepositoryDatabase(connection, userRepository, disciplineRepository)
     learningRepository = new LearningRepositoryDatabase(connection)
 
-    await learningRepository.clear()
-    await quizRepository.clear()
-    await questionRepository.clear()
-    await disciplineRepository.clear()
-    await userRepository.clear()
+    await connection.clear([
+      "user_topic_learnings",
+      "quiz_answers",
+      "quizzes",
+      "questions",
+      "topics",
+      "disciplines",
+      "users",
+    ])
 
     // UseCase
     getLearning = new GetLearning(disciplineRepository, userRepository, learningRepository)
@@ -84,6 +88,7 @@ describe("QuizRepository", () => {
     )
 
     const fixture = await databaseFixture({
+      connection,
       userRepository,
       disciplineRepository,
       questionRepository,
@@ -163,6 +168,7 @@ describe("QuizRepository", () => {
 
   test("should get statistics from user learning", async () => {
     const fixture = await databaseFixture({
+      connection,
       userRepository,
       disciplineRepository,
       questionRepository,
@@ -455,6 +461,7 @@ describe("QuizRepository", () => {
 
     test("should calculate collectiveAvgScore of topic in discipline", async () => {
       const fixture = await databaseFixture({
+        connection,
         userRepository,
         disciplineRepository,
         questionRepository,

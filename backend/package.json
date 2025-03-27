@@ -56,6 +56,7 @@
         "options": {
           "jestConfig": "backend/jest.config.ts",
           "runInBand": true,
+          "noCache": true,
           "processEnv": {
             "NODE_ENV": "test"
           }

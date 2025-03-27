@@ -19,8 +19,7 @@ describe("CreateQuestion", () => {
     disciplineRepository = new DisciplineRepositoryDatabase(connection)
     questionRepository = new QuestionRepositoryDatabase(connection)
 
-    await questionRepository.clear()
-    await disciplineRepository.clear()
+    await connection.clear(["questions", "topics", "disciplines"])
 
     createQuestion = new CreateQuestion(questionRepository)
   })

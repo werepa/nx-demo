@@ -7,5 +7,4 @@ export interface QuizRepository {
   getById(quizId: string): Promise<Quiz | null>
   getAll({ userId, disciplineId, showAll }?: { userId: string; disciplineId?: string; showAll?: boolean }): Promise<Quiz[]>
   resetCanRepeat(userId: string, topicId: string): Promise<void>
-  clear(): Promise<void>
 }

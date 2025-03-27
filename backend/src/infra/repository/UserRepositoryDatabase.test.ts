@@ -11,7 +11,7 @@ describe("UserRepositoryDatabase", () => {
   beforeEach(async () => {
     connection = getTestDatabaseAdapter()
     userRepository = new UserRepositoryDatabase(connection)
-    await userRepository.clear()
+    await connection.clear(["users"])
   })
 
   afterEach(() => {

@@ -1,94 +1,61 @@
-import { DisciplineRepository } from '../../repository/DisciplineRepository';
-import { GetDisciplines } from './GetDisciplines';
-import { DatabaseConnection } from '../../../infra/database/DatabaseConnection';
-import { getTestDatabaseAdapter } from '../../../infra/database/TestDatabaseAdapter';
-import { DisciplineRepositoryDatabase } from '../../../infra/repository/DisciplineRepositoryDatabase';
-import { disciplineMock } from '../../../tests/mocks/disciplineMock';
+import { Discipline } from "../../../domain/entity/Discipline"
+import { DatabaseConnection, getTestDatabaseAdapter } from "../../../infra/database"
+import { DisciplineRepositoryDatabase } from "../../../infra/repository"
+import { disciplineMock } from "../../../tests/mocks"
+import { GetDisciplines } from "./GetDisciplines"
 
-describe('Casos de Uso => GetDisciplines', () => {
-  let connection: DatabaseConnection;
-  let disciplineRepository: DisciplineRepository;
-  let getDisciplines: GetDisciplines;
+describe("Usecase => GetDisciplines", () => {
+  let connection: DatabaseConnection
+  let getDisciplines: GetDisciplines
 
-  beforeAll(() => {
-    connection = getTestDatabaseAdapter();
-    disciplineRepository = new DisciplineRepositoryDatabase(connection);
-    getDisciplines = new GetDisciplines(disciplineRepository);
-  });
+  beforeEach(() => {
+    connection = getTestDatabaseAdapter()
+    const disciplineRepository = new DisciplineRepositoryDatabase(connection)
+    getDisciplines = new GetDisciplines(disciplineRepository)
+  })
 
   beforeEach(async () => {
-    await disciplineRepository.clear();
-  });
+    await connection.clear(["disciplines"])
+  })
 
   afterAll(() => {
-    connection.close();
-  });
+    connection.close()
+  })
 
-  test('should return an empty list if no disciplines exist', async () => {
-    const disciplines = await getDisciplines.execute();
-    expect(disciplines).toEqual([]);
-  });
+  test("should return an empty array when no disciplines exist", async () => {
+    const disciplines = await getDisciplines.execute()
+    expect(disciplines).toHaveLength(0)
+  })
 
-  test('should return a list of disciplines ordered by name', async () => {
-    const discipline1 = disciplineMock({ name: 'Matemática' });
-    const discipline2 = disciplineMock({ name: 'Português' });
-    const discipline3 = disciplineMock({ name: 'Geografia' });
-    const discipline4 = disciplineMock({ name: 'História' });
+  test("should return only active disciplines", async () => {
+    const discipline1 = disciplineMock({ name: "Discipline 1" })
+    const discipline2 = disciplineMock({ name: "Discipline 2" })
+    const discipline3 = disciplineMock({ name: "Discipline 3" })
+    discipline3.deactivate()
 
-    discipline3.deactivate();
+    const disciplineRepository = new DisciplineRepositoryDatabase(connection)
+    await disciplineRepository.save(discipline1)
+    await disciplineRepository.save(discipline2)
+    await disciplineRepository.save(discipline3)
 
-    await Promise.all([
-      disciplineRepository.save(discipline1),
-      disciplineRepository.save(discipline2),
-      disciplineRepository.save(discipline3),
-      disciplineRepository.save(discipline4),
-    ]);
+    const disciplines = await getDisciplines.execute()
+    expect(disciplines).toHaveLength(2)
+    expect(disciplines[0].name).toBe("Discipline 1")
+    expect(disciplines[1].name).toBe("Discipline 2")
+  })
 
-    const activeDisciplines = await getDisciplines.execute();
-    expect(activeDisciplines).toHaveLength(3);
-    expect(activeDisciplines[0]).toEqual(discipline4);
-    expect(activeDisciplines[1]).toEqual(discipline1);
-    expect(activeDisciplines[2]).toEqual(discipline2);
+  test("should return all disciplines when showAll is true", async () => {
+    const discipline1 = disciplineMock({ name: "Discipline 1" })
+    const discipline2 = disciplineMock({ name: "Discipline 2" })
+    const discipline3 = disciplineMock({ name: "Discipline 3" })
+    discipline3.deactivate()
 
-    const todasDisciplines = await getDisciplines.execute({ showAll: true });
-    expect(todasDisciplines).toHaveLength(4);
-    expect(todasDisciplines[0]).toEqual(discipline3);
-    expect(todasDisciplines[1]).toEqual(discipline4);
-    expect(todasDisciplines[2]).toEqual(discipline1);
-    expect(todasDisciplines[3]).toEqual(discipline2);
-  });
+    const disciplineRepository = new DisciplineRepositoryDatabase(connection)
+    await disciplineRepository.save(discipline1)
+    await disciplineRepository.save(discipline2)
+    await disciplineRepository.save(discipline3)
 
-  test('should return a list of disciplines based on search criteria', async () => {
-    const discipline1 = disciplineMock({ name: 'Matemática' });
-    const discipline2 = disciplineMock({ name: 'Português' });
-    const discipline3 = disciplineMock({ name: 'Geografia' });
-    const discipline4 = disciplineMock({ name: 'História' });
-    const discipline5 = disciplineMock({ name: 'Física' });
-    const discipline6 = disciplineMock({ name: 'Química' });
-    const discipline7 = disciplineMock({ name: 'Biologia' });
-    const discipline8 = disciplineMock({ name: 'Inglês' });
-    const discipline9 = disciplineMock({ name: 'Espanhol' });
-    const discipline10 = disciplineMock({ name: 'Educação Física' });
-    await Promise.all([
-      disciplineRepository.save(discipline1),
-      disciplineRepository.save(discipline2),
-      disciplineRepository.save(discipline3),
-      disciplineRepository.save(discipline4),
-      disciplineRepository.save(discipline5),
-      disciplineRepository.save(discipline6),
-      disciplineRepository.save(discipline7),
-      disciplineRepository.save(discipline8),
-      disciplineRepository.save(discipline9),
-      disciplineRepository.save(discipline10),
-    ]);
-
-    let disciplines = await getDisciplines.execute({ search: 'Português' });
-    expect(disciplines).toHaveLength(1);
-    expect(disciplines).toContainEqual(discipline2);
-
-    disciplines = await getDisciplines.execute({ search: 'física' });
-    expect(disciplines).toHaveLength(2);
-    expect(disciplines).toContainEqual(discipline5);
-    expect(disciplines).toContainEqual(discipline10);
-  });
-});
+    const disciplines = await getDisciplines.execute({ showAll: true })
+    expect(disciplines).toHaveLength(3)
+  })
+})

@@ -5,5 +5,4 @@ import { Learning } from "../../domain/entity/Learning"
 export interface LearningRepository {
   getDisciplineLearning(user: User, discipline: Discipline): Promise<Learning>
   save(learning: Learning): Promise<void>
-  clear(): Promise<void>
 }

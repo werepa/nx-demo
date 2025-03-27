@@ -100,19 +100,6 @@ export class DisciplineRepositoryDatabase implements DisciplineRepository {
     )
   }
 
-  async clear(): Promise<void> {
-    if (process.env["NODE_ENV"] === "production") return
-
-    if (this.connection.databaseType() === "postgres") {
-      const tables = ["topics", "disciplines"]
-      const truncateQuery = `TRUNCATE TABLE ${tables.map((table) => `public.${table}`).join(", ")} CASCADE`
-      await this.connection.run(truncateQuery)
-    } else {
-      await this.connection.run("DELETE FROM topics")
-      await this.connection.run("DELETE FROM disciplines")
-    }
-  }
-
   private async updateDiscipline(discipline: Discipline): Promise<void> {
     const query =
       "UPDATE disciplines SET name = ?, image = ?, is_active = ?, created_at = ?, updated_at = ? WHERE discipline_id = ?"

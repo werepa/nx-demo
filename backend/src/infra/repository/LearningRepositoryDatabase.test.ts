@@ -63,28 +63,29 @@ describe("LearningRepositoryDatabase", () => {
     userRepository = new UserRepositoryDatabase(connection)
     disciplineRepository = new DisciplineRepositoryDatabase(connection)
     questionRepository = new QuestionRepositoryDatabase(connection)
-    quizRepository = new QuizRepositoryDatabase(
-      connection,
-      userRepository,
-      disciplineRepository,
-    )
+    quizRepository = new QuizRepositoryDatabase(connection, userRepository, disciplineRepository)
     learningRepository = new LearningRepositoryDatabase(connection)
 
-    await learningRepository.clear()
-    await quizRepository.clear()
-    await questionRepository.clear()
-    await disciplineRepository.clear()
-    await userRepository.clear()
+    await connection.clear([
+      "user_topic_learnings",
+      "quiz_answers",
+      "quizzes",
+      "questions",
+      "topics",
+      "disciplines",
+      "users",
+    ])
 
     correctQuizAnswer = new CheckQuizAnswer(
       userRepository,
       disciplineRepository,
       questionRepository,
       quizRepository,
-      learningRepository,
+      learningRepository
     )
 
     const fixture = await databaseFixture({
+      connection,
       userRepository,
       disciplineRepository,
       questionRepository,
@@ -119,10 +120,7 @@ describe("LearningRepositoryDatabase", () => {
   })
 
   test("should return an user learning", async () => {
-    const learning = await learningRepository.getDisciplineLearning(
-      userMember1,
-      portugues,
-    )
+    const learning = await learningRepository.getDisciplineLearning(userMember1, portugues)
     const craseLearning = learning?.topics.findByTopicId(crase.topicId)
     expect(learning?.topics.getCount()).toBe(13)
     expect(learning?.history.getCount()).toBe(10)
@@ -131,10 +129,7 @@ describe("LearningRepositoryDatabase", () => {
 
   describe("User TopicLearning", () => {
     test("should return an user topic learning", async () => {
-      let learning = await learningRepository.getDisciplineLearning(
-        userMember1,
-        portugues,
-      )
+      let learning = await learningRepository.getDisciplineLearning(userMember1, portugues)
       let craseLearning = learning?.topics.findByTopicId(crase.topicId)
       expect(learning?.topics.getCount()).toBe(13)
       expect(craseLearning?.topic.name).toBe("Crase")
@@ -146,10 +141,7 @@ describe("LearningRepositoryDatabase", () => {
       expect(craseLearning?.score()).toBe(0)
       expect(craseLearning?.collectiveAvgGrade).toBe(54.16)
 
-      learning = await learningRepository.getDisciplineLearning(
-        userMember2,
-        portugues,
-      )
+      learning = await learningRepository.getDisciplineLearning(userMember2, portugues)
       craseLearning = learning?.topics.findByTopicId(crase.topicId)
       expect(learning?.topics.getCount()).toBe(13)
       expect(craseLearning?.topic.name).toBe("Crase")

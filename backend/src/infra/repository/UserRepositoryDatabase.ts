@@ -79,32 +79,6 @@ export class UserRepositoryDatabase implements UserRepository {
     return usersFromDB.map((userFromDB: RawUserData) => User.toDomain(this.convertDatabaseUser(userFromDB)))
   }
 
-  async clear(): Promise<void> {
-    if (process.env["NODE_ENV"] === "production") return
-
-    if (this.connection.databaseType() === "postgres") {
-      // Inicia uma transação
-      await this.connection.run("BEGIN")
-      try {
-        // Desabilita temporariamente as foreign keys
-        await this.connection.run("SET CONSTRAINTS ALL DEFERRED")
-
-        const tables = ["users"] // Adicione outras tabelas se necessário
-        const truncateQuery = `TRUNCATE TABLE ${tables
-          .map((table) => `public.${table}`)
-          .join(", ")} RESTART IDENTITY CASCADE`
-
-        await this.connection.run(truncateQuery)
-        await this.connection.run("COMMIT")
-      } catch (error) {
-        await this.connection.run("ROLLBACK")
-        throw error
-      }
-    } else {
-      return this.connection.run("DELETE FROM users")
-    }
-  }
-
   private convertDatabaseUser(userFromDB: RawUserData): UserState {
     return {
       userId: userFromDB.user_id,

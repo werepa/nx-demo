@@ -116,4 +116,18 @@ export class InMemoryAdapter implements DatabaseConnection {
   databaseType(): DatabaseType {
     return "sqlite"
   }
+
+  async clear(tables: string[]): Promise<void> {
+    if (process.env["NODE_ENV"] === "production") return
+
+    try {
+      this.checkConnection()
+      tables.forEach((table) => {
+        const stmt = this.connection.db.prepare(`DELETE FROM ${table}`)
+        stmt.run()
+      })
+    } catch (error) {
+      this.handleError(error)
+    }
+  }
 }

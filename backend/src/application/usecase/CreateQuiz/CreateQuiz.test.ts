@@ -53,11 +53,15 @@ describe("UseCase => CreateQuiz", () => {
     quizRepository = new QuizRepositoryDatabase(connection, userRepository, disciplineRepository)
     learningRepository = new LearningRepositoryDatabase(connection)
 
-    await learningRepository.clear()
-    await quizRepository.clear()
-    await questionRepository.clear()
-    await disciplineRepository.clear()
-    await userRepository.clear()
+    await connection.clear([
+      "user_topic_learnings",
+      "quiz_answers",
+      "quizzes",
+      "questions",
+      "topics",
+      "disciplines",
+      "users",
+    ])
 
     // useCases
     createQuiz = new CreateQuiz(quizRepository, userRepository, disciplineRepository)
@@ -71,6 +75,7 @@ describe("UseCase => CreateQuiz", () => {
     )
 
     const fixture = await databaseFixture({
+      connection,
       userRepository,
       disciplineRepository,
       questionRepository,

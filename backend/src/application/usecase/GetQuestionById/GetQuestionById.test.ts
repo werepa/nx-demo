@@ -1,35 +1,23 @@
+import { DatabaseConnection, getTestDatabaseAdapter } from "../../../infra/database"
+import { DisciplineRepositoryDatabase, QuestionRepositoryDatabase } from "../../../infra/repository"
+import { disciplineMock, questionMock, topicMock } from "../../../tests/mocks"
 import { GetQuestionById } from "./GetQuestionById"
-import { QuestionRepository } from "../../repository/QuestionRepository"
-import { Question } from "../../../domain/entity/Question"
-import { faker } from "@faker-js/faker"
-import { CreateQuestion } from ".."
-import { DatabaseConnection } from "../../../infra/database/DatabaseConnection"
-import { getTestDatabaseAdapter } from "../../../infra/database/TestDatabaseAdapter"
-import { DisciplineRepositoryDatabase } from "../../../infra/repository/DisciplineRepositoryDatabase"
-import { QuestionRepositoryDatabase } from "../../../infra/repository/QuestionRepositoryDatabase"
-import { DisciplineRepository } from "../../repository/DisciplineRepository"
-import { disciplineMock, topicMock } from "../../../tests/mocks/disciplineMock"
 
-describe("GetQuestionById", () => {
+describe("UseCase => GetQuestionById", () => {
   let connection: DatabaseConnection
-  let disciplineRepository: DisciplineRepository
-  let questionRepository: QuestionRepository
-  let createQuestion: CreateQuestion
   let getQuestionById: GetQuestionById
+  let disciplineRepository: DisciplineRepositoryDatabase
+  let questionRepository: QuestionRepositoryDatabase
 
-  beforeAll(async () => {
+  beforeEach(async () => {
     connection = getTestDatabaseAdapter()
 
     disciplineRepository = new DisciplineRepositoryDatabase(connection)
     questionRepository = new QuestionRepositoryDatabase(connection)
 
-    createQuestion = new CreateQuestion(questionRepository)
-    getQuestionById = new GetQuestionById(questionRepository)
-  })
+    await connection.clear(["questions", "topics", "disciplines"])
 
-  beforeEach(async () => {
-    await questionRepository.clear()
-    await disciplineRepository.clear()
+    getQuestionById = new GetQuestionById(questionRepository)
   })
 
   afterAll(() => {
@@ -41,24 +29,16 @@ describe("GetQuestionById", () => {
     const crase = topicMock({ name: "Crase" })
     portugues.topics.add(crase)
     await disciplineRepository.save(portugues)
-    const savedQuestion = await createQuestion.execute({
-      prompt: "Sample Question",
-      options: [
-        { text: "Option 1", isCorrectAnswer: true },
-        { text: "Option 2", isCorrectAnswer: false },
-        { text: "Option 3", isCorrectAnswer: false },
-        { text: "Option 4", isCorrectAnswer: false },
-      ],
-      topicId: crase.topicId,
-      topicRootId: crase.topicId,
-    })
-    const question = await getQuestionById.execute(savedQuestion.questionId)
-    expect(question).toBeInstanceOf(Question)
-    expect(question).toEqual(savedQuestion)
+
+    const question = questionMock({ topicId: crase.topicId })
+    await questionRepository.save(question)
+
+    const result = await getQuestionById.execute(question.questionId)
+    expect(result).toEqual(question)
   })
 
-  test("should throw an error if question not found", async () => {
-    const nonExistentQuestionId = faker.string.uuid()
+  test("should throw error when question not found", async () => {
+    const nonExistentQuestionId = "non-existent-id"
     await expect(getQuestionById.execute(nonExistentQuestionId)).rejects.toThrow(
       `Question ID:${nonExistentQuestionId} does not exist!`
     )

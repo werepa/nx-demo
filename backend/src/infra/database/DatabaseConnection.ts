@@ -11,6 +11,7 @@ export interface DatabaseConnection {
   get<T>(statement: string, params?: SqlParameter[]): Promise<T>
   all<T>(statement: string, params?: SqlParameter[]): Promise<T[]>
   close(): Promise<void>
+  clear(tables: string[]): Promise<void>
   // query<T>(query: string, params?: SqlParameter[]): Promise<QueryResult<T>>
   // one<T>(query: string, params?: SqlParameter[]): Promise<T>
   // none(query: string, params?: SqlParameter[]): Promise<void>

@@ -8,11 +8,10 @@ describe("DisciplineRepositoryDatabase", () => {
   let connection: DatabaseConnection
   let disciplineRepository: DisciplineRepository
 
-  beforeEach(() => {
+  beforeEach(async () => {
     connection = getTestDatabaseAdapter()
-
     disciplineRepository = new DisciplineRepositoryDatabase(connection)
-    disciplineRepository.clear()
+    await connection.clear(["topics", "disciplines"])
   })
 
   afterEach(() => {
@@ -161,20 +160,6 @@ describe("DisciplineRepositoryDatabase", () => {
         showAll: false,
       })
       expect(savedDisciplines).toHaveLength(0)
-    })
-
-    test("should clear all disciplines", async () => {
-      const discipline = disciplineMock()
-      await disciplineRepository.save(discipline)
-      const savedDisciplines = await disciplineRepository.getAll({
-        showAll: true,
-      })
-      expect(savedDisciplines).toHaveLength(1)
-      await disciplineRepository.clear()
-      const clearedDisciplines = await disciplineRepository.getAll({
-        showAll: true,
-      })
-      expect(clearedDisciplines).toHaveLength(0)
     })
   })
 })

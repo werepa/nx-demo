@@ -22,22 +22,18 @@ describe("Usecase => CreateUser", () => {
 
   beforeEach(async () => {
     userRepository = new UserRepositoryDatabase(connection)
-    await userRepository.clear()
+    await connection.clear(["users"])
 
     createUser = new CreateUser(userRepository)
     getUserById = new GetUserById(userRepository)
     getUsers = new GetUsers(userRepository)
   })
 
-  afterEach(async () => {
-    await userRepository.clear()
-  })
-
   afterAll(async () => {
     await connection.close()
   })
 
-  test.only("should create an user in the repository", async () => {
+  test("should create an user in the repository", async () => {
     const users = await userRepository.getAll()
     expect(users).toHaveLength(0)
 

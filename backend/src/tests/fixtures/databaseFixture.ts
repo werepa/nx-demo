@@ -74,6 +74,7 @@ export class TestDatabaseFixture {
 }
 
 export const databaseFixture = async ({
+  connection,
   userRepository,
   disciplineRepository,
   questionRepository,
@@ -82,6 +83,7 @@ export const databaseFixture = async ({
   createQuizzes = true,
   databaseExtended = false,
 }: {
+  connection: DatabaseConnection
   userRepository: UserRepository
   disciplineRepository: DisciplineRepository
   questionRepository: QuestionRepository
@@ -102,9 +104,7 @@ export const databaseFixture = async ({
   let semantica: Topic = Topic.create({ name: "Semântica" })
   let figurasDeLinguagem: Topic = Topic.create({ name: "Figuras de Linguagem" })
 
-  // =================== Fixture User ===================
-
-  await userRepository.clear()
+  await connection.clear(["users"])
 
   const userAdmin = User.create({
     name: "User Admin",
@@ -154,8 +154,7 @@ export const databaseFixture = async ({
   await userRepository.save(userInactive)
 
   // =================== Fixture Discipline ===================
-
-  await disciplineRepository.clear()
+  await connection.clear(["topics", "disciplines"])
 
   // ---------- Direito Penal ----------
   let direitoPenal: Discipline | null = Discipline.create({ name: "Direito Penal" })
@@ -283,8 +282,7 @@ export const databaseFixture = async ({
   await disciplineRepository.save(historia)
 
   // =================== Fixture Question ===================
-
-  await questionRepository.clear()
+  await connection.clear(["questions"])
 
   const questionInactive = Question.create({
     topicId: crase.topicId,
@@ -380,7 +378,7 @@ export const databaseFixture = async ({
 
   // =================== Fixture Quiz ===================
   if (createQuizzes) {
-    await quizRepository.clear()
+    await connection.clear(["quiz_answers", "quizzes"])
 
     const answers = [
       { user: userMember1, topic: crase, correctAnswer: false },

@@ -122,16 +122,6 @@ export class LearningRepositoryDatabase implements LearningRepository {
       })
   }
 
-  async clear(): Promise<void> {
-    if (this.connection.databaseType() === "postgres") {
-      const tables = ["user_topic_learnings"]
-      const truncateQuery = `TRUNCATE TABLE ${tables.map((table) => `public.${table}`).join(", ")} CASCADE`
-      return this.connection.run(truncateQuery)
-    } else {
-      return this.connection.run("DELETE FROM user_topic_learnings")
-    }
-  }
-
   private async insertTopicLearning(topicLearning: TopicLearning): Promise<void> {
     const query = `
       INSERT INTO user_topic_learnings (

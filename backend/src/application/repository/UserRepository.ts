@@ -5,7 +5,6 @@ export interface UserRepository {
   getAll({ showAll }?: { showAll?: boolean }): Promise<User[]>
   getById(id: string): Promise<User | null>
   getByEmail(email: string): Promise<User | null>
-  clear(): Promise<void>
   invalidateToken(token: string): Promise<void>
   isTokenValid(token: string): Promise<boolean>
 }

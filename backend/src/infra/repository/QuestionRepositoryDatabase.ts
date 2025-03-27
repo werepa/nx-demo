@@ -208,18 +208,6 @@ export class QuestionRepositoryDatabase implements QuestionRepository {
     return questionStatistics
   }
 
-  async clear(): Promise<void> {
-    if (process.env["NODE_ENV"] === "production") return
-
-    if (this.connection.databaseType() === "postgres") {
-      const tables = ["questions"]
-      const truncateQuery = `TRUNCATE TABLE ${tables.map((table) => `public.${table}`).join(", ")} CASCADE`
-      return this.connection.run(truncateQuery)
-    } else {
-      return this.connection.run("DELETE FROM questions")
-    }
-  }
-
   private convertDatabaseQuestion(question: RawQuestionData): QuestionState {
     const rawOptionsList: QuestionOptionState[] = JSON.parse(question.options)
     const questionOptionsDTO: QuestionOption[] = rawOptionsList.map((questionOptionDTO: QuestionOptionDTO) =>

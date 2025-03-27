@@ -66,79 +66,6 @@ export class PgPromiseAdapter implements DatabaseConnection {
     }
   }
 
-  // async run(statement: string, params?: SqlParameter[]): Promise<void> {
-  //   try {
-  //     this.checkConnection()
-  //     await this.connection.none(statement, params || [])
-  //   } catch (error) {
-  //     error.statement = `Error executing statement: ${statement}`
-  //     error.params = `Parameters: ${JSON.stringify(params)}`
-  //     this.handleError(error)
-  //   }
-  // }
-
-  // async get<T>(statement: string, params?: SqlParameter[]): Promise<T | undefined> {
-  //   try {
-  //     this.checkConnection()
-  //     const result = await this.connection.oneOrNone(statement, params || [])
-  //     return result as T | undefined
-  //   } catch (error) {
-  //     error.statement = `Error executing statement: ${statement}`
-  //     error.params = `Parameters: ${JSON.stringify(params)}`
-  //     this.handleError(error)
-  //   }
-  // }
-
-  // async all<T>(statement: string, params?: SqlParameter[]): Promise<T[]> {
-  //   try {
-  //     this.checkConnection()
-  //     const results = await this.connection.any(statement, params || [])
-  //     return results as T[]
-  //   } catch (error) {
-  //     error.statement = `Error executing statement: ${statement}`
-  //     error.params = `Parameters: ${JSON.stringify(params)}`
-  //     this.handleError(error)
-  //   }
-  // }
-
-  // async query<T>(query: string, params?: SqlParameter[]): Promise<QueryResult<T>> {
-  //   try {
-  //     this.checkConnection()
-  //     const result = await this.connection.query(query, params || [])
-  //     return {
-  //       rows: result as T[],
-  //       rowCount: result.length,
-  //     }
-  //   } catch (error) {
-  //     error.statement = `Error executing query: ${query}`
-  //     error.params = `Parameters: ${JSON.stringify(params)}`
-  //     this.handleError(error)
-  //   }
-  // }
-
-  // async one<T>(query: string, params?: SqlParameter[]): Promise<T | undefined> {
-  //   try {
-  //     this.checkConnection()
-  //     const result = await this.connection.oneOrNone(query, params || [])
-  //     return result as T | undefined
-  //   } catch (error) {
-  //     error.statement = `Error executing query: ${query}`
-  //     error.params = `Parameters: ${JSON.stringify(params)}`
-  //     this.handleError(error)
-  //   }
-  // }
-
-  // async none(query: string, params?: SqlParameter[]): Promise<void> {
-  //   try {
-  //     this.checkConnection()
-  //     await this.connection.none(query, params || [])
-  //   } catch (error) {
-  //     error.statement = `Error executing query: ${query}`
-  //     error.params = `Parameters: ${JSON.stringify(params)}`
-  //     this.handleError(error)
-  //   }
-  // }
-
   async close(): Promise<void> {
     try {
       if (this.isOpen) {
@@ -153,6 +80,26 @@ export class PgPromiseAdapter implements DatabaseConnection {
 
   databaseType(): DatabaseType {
     return "postgres"
+  }
+
+  async clear(tables: string[]): Promise<void> {
+    if (process.env["NODE_ENV"] === "production") return
+
+    try {
+      this.checkConnection()
+      await this.connection.tx(async (transaction: pgPromise.ITask<object>) => {
+        await transaction.none("SET CONSTRAINTS ALL DEFERRED")
+        const truncateQuery = `TRUNCATE TABLE ${tables
+          .map((table) => `public.${table}`)
+          .join(", ")} RESTART IDENTITY CASCADE`
+        await transaction.none(truncateQuery)
+        await transaction.none("SET CONSTRAINTS ALL IMMEDIATE")
+      })
+    } catch (error) {
+      error.statement = "Error clearing tables"
+      error.params = `Tables: ${JSON.stringify(tables)}`
+      this.handleError(error)
+    }
   }
 
   private transformQuery(query: string): string {
