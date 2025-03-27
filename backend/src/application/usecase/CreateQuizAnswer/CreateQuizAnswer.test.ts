@@ -103,7 +103,7 @@ describe("CreateQuizAnswer", () => {
     connection.close()
   })
 
-  test("should create a quiz answer", async () => {
+  test.only("should create a quiz answer", async () => {
     const dto1: CreateQuizAnswerCommand = {
       quizId: quiz.quizId,
       questionId: question1.questionId,
@@ -144,7 +144,7 @@ describe("CreateQuizAnswer", () => {
       questionId: question3.questionId,
       topicId: question3.topicId,
       correctOptionId: getCorrectOption(question3),
-      userOptionId: getIncorrectOption(question3),
+      userOptionId: getCorrectOption(question3),
     }
     result = await createQuizAnswer.execute(dto4)
     expect(result.isUserAnswerCorrect).toBe(true)

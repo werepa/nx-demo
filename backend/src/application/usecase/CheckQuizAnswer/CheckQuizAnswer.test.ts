@@ -4,7 +4,7 @@ import { Topic } from "../../../domain/entity/Topic"
 import { Quiz } from "../../../domain/entity/Quiz"
 import { Question } from "../../../domain/entity/Question"
 import { Learning } from "../../../domain/entity/Learning"
-import { CheckQuizAnswer, CreateQuiz, GetQuizById } from ".."
+import { CheckQuizAnswer, CheckQuizAnswerCommand, CreateQuiz, GetQuizById } from ".."
 import { databaseFixture } from "../../../tests/fixtures/databaseFixture"
 import { getCorrectOption, getIncorrectOption } from "../../../tests/mocks/questionMock"
 import { DatabaseConnection } from "../../../infra/database/DatabaseConnection"
@@ -119,13 +119,13 @@ describe("CheckQuizAnswer", () => {
     expect(questions[0].topicId).toBe(crase.topicId)
 
     // UserMember 1
-    let dto = {
+    let dto: CheckQuizAnswerCommand = {
       disciplineId: portugues?.disciplineId,
       userId: userMember1.userId,
       userQuizAnswer: {
         quizId: quiz1.quizId,
         questionId: questions[0].questionId,
-        optionId: getCorrectOption(questions[0]),
+        userOptionId: getCorrectOption(questions[0]),
         topicId: questions[0].topicId,
       },
     }
@@ -153,7 +153,7 @@ describe("CheckQuizAnswer", () => {
       userQuizAnswer: {
         quizId: quiz2.quizId,
         questionId: questions[0].questionId,
-        optionId: getCorrectOption(questions[0]),
+        userOptionId: getCorrectOption(questions[0]),
         topicId: questions[0].topicId,
       },
     }
@@ -168,7 +168,7 @@ describe("CheckQuizAnswer", () => {
       userQuizAnswer: {
         quizId: quiz1.quizId,
         questionId: questions[1].questionId,
-        optionId: getIncorrectOption(questions[1]),
+        userOptionId: getIncorrectOption(questions[1]),
         topicId: questions[1].topicId,
       },
     }
@@ -192,7 +192,7 @@ describe("CheckQuizAnswer", () => {
       userQuizAnswer: {
         quizId: quiz1.quizId,
         questionId: questions[0].questionId,
-        optionId: questions[0].options.getItems()[0].optionId,
+        userOptionId: questions[0].options.getItems()[0].optionId,
         topicId: questions[0].topicId,
       },
     }
@@ -208,7 +208,7 @@ describe("CheckQuizAnswer", () => {
       userQuizAnswer: {
         quizId: quiz1.quizId,
         questionId: questions[0].questionId,
-        optionId: questions[0].options.getItems()[0].optionId,
+        userOptionId: questions[0].options.getItems()[0].optionId,
         topicId: questions[0].topicId,
       },
     }

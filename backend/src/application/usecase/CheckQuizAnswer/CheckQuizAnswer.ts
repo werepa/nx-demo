@@ -1,4 +1,4 @@
-import { CheckQuizAnswerOutputDTO } from "@simulex/models"
+import { CheckQuizAnswerOutputDTO as CheckQuizAnswerOutput } from "@simulex/models"
 import { Discipline, QuestionOption, Question, QuizAnswer, User } from "../../../domain/entity"
 import {
   DisciplineRepository,
@@ -20,7 +20,7 @@ export class CheckQuizAnswer {
     private learningRepository: LearningRepository
   ) {}
 
-  async execute(dto: CheckQuizAnswerInputDTO): Promise<CheckQuizAnswerOutputDTO> {
+  async execute(dto: CheckQuizAnswerCommand): Promise<CheckQuizAnswerOutput> {
     this.user = await this.validateUser(dto.userId)
     this.discipline = await this.validateDiscipline(dto.disciplineId)
 
@@ -51,7 +51,7 @@ export class CheckQuizAnswer {
         isUserAnswerCorrect: qa.isUserAnswerCorrect,
       }))
 
-    const output: CheckQuizAnswerOutputDTO = {
+    const output: CheckQuizAnswerOutput = {
       questionId: question.id,
       userOptionId: dto.userQuizAnswer.userOptionId || null,
       correctOptionId: question.options.getItems().find((o: QuestionOption) => o.isCorrectAnswer)?.optionId || null,
@@ -112,7 +112,7 @@ export class CheckQuizAnswer {
   }
 }
 
-export type CheckQuizAnswerInputDTO = {
+export type CheckQuizAnswerCommand = {
   disciplineId: string
   userId: string
   userQuizAnswer: {
