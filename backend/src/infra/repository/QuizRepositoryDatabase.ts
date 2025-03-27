@@ -112,20 +112,8 @@ export class QuizRepositoryDatabase implements QuizRepository {
     return Promise.all(
       quizzesFromDB.map(async (quizFromDB: QuizRow) => {
         const user = await this.userRepository.getById(quizFromDB.user_id)
-
         const discipline = await this.disciplineRepository.getById(quizFromDB.discipline_id)
-
-        const quizState: QuizState = {
-          quizId: quizFromDB.quiz_id,
-          quizType: QuizType.create(quizFromDB.quiz_type),
-          user,
-          discipline,
-          answers: [],
-          isActive: !!quizFromDB.is_active,
-          createdAt: DateBr.create(quizFromDB.created_at).value,
-          updatedAt: quizFromDB.updated_at ? DateBr.create(quizFromDB.updated_at).value : null,
-          topicsRootId: [],
-        }
+        const quizState = this.convertDatabaseQuestion(quizFromDB, [], user, discipline)
         return Quiz.toDomain(quizState)
       })
     )
@@ -138,24 +126,8 @@ export class QuizRepositoryDatabase implements QuizRepository {
     const user = await this.userRepository.getById(quizFromDB.user_id)
     const discipline = await this.disciplineRepository.getById(quizFromDB.discipline_id)
     const answers = await this.getAnswers(quizId)
-
     if (!discipline) return null
-
-    // Create a new discipline with only the topics that are in the quiz's topicsRoot
-    const topicsIds = JSON.parse(quizFromDB.topics_id)
-    const quizTopics = discipline.topics.getItems().filter((topic) => topicsIds.includes(topic.topicId))
-
-    const quizState: QuizState = {
-      quizId: quizFromDB.quiz_id,
-      quizType: QuizType.create(quizFromDB.quiz_type),
-      user,
-      discipline,
-      answers,
-      isActive: !!quizFromDB.is_active,
-      createdAt: DateBr.create(quizFromDB.created_at).value,
-      updatedAt: quizFromDB.updated_at ? DateBr.create(quizFromDB.updated_at).value : null,
-      topicsRootId: topicsIds,
-    }
+    const quizState = this.convertDatabaseQuestion(quizFromDB, answers, user, discipline)
     return Quiz.toDomain(quizState)
   }
 
@@ -194,6 +166,25 @@ export class QuizRepositoryDatabase implements QuizRepository {
     } else {
       await this.connection.run("DELETE FROM quiz_answers")
       return this.connection.run("DELETE FROM quizzes")
+    }
+  }
+
+  private convertDatabaseQuestion(
+    quizFromDB: QuizRow,
+    answers: QuizAnswer[] = [],
+    user = null,
+    discipline = null
+  ): QuizState {
+    return {
+      quizId: quizFromDB.quiz_id,
+      quizType: QuizType.create(quizFromDB.quiz_type),
+      user,
+      discipline,
+      answers,
+      isActive: !!quizFromDB.is_active,
+      createdAt: DateBr.create(quizFromDB.created_at).value,
+      updatedAt: quizFromDB.updated_at ? DateBr.create(quizFromDB.updated_at).value : null,
+      topicsRootId: JSON.parse(quizFromDB.topics_id),
     }
   }
 

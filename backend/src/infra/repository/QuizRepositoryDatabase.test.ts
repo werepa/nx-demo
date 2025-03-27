@@ -57,7 +57,6 @@ describe("QuizRepositoryDatabase", () => {
     const disciplineSaved = await disciplineRepository.getById(discipline.disciplineId)
 
     const quiz = quizMock({ user: user, discipline: disciplineSaved })
-    quiz.topicsRoot.add(topic1)
     await quizRepository.save(quiz)
     const savedQuiz = await quizRepository.getById(quiz.quizId)
     expect(savedQuiz.toDTO()).toEqual(quiz.toDTO())
@@ -90,7 +89,25 @@ describe("QuizRepositoryDatabase", () => {
 
     const quizzes = await quizRepository.getAll({ userId: user1.userId })
     expect(quizzes).toHaveLength(2)
-    expect(quizzes[0].user.userId).toBe(user1.userId)
-    expect(quizzes[1].user.userId).toBe(user1.userId)
+
+    const result1 = quizzes.filter((q) => q.quizId === quiz1.quizId)[0]
+    expect(result1.quizId).toBe(quiz1.quizId)
+    expect(result1.quizType).toEqual(quiz1.quizType)
+    expect(result1.discipline.id).toEqual(quiz1.discipline.id)
+    expect(result1.discipline.topics.getCount()).toEqual(quiz1.discipline.topics.getCount())
+    expect(result1.user.id).toEqual(quiz1.user.id)
+    expect(result1.topicsRoot.getCount()).toEqual(quiz1.topicsRoot.getCount())
+    expect(result1.answers.getCount()).toEqual(quiz1.answers.getCount())
+    expect(result1.isActive).toEqual(quiz1.isActive)
+
+    const result2 = quizzes.filter((q) => q.quizId === quiz2.quizId)[0]
+    expect(result2.quizId).toBe(quiz2.quizId)
+    expect(result2.quizType).toEqual(quiz2.quizType)
+    expect(result2.discipline.id).toEqual(quiz2.discipline.id)
+    expect(result2.discipline.topics.getCount()).toEqual(quiz2.discipline.topics.getCount())
+    expect(result2.user.id).toEqual(quiz2.user.id)
+    expect(result2.topicsRoot.getCount()).toEqual(quiz2.topicsRoot.getCount())
+    expect(result2.answers.getCount()).toEqual(quiz2.answers.getCount())
+    expect(result2.isActive).toEqual(quiz2.isActive)
   })
 })
