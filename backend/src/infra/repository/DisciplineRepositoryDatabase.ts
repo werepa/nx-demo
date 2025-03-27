@@ -4,6 +4,29 @@ import { DateBr } from "../../shared/domain/valueObject"
 import { DisciplineState, TopicState } from "../../shared/models"
 import { DatabaseConnection } from "../database"
 
+interface RawDisciplineData {
+  discipline_id: string
+  name: string
+  image: string
+  is_active: number | boolean
+  created_at: string
+  updated_at: string | null
+}
+
+interface RawTopicData {
+  topic_id: string
+  discipline_id: string
+  name: string
+  is_classify: number | boolean
+  parent_id: string | null
+  topic_root_id: string
+  dependencies: string
+  obs: string | null
+  is_active: number | boolean
+  created_at: string
+  updated_at: string | null
+}
+
 export class DisciplineRepositoryDatabase implements DisciplineRepository {
   constructor(private readonly connection: DatabaseConnection) {}
 
@@ -61,9 +84,9 @@ export class DisciplineRepositoryDatabase implements DisciplineRepository {
       : await this.connection.all(queryDiscipline)
 
     const disciplinesState: DisciplineState[] = await Promise.all(
-      disciplinesFromSqlite.map(async (disciplineFromSqlite: any) => {
-        const topicsFromSqlite = await this.fetchTopicsByDisciplineId(disciplineFromSqlite.discipline_id)
-        return this.convertDatabaseDiscipline(disciplineFromSqlite, topicsFromSqlite)
+      disciplinesFromSqlite.map(async (rawDisciplineData: RawDisciplineData) => {
+        const topicsFromSqlite = await this.fetchTopicsByDisciplineId(rawDisciplineData.discipline_id)
+        return this.convertDatabaseDiscipline(rawDisciplineData, topicsFromSqlite)
       })
     )
 
@@ -144,17 +167,17 @@ export class DisciplineRepositoryDatabase implements DisciplineRepository {
     await this.connection.run(query, params)
   }
 
-  private async fetchDisciplineById(disciplineId: string): Promise<any> {
+  private fetchDisciplineById(disciplineId: string): Promise<RawDisciplineData | null> {
     const query = "SELECT * FROM disciplines WHERE discipline_id = ?"
     return this.connection.get(query, [disciplineId])
   }
 
-  private async fetchTopicsByDisciplineId(disciplineId: string): Promise<any[]> {
+  private fetchTopicsByDisciplineId(disciplineId: string): Promise<RawTopicData[]> {
     const query = "SELECT * FROM topics WHERE discipline_id = ? ORDER BY name"
     return this.connection.all(query, [disciplineId])
   }
 
-  private async fetchDisciplineByName(name: string): Promise<any> {
+  private fetchDisciplineByName(name: string): Promise<RawDisciplineData | null> {
     const queryDisciplineParts = [`SELECT * FROM disciplines WHERE ${this.dbType(1)}`]
     if (this.connection.databaseType() === "postgres") {
       queryDisciplineParts.push("AND name ILIKE ?")
@@ -165,17 +188,17 @@ export class DisciplineRepositoryDatabase implements DisciplineRepository {
     return this.connection.get(query, [`%${name?.trim().toLowerCase()}%`])
   }
 
-  private convertDatabaseDiscipline(disciplineFromDB: any, topicsFromDB: any): DisciplineState {
+  private convertDatabaseDiscipline(rawDisciplineData: RawDisciplineData, rawTopicsData: RawTopicData[]): DisciplineState {
     const disciplineState: DisciplineState = {
-      disciplineId: disciplineFromDB.discipline_id,
-      name: disciplineFromDB.name,
+      disciplineId: rawDisciplineData.discipline_id,
+      name: rawDisciplineData.name,
       topics: [],
-      image: disciplineFromDB.image,
-      isActive: !!disciplineFromDB.is_active,
-      createdAt: DateBr.create(disciplineFromDB.created_at).value,
-      updatedAt: disciplineFromDB.updated_at ? DateBr.create(disciplineFromDB.updated_at).value : null,
+      image: rawDisciplineData.image,
+      isActive: !!rawDisciplineData.is_active,
+      createdAt: DateBr.create(rawDisciplineData.created_at).value,
+      updatedAt: rawDisciplineData.updated_at ? DateBr.create(rawDisciplineData.updated_at).value : null,
     }
-    topicsFromDB.map((topic: any) => {
+    rawTopicsData.map((topic: RawTopicData) => {
       const topicState: TopicState = {
         topicId: topic.topic_id,
         disciplineId: topic.discipline_id,
@@ -195,47 +218,7 @@ export class DisciplineRepositoryDatabase implements DisciplineRepository {
     return disciplineState
   }
 
-  private dbType(value: number): any {
+  private dbType(value: number): boolean | number {
     return this.connection.databaseType() === "postgres" ? Boolean(value) : value
-  }
-
-  private mapToDomain(result: DisciplineState): Discipline {
-    return Discipline.toDomain(result)
-  }
-
-  private async getTopics(disciplineId: string): Promise<TopicState[]> {
-    const result = await this.connection.query<TopicState>(`
-      SELECT 
-        t.topic_id as "topicId",
-        t.discipline_id as "disciplineId",
-        t.name,
-        t.is_topic_classify as "isTopicClassify",
-        t.topic_parent_id as "topicParentId",
-        t.topic_root_id as "topicRootId",
-        t.depth,
-        t.dependencies,
-        t.obs,
-        t.is_active as "isActive",
-        t.created_at as "createdAt",
-        t.updated_at as "updatedAt"
-      FROM topics t
-      WHERE t.discipline_id = '${disciplineId}'
-      AND t.is_active = true
-    `)
-    return result.rows
-  }
-
-  private async getDiscipline(disciplineId: string): Promise<DisciplineState> {
-    return this.connection.one<DisciplineState>(`
-      SELECT 
-        d.discipline_id as "disciplineId",
-        d.name,
-        d.image,
-        d.is_active as "isActive",
-        d.created_at as "createdAt",
-        d.updated_at as "updatedAt"
-      FROM disciplines d
-      WHERE d.discipline_id = '${disciplineId}'
-    `)
   }
 }

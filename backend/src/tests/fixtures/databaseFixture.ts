@@ -7,13 +7,6 @@ import { DisciplineRepository, QuestionRepository, QuizRepository, UserRepositor
 import { DatabaseConnection } from "../../infra/database/DatabaseConnection"
 import { DisciplineState, TopicState, UserState } from "../../shared/models"
 
-type DbResultType<T> = {
-  rows: T[]
-  rowCount: number
-  command?: string
-  fields?: unknown[]
-}
-
 interface DatabaseFixture {
   users: UserState[]
   disciplines: DisciplineState[]
@@ -37,21 +30,21 @@ export class TestDatabaseFixture {
     return TestDatabaseFixture.instance
   }
 
-  async loadUsers(): Promise<DbResultType<UserState>> {
-    const result = await this.connection.query<UserState>("SELECT * FROM users")
-    this.fixture.users = result.rows
+  async loadUsers(): Promise<UserState[]> {
+    const result = await this.connection.all<UserState>("SELECT * FROM users")
+    this.fixture.users = result
     return result
   }
 
-  async loadDisciplines(): Promise<DbResultType<DisciplineState>> {
-    const result = await this.connection.query<DisciplineState>("SELECT * FROM disciplines")
-    this.fixture.disciplines = result.rows
+  async loadDisciplines(): Promise<DisciplineState[]> {
+    const result = await this.connection.all<DisciplineState>("SELECT * FROM disciplines")
+    this.fixture.disciplines = result
     return result
   }
 
-  async loadTopics(): Promise<DbResultType<TopicState>> {
-    const result = await this.connection.query<TopicState>("SELECT * FROM topics")
-    this.fixture.topics = result.rows
+  async loadTopics(): Promise<TopicState[]> {
+    const result = await this.connection.all<TopicState>("SELECT * FROM topics")
+    this.fixture.topics = result
     return result
   }
 

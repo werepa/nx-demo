@@ -103,7 +103,7 @@ describe("CreateQuizAnswer", () => {
     connection.close()
   })
 
-  test.only("should create a quiz answer", async () => {
+  test("should create a quiz answer", async () => {
     const dto1: CreateQuizAnswerCommand = {
       quizId: quiz.quizId,
       questionId: question1.questionId,

@@ -17,6 +17,54 @@ interface QuestionStatsByTopic {
   avgGrade: number
 }
 
+interface DisciplineStats {
+  topic_id: string
+  qty_questions: number
+}
+
+interface RawTopicLearning {
+  user_topic_learning_id: string
+  user_id: string
+  topic_id: string
+  score: number
+  avg_grade: number
+  level_in_topic: number
+  qty_questions_answered: number
+}
+interface RawQuizAnswer {
+  quiz_answer_id: string
+  quiz_id: string
+  topic_id: string
+  question_id: string
+  user_option_id: string
+  is_user_answer_correct: boolean | number
+  can_repeat: boolean | number
+  created_at: DateBr
+  correct_option_id: string
+}
+
+interface DisciplineHistory {
+  quiz_answer_id: string
+  quiz_id: string
+  topic_id: string
+  question_id: string
+  user_option_id: string
+  is_user_answer_correct: boolean | number
+  can_repeat: boolean | number
+  created_at: DateBr
+  correct_option_id: string
+}
+interface RawCollectiveTopicLearning {
+  topic_id: string
+  collective_avg_grade: number
+  collective_avg_score: number
+}
+
+interface TopicStats {
+  topic_id: string
+  qty_questions: number
+}
+
 export class LearningRepositoryDatabase implements LearningRepository {
   constructor(private readonly connection: DatabaseConnection) {}
 
@@ -120,7 +168,7 @@ export class LearningRepositoryDatabase implements LearningRepository {
     await this.connection.run(query, params)
   }
 
-  private async fetchDisciplineStats(disciplineId: string): Promise<any> {
+  private async fetchDisciplineStats(disciplineId: string): Promise<DisciplineStats[]> {
     const query = `
       SELECT q.topic_id, count(q.question_id) as qty_questions
       FROM questions q
@@ -139,7 +187,7 @@ export class LearningRepositoryDatabase implements LearningRepository {
     return result.length > 0
   }
 
-  private async fetchDisciplineLearning(dto: { userId: string; disciplineId: string }): Promise<any> {
+  private async fetchDisciplineLearning(dto: { userId: string; disciplineId: string }): Promise<RawTopicLearning[]> {
     const query = `
       SELECT utl.* FROM user_topic_learnings utl
       JOIN topics t ON utl.topic_id = t.topic_id
@@ -148,7 +196,7 @@ export class LearningRepositoryDatabase implements LearningRepository {
     return this.connection.all(query, [dto.userId, dto.disciplineId])
   }
 
-  private async fetchCollectiveDisciplineLearning(dto: { disciplineId: string }): Promise<any> {
+  private async fetchCollectiveDisciplineLearning(dto: { disciplineId: string }): Promise<RawCollectiveTopicLearning[]> {
     const query = `
       SELECT utl.topic_id, AVG(utl.avg_grade) as collective_avg_grade, AVG(utl.score) as collective_avg_score
       FROM user_topic_learnings utl
@@ -159,7 +207,7 @@ export class LearningRepositoryDatabase implements LearningRepository {
     return this.connection.all(query, [dto.disciplineId])
   }
 
-  private async fetchDisciplineHistory(dto: { userId: string; disciplineId: string }): Promise<any> {
+  private async fetchDisciplineHistory(dto: { userId: string; disciplineId: string }): Promise<DisciplineHistory[]> {
     const query = `
       SELECT t.topic_id, qa.* FROM quiz_answers qa
       JOIN questions q ON qa.question_id = q.question_id
@@ -171,18 +219,18 @@ export class LearningRepositoryDatabase implements LearningRepository {
   }
 
   private convertDatabaseLearning(
-    disciplineStats: any,
-    disciplineLearningFromDB: any,
-    disciplineCollectiveLearningFromDB: any,
-    disciplineHistoryFromDB: any,
+    disciplineStats: DisciplineStats[],
+    disciplineLearningFromDB: RawTopicLearning[],
+    disciplineCollectiveLearningFromDB: RawCollectiveTopicLearning[],
+    disciplineHistoryFromDB: DisciplineHistory[],
     user: User,
     discipline: Discipline
   ): Learning {
     const learning = Learning.create({ discipline, user })
-    disciplineStats.forEach((topicStats: any) => {
-      const topicLearningFromDB = disciplineLearningFromDB?.find((t: any) => t.topic_id === topicStats.topic_id)
+    disciplineStats.forEach((topicStats: TopicStats) => {
+      const topicLearningFromDB = disciplineLearningFromDB?.find((t: RawTopicLearning) => t.topic_id === topicStats.topic_id)
       const topicCollectiveLearningFromDB = disciplineCollectiveLearningFromDB.find(
-        (t: any) => t.topic_id === topicStats.topic_id
+        (t: RawCollectiveTopicLearning) => t.topic_id === topicStats.topic_id
       )
       const topicLearning = TopicLearning.toDomain({
         topicLearningId: topicLearningFromDB?.user_topic_learning_id || randomUUID(),
@@ -207,7 +255,7 @@ export class LearningRepositoryDatabase implements LearningRepository {
       if (topic) learning.topics.remove(topic)
       learning.topics.add(topicLearning)
     })
-    disciplineHistoryFromDB.forEach((quizAnswerFromDB: any) =>
+    disciplineHistoryFromDB.forEach((quizAnswerFromDB: RawQuizAnswer) =>
       learning.history.add(
         QuizAnswer.toDomain({
           quizAnswerId: quizAnswerFromDB.quiz_answer_id,
@@ -320,23 +368,25 @@ export class LearningRepositoryDatabase implements LearningRepository {
     return maxQtyAllQuestionsRootRecursive
   }
 
-  private dbType(value: number): any {
+  private dbType(value: number): boolean | number {
     return this.connection.databaseType() === "postgres" ? Boolean(value) : value
   }
 
-  private async getQuestionStatsByTopic(userId: string, disciplineId: string): Promise<QuestionStatsByTopic[]> {
-    const result = await this.connection.query<QuestionStatsByTopic>(`
+  private getQuestionStatsByTopic(userId: string, disciplineId: string): Promise<QuestionStatsByTopic[]> {
+    return this.connection.all<QuestionStatsByTopic>(
+      `
       SELECT 
         q.topic_id as "topicId",
         COUNT(qa.quiz_answer_id) as "qtyAnswered",
         SUM(CASE WHEN qa.correct_answered THEN 1 ELSE 0 END) as "qtyCorrectAnswered",
         AVG(CASE WHEN qa.correct_answered THEN 1 ELSE 0 END) as "avgGrade"
       FROM questions q
-      LEFT JOIN quiz_answers qa ON qa.question_id = q.question_id AND qa.user_id = '${userId}'
-      WHERE q.discipline_id = '${disciplineId}'
+      LEFT JOIN quiz_answers qa ON qa.question_id = q.question_id AND qa.user_id = ? '
+      WHERE q.discipline_id = ? '
       GROUP BY q.topic_id
-    `)
-    return result.rows
+    `,
+      [userId, disciplineId]
+    )
   }
 
   private mapToDomain(learningData: LearningState): Learning {

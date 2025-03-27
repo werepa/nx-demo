@@ -1,7 +1,7 @@
 // import { OptionDTO } from '../shared/dto/OptionDTO';
 // import pgp from "pg-promise"
 
-// describe.skip("Migration", () => {
+// describe("Migration", () => {
 //   let pgp_simulex: any
 //   let pgp_simulex: any
 

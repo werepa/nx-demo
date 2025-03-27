@@ -83,9 +83,23 @@ export class UserRepositoryDatabase implements UserRepository {
     if (process.env["NODE_ENV"] === "production") return
 
     if (this.connection.databaseType() === "postgres") {
-      const tables = ["users"]
-      const truncateQuery = `TRUNCATE TABLE ${tables.map((table) => `public.${table}`).join(", ")} CASCADE`
-      return this.connection.run(truncateQuery)
+      // Inicia uma transação
+      await this.connection.run("BEGIN")
+      try {
+        // Desabilita temporariamente as foreign keys
+        await this.connection.run("SET CONSTRAINTS ALL DEFERRED")
+
+        const tables = ["users"] // Adicione outras tabelas se necessário
+        const truncateQuery = `TRUNCATE TABLE ${tables
+          .map((table) => `public.${table}`)
+          .join(", ")} RESTART IDENTITY CASCADE`
+
+        await this.connection.run(truncateQuery)
+        await this.connection.run("COMMIT")
+      } catch (error) {
+        await this.connection.run("ROLLBACK")
+        throw error
+      }
     } else {
       return this.connection.run("DELETE FROM users")
     }

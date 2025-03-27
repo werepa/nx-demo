@@ -4,11 +4,10 @@ import {
   QuestionDisciplineStatistics,
   TopicStatistics,
 } from "../../application/repository/QuestionRepository"
-import { Question } from "../../domain/entity/Question"
+import { Question, QuestionOption } from "../../domain/entity"
 import { DateBr } from "../../shared/domain/valueObject/DateBr"
 import { QuestionOptionState, QuestionState } from "../../shared/models"
 import { DatabaseConnection } from "../database"
-import { QuestionOption } from "backend/src/domain/entity"
 
 interface RawQuestionData {
   question_id: string
