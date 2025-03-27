@@ -104,6 +104,25 @@
         "production",
         "^production"
       ]
+    },
+    "build": {
+      "dependsOn": [
+        "^build"
+      ]
+    },
+    "lint": {
+      "inputs": [
+        "default",
+        "{workspaceRoot}/.eslintrc.json"
+      ]
+    }
+  },
+  "extends": "@nx/workspace/presets/core.json",
+  "pluginsConfig": {
+    "@nx/js": {
+      "analyzeSourceFiles": true,
+      "useDependencyProcessing": true,
+      "normalizePath": true
     }
   }
 }

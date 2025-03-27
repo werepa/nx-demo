@@ -22,6 +22,7 @@
     "skipLibCheck": true,
     "strictNullChecks": false,
     "strict": false,
-    "target": "es2022"
+    "target": "es2022",
+    "forceConsistentCasingInFileNames": true
   }
 }

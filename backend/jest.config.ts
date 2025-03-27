@@ -12,5 +12,4 @@ export default {
   roots: ["<rootDir>/src"],
   maxWorkers: 1,
   cache: false,
-  runInBand: true,
 }
