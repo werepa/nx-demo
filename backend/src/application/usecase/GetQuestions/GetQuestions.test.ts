@@ -30,7 +30,7 @@ describe("GetQuestions", () => {
     connection.close()
   })
 
-  test.only("should return questions when topicId and showAll are provided", async () => {
+  test("should return questions when topicId and showAll are provided", async () => {
     const portugues = disciplineMock({ name: "Português" })
     const crase = topicMock({ name: "Crase" })
     const pronomes = topicMock({ name: "Pronomes" })
@@ -51,20 +51,16 @@ describe("GetQuestions", () => {
       showAll: true,
     })
 
-    const sortedQuestions = questions.sort((a, b) => a.questionId.localeCompare(b.questionId))
-    const sortedResult = result1.sort((a, b) => a.questionId.localeCompare(b.questionId))
+    expect(questions).toHaveLength(3)
+    expect(result1).toHaveLength(2)
 
-    expect(sortedQuestions).toHaveLength(3)
-    expect(sortedResult).toHaveLength(3)
-    // expect(sortedResult[0].toDTO()).toEqual({ ...sortedQuestions[0].toDTO(), createdAt: sortedResult[0].toDTO().createdAt })
-    // expect(sortedResult).toContainEqual(sortedQuestions[0])
-    // expect(sortedResult).toContainEqual(sortedQuestions[2])
+    expect(result1).toContainEqual(questions[0])
+    expect(result1).toContainEqual(questions[2])
 
-    // const result2 = await getQuestions.execute({ topicId: crase.topicId })
-    // const sortedResult2 = result2.sort((a, b) => a.questionId.localeCompare(b.questionId))
+    const result2 = await getQuestions.execute({ topicId: crase.topicId })
 
-    // expect(sortedResult2).toHaveLength(1)
-    // expect(sortedResult2[0].toDTO()).toEqual(sortedQuestions[2].toDTO())
+    expect(result2).toHaveLength(1)
+    expect(result2[0].toDTO()).toEqual(questions[2].toDTO())
   })
 
   test("should throw error when no topicId are provided", async () => {
