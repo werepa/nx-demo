@@ -1,3 +1,4 @@
+import { QuestionOptionDTO } from "@simulex/models"
 import {
   QuestionRepository,
   QuestionDisciplineStatistics,
@@ -5,8 +6,29 @@ import {
 } from "../../application/repository/QuestionRepository"
 import { Question } from "../../domain/entity/Question"
 import { DateBr } from "../../shared/domain/valueObject/DateBr"
-import { QuestionState } from "../../shared/models"
+import { QuestionOptionState, QuestionState } from "../../shared/models"
 import { DatabaseConnection } from "../database"
+import { QuestionOption } from "backend/src/domain/entity"
+
+interface RawQuestionData {
+  question_id: string
+  topic_id: string
+  prompt: string
+  options: string
+  is_multiple_choice: number | boolean
+  difficulty: number
+  qty_correct_answers: number
+  qty_answered: number
+  difficulty_recursive: number
+  simulex_hash: string
+  topic_root_id: string
+  linked_topics: string
+  year: number
+  source_id: string
+  is_active: number | boolean
+  created_by: string
+  created_at: string
+}
 
 export class QuestionRepositoryDatabase implements QuestionRepository {
   constructor(private readonly connection: DatabaseConnection) {}
@@ -109,9 +131,24 @@ export class QuestionRepositoryDatabase implements QuestionRepository {
     if (!showAll) queryParts.push(`AND is_active = ${this.dbType(1)}`)
     if (topicId) queryParts.push(`AND topic_id = '${topicId}'`)
     queryParts.push("ORDER BY created_at DESC LIMIT 100")
+
     const query = queryParts.join(" ")
-    const questionsFromDB = await this.connection.all(query)
-    return questionsFromDB.map((question: any) => Question.toDomain(this.convertDatabaseQuestion(question)))
+    const questionsFromDB = await this.connection.all<RawQuestionData>(query)
+    return questionsFromDB.map((question: RawQuestionData) => {
+      question.linked_topics = JSON.parse(question.linked_topics)
+      const rawOptionsList: QuestionOptionState[] = JSON.parse(question.options)
+      const questionOptionsDTOList = rawOptionsList.map((questionOptionDTO: QuestionOptionDTO) =>
+        QuestionOption.toDomain({
+          optionId: questionOptionDTO.optionId,
+          text: questionOptionDTO.text,
+          isCorrectAnswer: questionOptionDTO.isCorrectAnswer,
+          questionId: questionOptionDTO.questionId,
+          item: questionOptionDTO.item,
+          obs: questionOptionDTO.obs,
+        })
+      )
+      return Question.toDomain(this.convertDatabaseQuestion({ ...question, options: questionOptionsDTOList }))
+    })
   }
 
   async getRandom({
