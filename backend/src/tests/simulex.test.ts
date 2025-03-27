@@ -236,7 +236,7 @@ describe("Simulex", () => {
       const { quizId } = await createQuiz.execute({
         userId: userMember1.userId,
         disciplineId: portugues.disciplineId,
-        topicsRoot: [crase.topicId, palavrasRepetidas.topicId],
+        topicsRoot: [crase.topicId, pronomes.topicId],
       })
       quiz1 = await getQuizById.execute(quizId)
       expect(quiz1).toBeInstanceOf(Quiz)
