@@ -65,11 +65,7 @@ describe("Fixture => Database", () => {
     userRepository = new UserRepositoryDatabase(connection)
     disciplineRepository = new DisciplineRepositoryDatabase(connection)
     questionRepository = new QuestionRepositoryDatabase(connection)
-    quizRepository = new QuizRepositoryDatabase(
-      connection,
-      userRepository,
-      disciplineRepository,
-    )
+    quizRepository = new QuizRepositoryDatabase(connection, userRepository, disciplineRepository)
     learningRepository = new LearningRepositoryDatabase(connection)
 
     await learningRepository.clear()
@@ -84,13 +80,9 @@ describe("Fixture => Database", () => {
       disciplineRepository,
       questionRepository,
       quizRepository,
-      learningRepository,
+      learningRepository
     )
-    getLearning = new GetLearning(
-      disciplineRepository,
-      userRepository,
-      learningRepository,
-    )
+    getLearning = new GetLearning(disciplineRepository, userRepository, learningRepository)
 
     const fixture = await databaseFixture({
       userRepository,
@@ -185,69 +177,39 @@ describe("Fixture => Database", () => {
     expect(
       await questionRepository.getAll({
         topicId: portuguesClassificar.topicId,
-      }),
+      })
     ).toHaveLength(1)
-    expect(
-      await questionRepository.getAll({ topicId: pronomes.topicId }),
-    ).toHaveLength(3)
-    expect(
-      await questionRepository.getAll({ topicId: pessoais.topicId }),
-    ).toHaveLength(0)
-    expect(
-      await questionRepository.getAll({ topicId: casoReto.topicId }),
-    ).toHaveLength(3)
-    expect(
-      await questionRepository.getAll({ topicId: obliquos.topicId }),
-    ).toHaveLength(1)
-    expect(
-      await questionRepository.getAll({ topicId: tratamento.topicId }),
-    ).toHaveLength(2)
-    expect(
-      await questionRepository.getAll({ topicId: crase.topicId }),
-    ).toHaveLength(4)
-    expect(
-      await questionRepository.getAll({ topicId: palavrasRepetidas.topicId }),
-    ).toHaveLength(1)
-    expect(
-      await questionRepository.getAll({ topicId: palavrasMasculinas.topicId }),
-    ).toHaveLength(1)
-    expect(
-      await questionRepository.getAll({ topicId: palavrasEspeciais.topicId }),
-    ).toHaveLength(0)
-    expect(
-      await questionRepository.getAll({ topicId: distancia.topicId }),
-    ).toHaveLength(2)
-    expect(
-      await questionRepository.getAll({ topicId: terra.topicId }),
-    ).toHaveLength(3)
-    expect(
-      await questionRepository.getAll({ topicId: nomesCidades.topicId }),
-    ).toHaveLength(0)
-    expect(
-      await questionRepository.getAll({ topicId: inqueritoPolicial.topicId }),
-    ).toHaveLength(0)
+    expect(await questionRepository.getAll({ topicId: pronomes.topicId })).toHaveLength(3)
+    expect(await questionRepository.getAll({ topicId: pessoais.topicId })).toHaveLength(0)
+    expect(await questionRepository.getAll({ topicId: casoReto.topicId })).toHaveLength(3)
+    expect(await questionRepository.getAll({ topicId: obliquos.topicId })).toHaveLength(1)
+    expect(await questionRepository.getAll({ topicId: tratamento.topicId })).toHaveLength(2)
+    expect(await questionRepository.getAll({ topicId: crase.topicId })).toHaveLength(4)
+    expect(await questionRepository.getAll({ topicId: palavrasRepetidas.topicId })).toHaveLength(1)
+    expect(await questionRepository.getAll({ topicId: palavrasMasculinas.topicId })).toHaveLength(1)
+    expect(await questionRepository.getAll({ topicId: palavrasEspeciais.topicId })).toHaveLength(0)
+    expect(await questionRepository.getAll({ topicId: distancia.topicId })).toHaveLength(2)
+    expect(await questionRepository.getAll({ topicId: terra.topicId })).toHaveLength(3)
+    expect(await questionRepository.getAll({ topicId: nomesCidades.topicId })).toHaveLength(0)
+    expect(await questionRepository.getAll({ topicId: inqueritoPolicial.topicId })).toHaveLength(0)
     expect(
       await questionRepository.getAll({
         topicId: direitosGarantiasIndividuais.topicId,
-      }),
+      })
     ).toHaveLength(0)
     expect(
       await questionRepository.getAll({
         topicId: poderesAdministrativos.topicId,
-      }),
+      })
     ).toHaveLength(2)
-    expect(
-      await questionRepository.getAll({ topicId: poderVinculado.topicId }),
-    ).toHaveLength(1)
-    expect(
-      await questionRepository.getAll({ topicId: topicInactive.topicId }),
-    ).toHaveLength(0)
+    expect(await questionRepository.getAll({ topicId: poderVinculado.topicId })).toHaveLength(1)
+    expect(await questionRepository.getAll({ topicId: topicInactive.topicId })).toHaveLength(0)
 
     expect(
       await questionRepository.getAll({
         topicId: crase.topicId,
         showAll: true,
-      }),
+      })
     ).toHaveLength(5)
 
     const learning1 = await getLearning.execute({
@@ -258,9 +220,7 @@ describe("Fixture => Database", () => {
     expect(learning1.topics.getItems()).toHaveLength(13)
     expect(learning1.topics.findByTopicId(crase.topicId)?.qtyQuestions).toBe(4)
     expect(learning1.topics.findByTopicId(terra.topicId)?.qtyQuestions).toBe(3)
-    expect(learning1.topics.findByTopicId(pronomes.topicId)?.qtyQuestions).toBe(
-      3,
-    )
+    expect(learning1.topics.findByTopicId(pronomes.topicId)?.qtyQuestions).toBe(3)
   })
 
   it("should create test quizzes", async () => {
@@ -272,10 +232,7 @@ describe("Fixture => Database", () => {
     expect(quizzes[0].topicsRoot.getItems()[1].name).toBe("Pronomes")
 
     // UserMember1 Statistics
-    let learning = await learningRepository.getDisciplineLearning(
-      userMember1,
-      portugues,
-    )
+    let learning = await learningRepository.getDisciplineLearning(userMember1, portugues)
 
     let craseLearning = learning?.topics.findByTopicId(crase.topicId)
     expect(learning?.discipline.disciplineId).toBe(portugues?.disciplineId)
@@ -283,9 +240,7 @@ describe("Fixture => Database", () => {
     expect(craseLearning?.qtyQuestionsCorrectAnswered()).toBe(1)
     expect(craseLearning?.qtyQuestionsAnswered()).toBe(3)
 
-    let palavrasRepetidasStatistics = learning?.topics.findByTopicId(
-      palavrasRepetidas.topicId,
-    )
+    let palavrasRepetidasStatistics = learning?.topics.findByTopicId(palavrasRepetidas.topicId)
     expect(palavrasRepetidasStatistics).toBeDefined()
     expect(palavrasRepetidasStatistics?.qtyQuestionsCorrectAnswered()).toBe(1)
     expect(palavrasRepetidasStatistics?.qtyQuestionsAnswered()).toBe(1)
@@ -306,10 +261,7 @@ describe("Fixture => Database", () => {
     expect(pronomesStatistics?.qtyQuestionsAnswered()).toBe(2)
 
     // UserMember2 Statistics
-    learning = await learningRepository.getDisciplineLearning(
-      userMember2,
-      portugues,
-    )
+    learning = await learningRepository.getDisciplineLearning(userMember2, portugues)
 
     craseLearning = learning?.topics.findByTopicId(crase.topicId)
     expect(learning?.discipline.disciplineId).toBe(portugues?.disciplineId)
@@ -317,9 +269,7 @@ describe("Fixture => Database", () => {
     expect(craseLearning?.qtyQuestionsCorrectAnswered()).toBe(3)
     expect(craseLearning?.qtyQuestionsAnswered()).toBe(4)
 
-    palavrasRepetidasStatistics = learning?.topics.findByTopicId(
-      palavrasRepetidas.topicId,
-    )
+    palavrasRepetidasStatistics = learning?.topics.findByTopicId(palavrasRepetidas.topicId)
     expect(palavrasRepetidasStatistics).toBeDefined()
     expect(palavrasRepetidasStatistics?.qtyQuestionsCorrectAnswered()).toBe(1)
     expect(palavrasRepetidasStatistics?.qtyQuestionsAnswered()).toBe(1)

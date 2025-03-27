@@ -469,16 +469,26 @@ export const databaseFixture = async ({
   }
 }
 
+interface FixtureQuizAnswer {
+  user: User
+  topic: Topic
+  correctAnswer: boolean
+}
+
 async function processUser(
   user: User,
   discipline: Discipline,
   quizRepository: QuizRepository,
   questionRepository: QuestionRepository,
   correctQuizAnswer: CheckQuizAnswer,
-  answers: any
+  answers: FixtureQuizAnswer[]
 ) {
   const topicsRoot: Topic[] = Array.from(
-    new Set(answers.filter((answer: any) => answer.topic.isRoot()).map((answer: any) => answer.topic as Topic))
+    new Set(
+      answers
+        .filter((answer: FixtureQuizAnswer) => answer.topic.isRoot())
+        .map((answer: FixtureQuizAnswer) => answer.topic as Topic)
+    )
   )
   const quiz = createQuiz(user, discipline, topicsRoot)
   await quizRepository.save(quiz)
@@ -487,7 +497,7 @@ async function processUser(
   await processAnswers(user, discipline, quiz, questions, correctQuizAnswer, answers)
 }
 
-function createQuiz(user: any, discipline: any, topics: Topic[]): Quiz {
+function createQuiz(user: User, discipline: Discipline, topics: Topic[]): Quiz {
   const quiz = Quiz.create({
     user,
     discipline,
@@ -504,15 +514,12 @@ async function processAnswers(
   quiz: Quiz,
   questions: Question[],
   correctQuizAnswer: CheckQuizAnswer,
-  answers: any
+  answers: FixtureQuizAnswer[]
 ) {
-  const userAnswers = answers.filter((answer: any) => answer.user.userId === user.userId)
+  const userAnswers = answers.filter((answer: FixtureQuizAnswer) => answer.user.userId === user.userId)
   for (const answer of userAnswers) {
     const question = questions.find((q) => q.topicId === answer.topic.topicId)
     if (question) {
-      // if (answer.topic.name === "Crase") {
-      //   console.log(learning.topics.findByTopicId(answer.topic.topicId).topicLearningId)
-      // }
       await correctQuizAnswer.execute({
         disciplineId: discipline.disciplineId,
         userId: user.userId,
