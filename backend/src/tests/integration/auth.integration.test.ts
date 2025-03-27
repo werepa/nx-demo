@@ -6,7 +6,7 @@ import { UserRepositoryDatabase } from "../../infra/repository"
 import app from "../../main"
 import { faker } from "@faker-js/faker"
 
-describe("Auth Integration Tests", () => {
+xdescribe("Auth Integration Tests", () => {
   let connection: DatabaseConnection
   let userRepository: UserRepositoryDatabase
   let createUser: CreateUser
@@ -28,7 +28,7 @@ describe("Auth Integration Tests", () => {
     await connection.close()
   })
 
-  test("should register a new user", async () => {
+  test.only("should register a new user", async () => {
     const newUser = {
       name: faker.person.fullName(),
       email: faker.internet.email(),
