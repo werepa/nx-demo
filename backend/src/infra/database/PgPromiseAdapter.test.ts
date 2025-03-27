@@ -53,7 +53,7 @@ describe("PgPromiseAdapter", () => {
     it("should retrieve a single row", async () => {
       // Arrange
       await adapter.run("CREATE TABLE test (id SERIAL PRIMARY KEY, name TEXT)")
-      await adapter.none("INSERT INTO test (name) VALUES ('Test Name')")
+      await adapter.run("INSERT INTO test (name) VALUES ('Test Name')")
 
       // Act
       const result = await adapter.get<{ id: number; name: string }>("SELECT * FROM test WHERE id = 1")
@@ -67,8 +67,8 @@ describe("PgPromiseAdapter", () => {
     it("should retrieve a single row using parameters", async () => {
       // Arrange
       await adapter.run("CREATE TABLE test (id SERIAL PRIMARY KEY, name TEXT)")
-      await adapter.none("INSERT INTO test (name) VALUES ('Test Name')")
-      await adapter.none("INSERT INTO test (name) VALUES ('Another Name')")
+      await adapter.run("INSERT INTO test (name) VALUES ('Test Name')")
+      await adapter.run("INSERT INTO test (name) VALUES ('Another Name')")
 
       // Act
       const result = await adapter.get<{ id: number; name: string }>("SELECT * FROM test WHERE id = $1", [1])
@@ -100,8 +100,8 @@ describe("PgPromiseAdapter", () => {
     it("should retrieve all matching rows", async () => {
       // Arrange
       await adapter.run("CREATE TABLE test (id SERIAL PRIMARY KEY, name TEXT)")
-      await adapter.none("INSERT INTO test (name) VALUES ('Name 1')")
-      await adapter.none("INSERT INTO test (name) VALUES ('Name 2')")
+      await adapter.run("INSERT INTO test (name) VALUES ('Name 1')")
+      await adapter.run("INSERT INTO test (name) VALUES ('Name 2')")
 
       // Act
       const results = await adapter.all<{ id: number; name: string }>("SELECT * FROM test ORDER BY id")
@@ -117,9 +117,9 @@ describe("PgPromiseAdapter", () => {
     it("should retrieve matching rows using parameters", async () => {
       // Arrange
       await adapter.run("CREATE TABLE test (id SERIAL PRIMARY KEY, name TEXT, type TEXT)")
-      await adapter.none("INSERT INTO test (name, type) VALUES ('Name 1', 'typeA')")
-      await adapter.none("INSERT INTO test (name, type) VALUES ('Name 2', 'typeB')")
-      await adapter.none("INSERT INTO test (name, type) VALUES ('Name 3', 'typeA')")
+      await adapter.run("INSERT INTO test (name, type) VALUES ('Name 1', 'typeA')")
+      await adapter.run("INSERT INTO test (name, type) VALUES ('Name 2', 'typeB')")
+      await adapter.run("INSERT INTO test (name, type) VALUES ('Name 3', 'typeA')")
 
       // Act
       const results = await adapter.all<{ id: number; name: string; type: string }>(
@@ -156,17 +156,16 @@ describe("PgPromiseAdapter", () => {
     it("should retrieve all matching rows with row count", async () => {
       // Arrange
       await adapter.run("CREATE TABLE test (id SERIAL PRIMARY KEY, name TEXT)")
-      await adapter.none("INSERT INTO test (name) VALUES ('Name 1')")
-      await adapter.none("INSERT INTO test (name) VALUES ('Name 2')")
+      await adapter.run("INSERT INTO test (name) VALUES ('Name 1')")
+      await adapter.run("INSERT INTO test (name) VALUES ('Name 2')")
 
       // Act
-      const result = await adapter.query<{ id: number; name: string }>("SELECT * FROM test ORDER BY id")
+      const result = await adapter.all<{ id: number; name: string }>("SELECT * FROM test ORDER BY id")
 
       // Assert
-      expect(result.rows).toHaveLength(2)
-      expect(result.rowCount).toBe(2)
-      expect(result.rows[0].id).toBe(1)
-      expect(result.rows[1].id).toBe(2)
+      expect(result).toHaveLength(2)
+      expect(result[0].id).toBe(1)
+      expect(result[1].id).toBe(2)
     })
 
     it("should return empty rows and zero rowCount for no matching rows", async () => {
@@ -174,16 +173,15 @@ describe("PgPromiseAdapter", () => {
       await adapter.run("CREATE TABLE test (id SERIAL PRIMARY KEY, name TEXT)")
 
       // Act
-      const result = await adapter.query<{ id: number; name: string }>("SELECT * FROM test")
+      const result = await adapter.all<{ id: number; name: string }>("SELECT * FROM test")
 
       // Assert
-      expect(result.rows).toHaveLength(0)
-      expect(result.rowCount).toBe(0)
+      expect(result).toHaveLength(0)
     })
 
     it("should throw an error for invalid query", async () => {
       // Act & Assert
-      await expect(adapter.query("SELECT invalid FROM test")).rejects.toThrow()
+      await expect(adapter.all("SELECT invalid FROM test")).rejects.toThrow()
     })
   })
 
@@ -191,10 +189,10 @@ describe("PgPromiseAdapter", () => {
     it("should retrieve a single row", async () => {
       // Arrange
       await adapter.run("CREATE TABLE test (id SERIAL PRIMARY KEY, name TEXT)")
-      await adapter.none("INSERT INTO test (name) VALUES ('Test Name')")
+      await adapter.run("INSERT INTO test (name) VALUES ('Test Name')")
 
       // Act
-      const result = await adapter.one<{ id: number; name: string }>("SELECT * FROM test WHERE id = 1")
+      const result = await adapter.get<{ id: number; name: string }>("SELECT * FROM test WHERE id = 1")
 
       // Assert
       expect(result).toBeDefined()
@@ -207,7 +205,7 @@ describe("PgPromiseAdapter", () => {
       await adapter.run("CREATE TABLE test (id SERIAL PRIMARY KEY, name TEXT)")
 
       // Act
-      const result = await adapter.one<{ id: number; name: string }>("SELECT * FROM test WHERE id = 999")
+      const result = await adapter.get<{ id: number; name: string }>("SELECT * FROM test WHERE id = 999")
 
       // Assert
       expect(result).toBeNull()
@@ -215,7 +213,7 @@ describe("PgPromiseAdapter", () => {
 
     it("should throw an error for invalid query", async () => {
       // Act & Assert
-      await expect(adapter.one("SELECT invalid FROM test")).rejects.toThrow()
+      await expect(adapter.get("SELECT invalid FROM test")).rejects.toThrow()
     })
   })
 
@@ -225,22 +223,63 @@ describe("PgPromiseAdapter", () => {
       await adapter.run("CREATE TABLE test (id SERIAL PRIMARY KEY, name TEXT)")
 
       // Act & Assert
-      await expect(adapter.none("INSERT INTO test (name) VALUES ('Test Name')")).resolves.not.toThrow()
+      await expect(adapter.run("INSERT INTO test (name) VALUES ('Test Name')")).resolves.not.toThrow()
     })
 
     it("should throw an error for invalid SQL statement", async () => {
       // Act & Assert
-      await expect(adapter.none("INSERT INVALID INTO test")).rejects.toThrow()
+      await expect(adapter.run("INSERT INVALID INTO test")).rejects.toThrow()
     })
   })
 
-  describe("close", () => {
-    it("should close the database connection", async () => {
-      // Arrange & Act
-      await adapter.close()
+  describe("transformQuery", () => {
+    it("should transform query with placeholders and conditions", () => {
+      // Arrange
+      const query = "SELECT * FROM users WHERE id = ? AND is_active = 1 AND name LIKE ?"
+      const expectedQuery = "SELECT * FROM public.users WHERE id = $1 AND is_active = true AND name LIKE $2"
+      const params = ["123", "%John%"]
+      const expectedParams = ["123", "%John%"]
+      // Act
+      const transformedQuery = adapter["transformQuery"](query)
+      // Assert
+      expect(transformedQuery).toBe(expectedQuery)
+    })
+    it("should transform query with table names", () => {
+      // Arrange
+      const query = "SELECT * FROM users JOIN orders ON users.id = orders.user_id"
+      const expectedQuery = "SELECT * FROM public.users JOIN public.orders ON users.id = orders.user_id"
+      // Act
+      const transformedQuery = adapter["transformQuery"](query)
+      // Assert
+      expect(transformedQuery).toBe(expectedQuery)
+    })
+    it("should transform query with WHERE 1", () => {
+      // Arrange
+      const query = "SELECT * FROM users WHERE 1 AND is_active = 1"
+      const expectedQuery = "SELECT * FROM public.users WHERE true AND is_active = true"
+      // Act
+      const transformedQuery = adapter["transformQuery"](query)
+      // Assert
+      expect(transformedQuery).toBe(expectedQuery)
+    })
+    it("should transform query with is_active = 0", () => {
+      // Arrange
+      const query = "SELECT * FROM users WHERE is_active = 0"
+      const expectedQuery = "SELECT * FROM public.users WHERE is_active = false"
+      // Act
+      const transformedQuery = adapter["transformQuery"](query)
+      // Assert
+      expect(transformedQuery).toBe(expectedQuery)
+    })
 
-      // Assert - After closing, any operation should throw
-      await expect(adapter.run("SELECT 1")).rejects.toThrow()
+    describe("close", () => {
+      it("should close the database connection", async () => {
+        // Arrange & Act
+        await adapter.close()
+
+        // Assert - After closing, any operation should throw
+        await expect(adapter.run("SELECT 1")).rejects.toThrow()
+      })
     })
   })
 })

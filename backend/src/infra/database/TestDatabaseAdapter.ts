@@ -3,5 +3,5 @@ import { PgPromiseAdapter } from "./PgPromiseAdapter"
 
 export function getTestDatabaseAdapter(): PgPromiseAdapter | InMemoryAdapter {
   process.env["NODE_ENV"] = "test"
-  return new InMemoryAdapter()
+  return new PgPromiseAdapter()
 }
