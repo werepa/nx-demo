@@ -32,7 +32,7 @@ interface RawQuestionData {
 export class QuestionRepositoryDatabase implements QuestionRepository {
   constructor(private readonly connection: DatabaseConnection) {}
 
-  private prepareQuestionParams(question: Question): any[] {
+  private prepareQuestionParams(question: Question): (string | number | boolean)[] {
     return [
       question.topicId,
       question.prompt,
@@ -226,10 +226,10 @@ export class QuestionRepositoryDatabase implements QuestionRepository {
       prompt: question.prompt,
       isMultipleChoice: question.is_multiple_choice === this.dbType(1),
       options: questionOptionsDTO,
-      difficulty: question.difficulty,
-      qtyAnswered: question.qty_answered,
-      qtyCorrectAnswers: question.qty_correct_answers,
-      difficultyRecursive: question.difficulty_recursive,
+      difficulty: Number(question.difficulty),
+      qtyAnswered: Number(question.qty_answered),
+      qtyCorrectAnswers: Number(question.qty_correct_answers),
+      difficultyRecursive: Number(question.difficulty_recursive),
       simulexHash: question.simulex_hash,
       topicRootId: question.topic_root_id,
       linkedTopics: JSON.parse(question.linked_topics),
@@ -241,7 +241,7 @@ export class QuestionRepositoryDatabase implements QuestionRepository {
     }
   }
 
-  private dbType(value: number): any {
+  private dbType(value: number): boolean | number {
     return this.connection.databaseType() === "postgres" ? Boolean(value) : value
   }
 }

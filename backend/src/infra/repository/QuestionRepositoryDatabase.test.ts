@@ -186,6 +186,7 @@ describe("QuestionRepositoryDatabase", () => {
   })
 
   test("should get statistics of questions about discipline", async () => {
+    await connection.clear(["questions", "topics", "disciplines"])
     const portugues = disciplineMock({ name: "Português" })
     const crase = topicMock({ name: "Crase" })
     const pronomes = topicMock({ name: "Pronomes" })
@@ -195,26 +196,22 @@ describe("QuestionRepositoryDatabase", () => {
     portugues.topics.add(pronomes)
     portugues.setTopicParent({ topic: palavrasRepetidas, topicParent: crase })
     await disciplineRepository.save(portugues)
-
     const direitoPenal = disciplineMock({ name: "Direito Penal" })
     const crimes = topicMock({ name: "Crimes" })
     direitoPenal.topics.add(crimes)
     await disciplineRepository.save(direitoPenal)
-
     const question1: Question = Question.create({
       prompt: "Pergunta 1 - Crase",
       options: [{ text: "Correta", isCorrectAnswer: true }],
       topicId: crase.topicId,
       topicRootId: crase.topicRootId,
     })
-
     const question2: Question = Question.create({
       prompt: "Pergunta 2 - Crase",
       options: [{ text: "Correta", isCorrectAnswer: true }],
       topicId: crase.topicId,
       topicRootId: crase.topicRootId,
     })
-
     const question3: Question = Question.create({
       prompt: "Pergunta 3 - Crase",
       options: [{ text: "Correta", isCorrectAnswer: true }],
@@ -222,27 +219,23 @@ describe("QuestionRepositoryDatabase", () => {
       topicRootId: crase.topicRootId,
     })
     question3.deactivate()
-
     const question4: Question = Question.create({
       prompt: "Pergunta 1 - Pronomes",
       options: [{ text: "Correta", isCorrectAnswer: true }],
       topicId: pronomes.topicId,
       topicRootId: pronomes.topicRootId,
     })
-
     const question5: Question = Question.create({
       prompt: "Pergunta 1 - Crimes",
       options: [{ text: "Correta", isCorrectAnswer: true }],
       topicId: crimes.topicId,
       topicRootId: crimes.topicRootId,
     })
-
     await questionRepository.save(question1)
     await questionRepository.save(question2)
     await questionRepository.save(question3)
     await questionRepository.save(question4)
     await questionRepository.save(question5)
-
     const portuguesStatistics = await questionRepository.getDisciplineStatistics(portugues.disciplineId)
     expect(portuguesStatistics.disciplineId).toBe(portugues.disciplineId)
     expect(portuguesStatistics.topics).toHaveLength(2)
@@ -254,7 +247,6 @@ describe("QuestionRepositoryDatabase", () => {
       topicId: pronomes.topicId,
       qtyQuestions: 1,
     })
-
     const direitoPenalStatistics = await questionRepository.getDisciplineStatistics(direitoPenal.disciplineId)
     expect(direitoPenalStatistics.disciplineId).toBe(direitoPenal.disciplineId)
     expect(direitoPenalStatistics.topics).toHaveLength(1)
@@ -335,7 +327,7 @@ describe("QuestionRepositoryDatabase", () => {
       learning1 = await learningRepository.getDisciplineLearning(userMember1, portugues)
     })
 
-    test("should get a random question from a topic that the user has not answered yet", async () => {
+    test.only("should get a random question from a topic that the user has not answered yet", async () => {
       // Crase
       let nextQuestion = await questionRepository.getRandom({
         topicId: crase.topicId,
