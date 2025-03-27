@@ -1,3 +1,4 @@
+import { faker } from "@faker-js/faker"
 import { DatabaseConnection, getTestDatabaseAdapter } from "../../../infra/database"
 import { DisciplineRepositoryDatabase, QuestionRepositoryDatabase } from "../../../infra/repository"
 import { disciplineMock, questionMock, topicMock } from "../../../tests/mocks"
@@ -38,7 +39,7 @@ describe("UseCase => GetQuestionById", () => {
   })
 
   test("should throw error when question not found", async () => {
-    const nonExistentQuestionId = "non-existent-id"
+    const nonExistentQuestionId = faker.string.uuid()
     await expect(getQuestionById.execute(nonExistentQuestionId)).rejects.toThrow(
       `Question ID:${nonExistentQuestionId} does not exist!`
     )

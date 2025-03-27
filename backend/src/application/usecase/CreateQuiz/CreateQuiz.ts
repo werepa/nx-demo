@@ -14,7 +14,7 @@ export class CreateQuiz {
     private disciplineRepository: DisciplineRepository
   ) {}
 
-  async execute(dto: Input): Promise<Output> {
+  async execute(dto: CreateQuizCommand): Promise<Output> {
     const user = await this.validateUser(dto.userId)
     const discipline = await this.validateDiscipline(dto.disciplineId)
 
@@ -74,7 +74,7 @@ export class CreateQuiz {
   }
 }
 
-type Input = {
+type CreateQuizCommand = {
   userId: string
   disciplineId: string
   topicsRoot: string[]
