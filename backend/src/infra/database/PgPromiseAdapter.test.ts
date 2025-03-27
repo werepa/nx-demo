@@ -1,22 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { PgPromiseAdapter } from "./PgPromiseAdapter"
 import { DatabaseType } from "./DatabaseConnection"
 
 describe("PgPromiseAdapter", () => {
   let adapter: PgPromiseAdapter
-  const TEST_DB_URL = "postgres://postgres:postgres@localhost:5432/simulex_test"
-
-  beforeAll(async () => {
-    // Create test database if it doesn't exist
-    const pgp = new PgPromiseAdapter("postgres://postgres:postgres@localhost:5432/postgres")
-    try {
-      await pgp.run("CREATE DATABASE simulex_test")
-    } catch (error: unknown) {
-      // Database may already exist, intentionally ignore error
-      console.log("Database simulex_test may already exist, ignoring error:", error)
-    } finally {
-      await pgp.close()
-    }
-  })
+  const TEST_DB_URL = process.env.TEST_DATABASE_URL
+  process.env.NODE_ENV = "test"
 
   beforeEach(async () => {
     adapter = new PgPromiseAdapter(TEST_DB_URL)
@@ -25,22 +14,11 @@ describe("PgPromiseAdapter", () => {
       await adapter.run("DROP TABLE IF EXISTS test")
     } catch (error: unknown) {
       // Ignore errors from non-existent tables, intentionally ignored
-      console.log("Error dropping test table, may not exist:", error)
     }
   })
 
   afterEach(async () => {
     await adapter.close()
-  })
-
-  afterAll(async () => {
-    // Clean up test database
-    const pgp = new PgPromiseAdapter("postgres://postgres:postgres@localhost:5432/postgres")
-    try {
-      await pgp.run("DROP DATABASE IF EXISTS simulex_test")
-    } finally {
-      await pgp.close()
-    }
   })
 
   describe("databaseType", () => {
@@ -101,7 +79,7 @@ describe("PgPromiseAdapter", () => {
       expect(result.name).toBe("Test Name")
     })
 
-    it("should return undefined for non-existent row", async () => {
+    it("should return null for non-existent row", async () => {
       // Arrange
       await adapter.run("CREATE TABLE test (id SERIAL PRIMARY KEY, name TEXT)")
 
@@ -109,7 +87,7 @@ describe("PgPromiseAdapter", () => {
       const result = await adapter.get<{ id: number; name: string }>("SELECT * FROM test WHERE id = 999")
 
       // Assert
-      expect(result).toBeUndefined()
+      expect(result).toBeNull()
     })
 
     it("should throw an error for invalid query", async () => {
@@ -224,7 +202,7 @@ describe("PgPromiseAdapter", () => {
       expect(result.name).toBe("Test Name")
     })
 
-    it("should return undefined for non-existent row", async () => {
+    it("should return null for non-existent row", async () => {
       // Arrange
       await adapter.run("CREATE TABLE test (id SERIAL PRIMARY KEY, name TEXT)")
 
@@ -232,7 +210,7 @@ describe("PgPromiseAdapter", () => {
       const result = await adapter.one<{ id: number; name: string }>("SELECT * FROM test WHERE id = 999")
 
       // Assert
-      expect(result).toBeUndefined()
+      expect(result).toBeNull()
     })
 
     it("should throw an error for invalid query", async () => {

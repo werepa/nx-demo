@@ -4,31 +4,42 @@ import { Logger } from "../../shared/utils/Logger"
 
 export class PgPromiseAdapter implements DatabaseConnection {
   private connection: pgPromise.IDatabase<object>
-  private logger: Logger
+  private readonly logger: Logger
+  private isOpen = true
 
   constructor(connectionUrl?: string) {
+    this.logger = new Logger()
     try {
       const pgp = pgPromise()
-      let dbUrl = connectionUrl || process.env.DATABASE_URL
-      dbUrl = process.env.NODE_ENV === "test" ? process.env.TEST_DATABASE_URL : dbUrl
+      const dbUrl = this.getConnectionUrl(connectionUrl)
       if (!dbUrl) {
         throw new Error("No database connection URL provided")
       }
       this.connection = pgp(dbUrl)
-      this.logger = new Logger()
     } catch (error) {
-      this.logger = new Logger()
       this.logger.error("Failed to initialize PostgreSQL database:" + error)
       throw error
     }
   }
-  F
+
+  private getConnectionUrl(connectionUrl?: string): string {
+    const dbUrl = connectionUrl || process.env.DATABASE_URL
+    return process.env.NODE_ENV === "test" ? process.env.TEST_DATABASE_URL : dbUrl
+  }
+
+  private checkConnection() {
+    if (!this.isOpen) {
+      throw new Error("Database connection is not open")
+    }
+  }
+
   databaseType(): DatabaseType {
     return "postgres"
   }
 
   async run(statement: string, params?: SqlParameter[]): Promise<void> {
     try {
+      this.checkConnection()
       await this.connection.none(statement, params || [])
     } catch (error) {
       this.logger.error(`Error executing statement: ${statement}`)
@@ -38,9 +49,10 @@ export class PgPromiseAdapter implements DatabaseConnection {
     }
   }
 
-  async get<T>(statement: string, params?: SqlParameter[]): Promise<T> {
+  async get<T>(statement: string, params?: SqlParameter[]): Promise<T | undefined> {
     try {
-      return await this.connection.one(statement, params || [])
+      this.checkConnection()
+      return await this.connection.oneOrNone(statement, params || [])
     } catch (error) {
       this.logger.error(`Error executing statement: ${statement}`)
       this.logger.error(`Parameters: ${JSON.stringify(params)}`)
@@ -51,6 +63,7 @@ export class PgPromiseAdapter implements DatabaseConnection {
 
   async all<T>(statement: string, params?: SqlParameter[]): Promise<T[]> {
     try {
+      this.checkConnection()
       return await this.connection.any(statement, params || [])
     } catch (error) {
       this.logger.error(`Error executing statement: ${statement}`)
@@ -62,8 +75,12 @@ export class PgPromiseAdapter implements DatabaseConnection {
 
   async close(): Promise<void> {
     try {
-      await this.connection.$pool.end()
+      if (this.isOpen) {
+        await this.connection.$pool.end()
+        this.isOpen = false
+      }
     } catch (error) {
+      this.logger.error("Error closing database connection")
       this.logger.error(error)
       throw error
     }
@@ -71,6 +88,7 @@ export class PgPromiseAdapter implements DatabaseConnection {
 
   async query<T>(query: string, params?: SqlParameter[]): Promise<QueryResult<T>> {
     try {
+      this.checkConnection()
       const result = await this.connection.query(query, params || [])
       return {
         rows: result,
@@ -84,9 +102,10 @@ export class PgPromiseAdapter implements DatabaseConnection {
     }
   }
 
-  async one<T>(query: string, params?: SqlParameter[]): Promise<T> {
+  async one<T>(query: string, params?: SqlParameter[]): Promise<T | undefined> {
     try {
-      return await this.connection.one(query, params || [])
+      this.checkConnection()
+      return await this.connection.oneOrNone(query, params || [])
     } catch (error) {
       this.logger.error(`Error executing query: ${query}`)
       this.logger.error(`Parameters: ${JSON.stringify(params)}`)
@@ -97,6 +116,7 @@ export class PgPromiseAdapter implements DatabaseConnection {
 
   async none(query: string, params?: SqlParameter[]): Promise<void> {
     try {
+      this.checkConnection()
       await this.connection.none(query, params || [])
     } catch (error) {
       this.logger.error(`Error executing query: ${query}`)
