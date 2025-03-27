@@ -117,8 +117,8 @@ export class QuestionRepositoryDatabase implements QuestionRepository {
   async getById(questionId: string): Promise<Question | null> {
     if (!questionId) return null
     const query = "SELECT * FROM questions WHERE question_id = ?"
-    const questionFromDB = await this.connection.get(query, [questionId])
-    return questionFromDB ? Question.toDomain(this.convertDatabaseQuestion(questionFromDB)) : null
+    const rawQuestionData = await this.connection.get<RawQuestionData>(query, [questionId])
+    return rawQuestionData ? Question.toDomain(this.convertDatabaseQuestion(rawQuestionData)) : null
   }
 
   async getAll(
@@ -133,21 +133,9 @@ export class QuestionRepositoryDatabase implements QuestionRepository {
     queryParts.push("ORDER BY created_at DESC LIMIT 100")
 
     const query = queryParts.join(" ")
-    const questionsFromDB = await this.connection.all<RawQuestionData>(query)
-    return questionsFromDB.map((question: RawQuestionData) => {
-      question.linked_topics = JSON.parse(question.linked_topics)
-      const rawOptionsList: QuestionOptionState[] = JSON.parse(question.options)
-      const questionOptionsDTOList = rawOptionsList.map((questionOptionDTO: QuestionOptionDTO) =>
-        QuestionOption.toDomain({
-          optionId: questionOptionDTO.optionId,
-          text: questionOptionDTO.text,
-          isCorrectAnswer: questionOptionDTO.isCorrectAnswer,
-          questionId: questionOptionDTO.questionId,
-          item: questionOptionDTO.item,
-          obs: questionOptionDTO.obs,
-        })
-      )
-      return Question.toDomain(this.convertDatabaseQuestion({ ...question, options: questionOptionsDTOList }))
+    const rawQuestionsData = await this.connection.all<RawQuestionData>(query)
+    return rawQuestionsData.map((question: RawQuestionData) => {
+      return Question.toDomain(this.convertDatabaseQuestion(question))
     })
   }
 
@@ -179,7 +167,7 @@ export class QuestionRepositoryDatabase implements QuestionRepository {
       LIMIT 1
     `
     const params = [topicId, topicId, userId, ...topicsRoot]
-    const question = await this.connection.get(query, params)
+    const question = await this.connection.get<RawQuestionData>(query, params)
 
     if (!question) {
       return null
@@ -191,8 +179,8 @@ export class QuestionRepositoryDatabase implements QuestionRepository {
   async getByHash(simulexHash: string): Promise<Question | null> {
     if (!simulexHash) return null
     const query = "SELECT * FROM questions WHERE simulex_hash = ?"
-    const questionFromDB = await this.connection.get(query, [simulexHash])
-    return questionFromDB ? Question.toDomain(this.convertDatabaseQuestion(questionFromDB)) : null
+    const rawQuestionData = await this.connection.get<RawQuestionData>(query, [simulexHash])
+    return rawQuestionData ? Question.toDomain(this.convertDatabaseQuestion(rawQuestionData)) : null
   }
 
   // retorna o total de questões ativas de cada tópico da disciplina
@@ -233,21 +221,32 @@ export class QuestionRepositoryDatabase implements QuestionRepository {
     }
   }
 
-  private convertDatabaseQuestion(question: any): QuestionState {
+  private convertDatabaseQuestion(question: RawQuestionData): QuestionState {
+    const rawOptionsList: QuestionOptionState[] = JSON.parse(question.options)
+    const questionOptionsDTO: QuestionOption[] = rawOptionsList.map((questionOptionDTO: QuestionOptionDTO) =>
+      QuestionOption.toDomain({
+        optionId: questionOptionDTO.optionId,
+        text: questionOptionDTO.text,
+        isCorrectAnswer: questionOptionDTO.isCorrectAnswer,
+        questionId: questionOptionDTO.questionId,
+        item: questionOptionDTO.item,
+        obs: questionOptionDTO.obs,
+      })
+    )
     return {
       questionId: question.question_id,
       topicId: question.topic_id,
       prompt: question.prompt,
       isMultipleChoice: question.is_multiple_choice === this.dbType(1),
-      options: question.options,
+      options: questionOptionsDTO,
       difficulty: question.difficulty,
       qtyAnswered: question.qty_answered,
       qtyCorrectAnswers: question.qty_correct_answers,
       difficultyRecursive: question.difficulty_recursive,
       simulexHash: question.simulex_hash,
       topicRootId: question.topic_root_id,
-      linkedTopics: question.linked_topics,
-      year: question.year,
+      linkedTopics: JSON.parse(question.linked_topics),
+      year: question.year.toString(),
       sourceId: question.source_id,
       isActive: question.is_active === this.dbType(1),
       createdBy: question.created_by,
