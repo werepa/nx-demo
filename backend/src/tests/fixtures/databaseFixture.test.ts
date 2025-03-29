@@ -129,8 +129,8 @@ describe("Fixture => Database", () => {
     topicInactive = fixture.topicInactive
   })
 
-  afterAll(() => {
-    connection.close()
+  afterAll(async () => {
+    await connection.close()
   })
 
   it("should create test users", async () => {

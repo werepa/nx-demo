@@ -11,13 +11,17 @@ describe("Usecase => CreateDiscipline", () => {
   let disciplineRepository: DisciplineRepository
   let createDiscipline: CreateDiscipline
 
-  beforeEach(() => {
+  beforeAll(() => {
     connection = getTestDatabaseAdapter()
     disciplineRepository = new DisciplineRepositoryDatabase(connection)
     createDiscipline = new CreateDiscipline(disciplineRepository)
   })
 
-  afterEach(() => {
+  beforeEach(async () => {
+    await connection.clear(["topics", "disciplines"])
+  })
+
+  afterAll(() => {
     connection.close()
   })
 

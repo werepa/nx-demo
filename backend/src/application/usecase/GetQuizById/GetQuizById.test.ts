@@ -14,20 +14,22 @@ describe("UseCase => GetQuizById", () => {
   let disciplineRepository: DisciplineRepositoryDatabase
   let quizRepository: QuizRepositoryDatabase
 
-  beforeEach(async () => {
+  beforeAll(() => {
     connection = getTestDatabaseAdapter()
 
     userRepository = new UserRepositoryDatabase(connection)
     disciplineRepository = new DisciplineRepositoryDatabase(connection)
     quizRepository = new QuizRepositoryDatabase(connection, userRepository, disciplineRepository)
 
-    await connection.clear(["quiz_answers", "quizzes", "questions", "topics", "disciplines", "users"])
-
     getQuizById = new GetQuizById(quizRepository)
   })
 
-  afterAll(() => {
-    connection.close()
+  beforeEach(async () => {
+    await connection.clear(["quiz_answers", "quizzes", "questions", "topics", "disciplines", "users"])
+  })
+
+  afterAll(async () => {
+    await connection.close()
   })
 
   test("should return the quiz when it exists", async () => {
@@ -51,10 +53,5 @@ describe("UseCase => GetQuizById", () => {
   test("should return null when the quiz does not exist!", async () => {
     const nonExistentQuizId = faker.string.uuid()
     expect(await getQuizById.execute(nonExistentQuizId)).toBeNull()
-  })
-
-  test("should throw an error if quiz does not exist", async () => {
-    const nonExistentQuizId = "non-existent-quiz-id"
-    await expect(getQuizById.execute(nonExistentQuizId)).rejects.toThrow(`Quiz ID:${nonExistentQuizId} does not exist!`)
   })
 })

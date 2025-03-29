@@ -12,20 +12,23 @@ xdescribe("Auth Integration Tests", () => {
   let createUser: CreateUser
   let loginUser: LoginUser
   let logoutUser: LogoutUser
+  let authController: AuthController
 
-  beforeEach(async () => {
+  beforeAll(() => {
     connection = getTestDatabaseAdapter()
     userRepository = new UserRepositoryDatabase(connection)
-
-    await connection.clear(["users"])
 
     createUser = new CreateUser(userRepository)
     loginUser = new LoginUser(userRepository)
     logoutUser = new LogoutUser(userRepository)
-    new AuthController(app, createUser, loginUser, logoutUser)
+    authController = new AuthController(app, createUser, loginUser, logoutUser)
   })
 
-  afterEach(async () => {
+  beforeEach(async () => {
+    await connection.clear(["users"])
+  })
+
+  afterAll(async () => {
     await connection.close()
   })
 

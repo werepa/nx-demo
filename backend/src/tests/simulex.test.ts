@@ -104,6 +104,7 @@ describe("Simulex", () => {
       learningRepository
     )
   })
+
   beforeEach(async () => {
     await connection.clear([
       "user_topic_learnings",
@@ -163,8 +164,9 @@ describe("Simulex", () => {
     semantica = fixture.semantica
     figurasDeLinguagem = fixture.figurasDeLinguagem
   })
-  afterAll(() => {
-    connection.close()
+
+  afterAll(async () => {
+    await connection.close()
   })
 
   describe("Fixtures", () => {

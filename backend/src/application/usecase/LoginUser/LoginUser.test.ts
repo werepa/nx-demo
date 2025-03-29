@@ -12,17 +12,18 @@ describe("Usecase => LoginUser", () => {
   let createUser: CreateUser
   let loginUser: LoginUser
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     connection = getTestDatabaseAdapter()
-
     userRepository = new UserRepositoryDatabase(connection)
     loginUser = new LoginUser(userRepository)
+  })
 
+  beforeEach(async () => {
     await connection.clear(["users"])
   })
 
-  afterEach(() => {
-    connection.close()
+  afterAll(async () => {
+    await connection.close()
   })
 
   test("should throw an error if email does not exist", async () => {

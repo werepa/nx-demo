@@ -11,16 +11,18 @@ describe("GetUsers", () => {
   let userRepository: UserRepository
   let getUsers: GetUsers
 
-  beforeEach(async () => {
+  beforeAll(() => {
     connection = getTestDatabaseAdapter()
     userRepository = new UserRepositoryDatabase(connection)
     getUsers = new GetUsers(userRepository)
+  })
 
+  beforeEach(async () => {
     await connection.clear(["users"])
   })
 
-  afterEach(() => {
-    connection.close()
+  afterAll(async () => {
+    await connection.close()
   })
 
   it("should return all users order by name", async () => {

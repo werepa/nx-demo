@@ -43,7 +43,7 @@ describe("CheckQuizAnswer", () => {
   let learning1: Learning
   let learning2: Learning
 
-  beforeAll(async () => {
+  beforeAll(() => {
     connection = getTestDatabaseAdapter()
 
     userRepository = new UserRepositoryDatabase(connection)
@@ -51,16 +51,6 @@ describe("CheckQuizAnswer", () => {
     questionRepository = new QuestionRepositoryDatabase(connection)
     quizRepository = new QuizRepositoryDatabase(connection, userRepository, disciplineRepository)
     learningRepository = new LearningRepositoryDatabase(connection)
-
-    await connection.clear([
-      "user_topic_learnings",
-      "quiz_answers",
-      "quizzes",
-      "questions",
-      "topics",
-      "disciplines",
-      "users",
-    ])
 
     // UseCase
     createQuiz = new CreateQuiz(quizRepository, userRepository, disciplineRepository)
@@ -115,8 +105,8 @@ describe("CheckQuizAnswer", () => {
     learning1 = await learningRepository.getDisciplineLearning(userMember1, portugues)
   })
 
-  afterAll(() => {
-    connection.close()
+  afterAll(async () => {
+    await connection.close()
   })
 
   test("should execute the correct quiz answer", async () => {

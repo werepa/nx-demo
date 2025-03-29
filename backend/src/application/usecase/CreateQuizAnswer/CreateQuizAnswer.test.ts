@@ -31,7 +31,7 @@ describe("CreateQuizAnswer", () => {
   let question3: Question
   let question4: Question
 
-  beforeEach(async () => {
+  beforeAll(() => {
     connection = getTestDatabaseAdapter()
 
     userRepository = new UserRepositoryDatabase(connection)
@@ -39,9 +39,11 @@ describe("CreateQuizAnswer", () => {
     questionRepository = new QuestionRepositoryDatabase(connection)
     quizRepository = new QuizRepositoryDatabase(connection, userRepository, disciplineRepository)
 
-    await connection.clear(["quiz_answers", "quizzes", "questions", "topics", "disciplines", "users"])
-
     createQuizAnswer = new CreateQuizAnswer(quizRepository, questionRepository)
+  })
+
+  beforeEach(async () => {
+    await connection.clear(["quiz_answers", "quizzes", "questions", "topics", "disciplines", "users"])
 
     const userMember = userMock({ name: "User Member" })
     userMember.updateRole(UserRole.create(RoleEnum.MEMBER))
@@ -96,8 +98,8 @@ describe("CreateQuizAnswer", () => {
     await quizRepository.save(quiz)
   })
 
-  afterEach(() => {
-    connection.close()
+  afterAll(async () => {
+    await connection.close()
   })
 
   test("should create a quiz answer", async () => {

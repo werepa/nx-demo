@@ -57,7 +57,7 @@ describe("LearningRepositoryDatabase", () => {
   let poderVinculado: Topic
   let topicInactive: Topic
 
-  beforeEach(async () => {
+  beforeAll(() => {
     connection = getTestDatabaseAdapter()
 
     userRepository = new UserRepositoryDatabase(connection)
@@ -66,6 +66,16 @@ describe("LearningRepositoryDatabase", () => {
     quizRepository = new QuizRepositoryDatabase(connection, userRepository, disciplineRepository)
     learningRepository = new LearningRepositoryDatabase(connection)
 
+    correctQuizAnswer = new CheckQuizAnswer(
+      userRepository,
+      disciplineRepository,
+      questionRepository,
+      quizRepository,
+      learningRepository
+    )
+  })
+
+  beforeEach(async () => {
     await connection.clear([
       "user_topic_learnings",
       "quiz_answers",
@@ -75,14 +85,6 @@ describe("LearningRepositoryDatabase", () => {
       "disciplines",
       "users",
     ])
-
-    correctQuizAnswer = new CheckQuizAnswer(
-      userRepository,
-      disciplineRepository,
-      questionRepository,
-      quizRepository,
-      learningRepository
-    )
 
     const fixture = await databaseFixture({
       connection,
@@ -115,8 +117,8 @@ describe("LearningRepositoryDatabase", () => {
     topicInactive = fixture.topicInactive
   })
 
-  afterEach(() => {
-    connection.close()
+  afterAll(async () => {
+    await connection.close()
   })
 
   test("should return an user learning", async () => {

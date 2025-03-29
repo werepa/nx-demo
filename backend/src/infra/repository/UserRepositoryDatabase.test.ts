@@ -8,14 +8,17 @@ describe("UserRepositoryDatabase", () => {
   let connection: DatabaseConnection
   let userRepository: UserRepository
 
-  beforeEach(async () => {
+  beforeAll(() => {
     connection = getTestDatabaseAdapter()
     userRepository = new UserRepositoryDatabase(connection)
+  })
+
+  beforeEach(async () => {
     await connection.clear(["users"])
   })
 
-  afterEach(() => {
-    connection.close()
+  afterAll(async () => {
+    await connection.close()
   })
 
   describe("User", () => {
@@ -71,20 +74,20 @@ describe("UserRepositoryDatabase", () => {
   })
 
   describe("Token Management", () => {
-    test("should invalidate a token", async () => {
-      const token = "valid_token"
-      await userRepository.invalidateToken(token)
+    test("should consider tokens valid by default", async () => {
+      const token = "new_token"
       const isValid = await userRepository.isTokenValid(token)
-      expect(isValid).toBe(false)
+      expect(isValid).toBe(true)
     })
 
-    test("should validate a token", async () => {
+    test("should invalidate tokens", async () => {
       const token = "valid_token"
-      const isValidBefore = await userRepository.isTokenValid(token)
-      expect(isValidBefore).toBe(true)
+      // First verify token is valid
+      expect(await userRepository.isTokenValid(token)).toBe(true)
+      // Invalidate it
       await userRepository.invalidateToken(token)
-      const isValidAfter = await userRepository.isTokenValid(token)
-      expect(isValidAfter).toBe(false)
+      // Verify it's now invalid
+      expect(await userRepository.isTokenValid(token)).toBe(false)
     })
   })
 })

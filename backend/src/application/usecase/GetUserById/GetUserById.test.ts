@@ -21,8 +21,8 @@ describe("GetUserById", () => {
     await connection.clear(["users"])
   })
 
-  afterAll(() => {
-    connection.close()
+  afterAll(async () => {
+    await connection.close()
   })
 
   it("should return the user when found", async () => {

@@ -17,6 +17,10 @@ describe("InMemoryAdapter", () => {
     }
   })
 
+  afterAll(async () => {
+    await adapter.close()
+  })
+
   describe("databaseType", () => {
     it("should return sqlite as database type", () => {
       // Arrange & Act

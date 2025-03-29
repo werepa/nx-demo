@@ -62,21 +62,11 @@ describe("GetLearning", () => {
 
   let topicLearning: TopicLearning
 
-  beforeEach(async () => {
+  beforeAll(() => {
     connection = getTestDatabaseAdapter()
 
     userRepository = new UserRepositoryDatabase(connection)
     disciplineRepository = new DisciplineRepositoryDatabase(connection)
-
-    await connection.clear([
-      "user_topic_learnings",
-      "quiz_answers",
-      "quizzes",
-      "questions",
-      "topics",
-      "disciplines",
-      "users",
-    ])
 
     questionRepository = new QuestionRepositoryDatabase(connection)
     quizRepository = new QuizRepositoryDatabase(connection, userRepository, disciplineRepository)
@@ -91,6 +81,17 @@ describe("GetLearning", () => {
       learningRepository
     )
     getLearning = new GetLearning(disciplineRepository, userRepository, learningRepository)
+  })
+  beforeEach(async () => {
+    await connection.clear([
+      "user_topic_learnings",
+      "quiz_answers",
+      "quizzes",
+      "questions",
+      "topics",
+      "disciplines",
+      "users",
+    ])
 
     const fixture = await databaseFixture({
       connection,
@@ -133,8 +134,8 @@ describe("GetLearning", () => {
     topicInactive = fixture.topicInactive
   })
 
-  afterEach(() => {
-    connection.close()
+  afterAll(async () => {
+    await connection.close()
   })
 
   it("should set discipline statistics properties", async () => {

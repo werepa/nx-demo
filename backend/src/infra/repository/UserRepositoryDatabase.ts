@@ -109,6 +109,8 @@ export class UserRepositoryDatabase implements UserRepository {
     this.tokenBlacklist.add(token)
   }
 
+  // TODO: Not suitable for production without persistence
+  // This is a temporary solution for testing purposes
   async isTokenValid(token: string): Promise<boolean> {
     return !this.tokenBlacklist.has(token)
   }

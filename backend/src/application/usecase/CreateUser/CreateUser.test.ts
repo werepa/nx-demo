@@ -16,12 +16,12 @@ describe("Usecase => CreateUser", () => {
   let getUserById: GetUserById
   let getUsers: GetUsers
 
-  beforeAll(async () => {
+  beforeAll(() => {
     connection = getTestDatabaseAdapter()
+    userRepository = new UserRepositoryDatabase(connection)
   })
 
   beforeEach(async () => {
-    userRepository = new UserRepositoryDatabase(connection)
     await connection.clear(["users"])
 
     createUser = new CreateUser(userRepository)

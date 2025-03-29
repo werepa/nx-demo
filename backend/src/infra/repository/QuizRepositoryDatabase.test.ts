@@ -32,8 +32,8 @@ describe("QuizRepositoryDatabase", () => {
     await connection.clear(["quiz_answers", "quizzes", "questions", "topics", "disciplines", "users"])
   })
 
-  afterAll(() => {
-    connection.close()
+  afterAll(async () => {
+    await connection.close()
   })
 
   test("should save a quiz", async () => {

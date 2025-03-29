@@ -38,8 +38,8 @@ describe("GetQuizzes", () => {
     await connection.clear(["quiz_answers", "quizzes", "questions", "topics", "disciplines", "users"])
   })
 
-  afterAll(() => {
-    connection.close()
+  afterAll(async () => {
+    await connection.close()
   })
 
   test("should return the quizzes when exists", async () => {

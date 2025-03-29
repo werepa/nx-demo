@@ -2,33 +2,26 @@ import { DatabaseConnection } from "../../../infra/database/DatabaseConnection"
 import { getTestDatabaseAdapter } from "../../../infra/database/TestDatabaseAdapter"
 import { GetUserByEmail } from "./GetUserByEmail"
 import { userMock } from "../../../tests/mocks"
-import { DisciplineRepository } from "../../repository/DisciplineRepository"
 import { UserRepository } from "../../repository/UserRepository"
-import { DisciplineRepositoryDatabase } from "../../../infra/repository/DisciplineRepositoryDatabase"
 import { UserRepositoryDatabase } from "../../../infra/repository/UserRepositoryDatabase"
-import { SqliteInMemory } from "../../../infra/repository/inMemory/SqliteInMemory"
 
 describe("GetUserByEmail", () => {
-  let sqlite: SqliteInMemory
   let connection: DatabaseConnection
-  let disciplineRepository: DisciplineRepository
   let userRepository: UserRepository
   let getUserByEmail: GetUserByEmail
 
-  beforeEach(async () => {
-    sqlite = new SqliteInMemory()
+  beforeAll(() => {
     connection = getTestDatabaseAdapter()
-
-    disciplineRepository = new DisciplineRepositoryDatabase(connection)
     userRepository = new UserRepositoryDatabase(connection)
-
-    await connection.clear(["topics", "disciplines", "users"])
-
     getUserByEmail = new GetUserByEmail(userRepository)
   })
 
-  afterEach(() => {
-    connection.close()
+  beforeEach(async () => {
+    await connection.clear(["users"])
+  })
+
+  afterAll(async () => {
+    await connection.close()
   })
 
   it("should return the user when found by email", async () => {

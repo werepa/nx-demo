@@ -8,14 +8,17 @@ describe("DisciplineRepositoryDatabase", () => {
   let connection: DatabaseConnection
   let disciplineRepository: DisciplineRepository
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     connection = getTestDatabaseAdapter()
     disciplineRepository = new DisciplineRepositoryDatabase(connection)
+  })
+
+  beforeEach(async () => {
     await connection.clear(["topics", "disciplines"])
   })
 
-  afterEach(() => {
-    connection.close()
+  afterAll(async () => {
+    await connection.close()
   })
 
   describe("Discipline", () => {

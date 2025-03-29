@@ -18,11 +18,11 @@ describe("Usecases => GetDisciplineById", () => {
   })
 
   beforeEach(async () => {
-    await connection.clear(["disciplines"])
+    await connection.clear(["topics", "disciplines"])
   })
 
-  afterAll(() => {
-    connection.close()
+  afterAll(async () => {
+    await connection.close()
   })
 
   test("should return the correct discipline when the ID is valid", async () => {

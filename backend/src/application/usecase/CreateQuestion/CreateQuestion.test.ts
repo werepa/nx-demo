@@ -13,19 +13,21 @@ describe("CreateQuestion", () => {
   let disciplineRepository: DisciplineRepository
   let createQuestion: CreateQuestion
 
-  beforeEach(async () => {
+  beforeAll(() => {
     connection = getTestDatabaseAdapter()
 
     disciplineRepository = new DisciplineRepositoryDatabase(connection)
     questionRepository = new QuestionRepositoryDatabase(connection)
 
-    await connection.clear(["questions", "topics", "disciplines"])
-
     createQuestion = new CreateQuestion(questionRepository)
   })
 
-  afterEach(() => {
-    connection.close()
+  beforeEach(async () => {
+    await connection.clear(["questions", "topics", "disciplines"])
+  })
+
+  afterAll(async () => {
+    await connection.close()
   })
 
   it("should create a question", async () => {

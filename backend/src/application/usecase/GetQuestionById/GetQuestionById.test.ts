@@ -10,19 +10,19 @@ describe("UseCase => GetQuestionById", () => {
   let disciplineRepository: DisciplineRepositoryDatabase
   let questionRepository: QuestionRepositoryDatabase
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     connection = getTestDatabaseAdapter()
-
     disciplineRepository = new DisciplineRepositoryDatabase(connection)
     questionRepository = new QuestionRepositoryDatabase(connection)
-
-    await connection.clear(["questions", "topics", "disciplines"])
-
     getQuestionById = new GetQuestionById(questionRepository)
   })
 
-  afterAll(() => {
-    connection.close()
+  beforeEach(async () => {
+    await connection.clear(["questions", "topics", "disciplines"])
+  })
+
+  afterAll(async () => {
+    await connection.close()
   })
 
   test("should return a question by ID", async () => {

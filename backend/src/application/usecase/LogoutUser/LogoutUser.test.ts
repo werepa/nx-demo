@@ -9,17 +9,18 @@ describe("Usecase => LogoutUser", () => {
   let userRepository: UserRepository
   let logoutUser: LogoutUser
 
-  beforeEach(async () => {
+  beforeAll(() => {
     connection = getTestDatabaseAdapter()
-
     userRepository = new UserRepositoryDatabase(connection)
     logoutUser = new LogoutUser(userRepository)
+  })
 
+  beforeEach(async () => {
     await connection.clear(["users"])
   })
 
-  afterEach(() => {
-    connection.close()
+  afterAll(async () => {
+    await connection.close()
   })
 
   it("should throw an error if the token is invalid", async () => {

@@ -1,4 +1,3 @@
-import { Discipline } from "../../../domain/entity/Discipline"
 import { DatabaseConnection, getTestDatabaseAdapter } from "../../../infra/database"
 import { DisciplineRepositoryDatabase } from "../../../infra/repository"
 import { disciplineMock } from "../../../tests/mocks"
@@ -8,18 +7,18 @@ describe("Usecase => GetDisciplines", () => {
   let connection: DatabaseConnection
   let getDisciplines: GetDisciplines
 
-  beforeEach(() => {
+  beforeAll(() => {
     connection = getTestDatabaseAdapter()
     const disciplineRepository = new DisciplineRepositoryDatabase(connection)
     getDisciplines = new GetDisciplines(disciplineRepository)
   })
 
   beforeEach(async () => {
-    await connection.clear(["disciplines"])
+    await connection.clear(["topics", "disciplines"])
   })
 
-  afterAll(() => {
-    connection.close()
+  afterAll(async () => {
+    await connection.close()
   })
 
   test("should return an empty array when no disciplines exist", async () => {

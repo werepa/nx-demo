@@ -21,6 +21,10 @@ describe("PgPromiseAdapter", () => {
     await adapter.close()
   })
 
+  afterAll(async () => {
+    await adapter.close()
+  })
+
   describe("databaseType", () => {
     it("should return postgres as database type", () => {
       // Arrange & Act

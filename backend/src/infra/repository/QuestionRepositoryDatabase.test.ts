@@ -32,12 +32,14 @@ describe("QuestionRepositoryDatabase", () => {
   let crase: Topic
   let pronomes: Topic
 
-  beforeEach(async () => {
+  beforeAll(() => {
     connection = getTestDatabaseAdapter()
 
     disciplineRepository = new DisciplineRepositoryDatabase(connection)
     questionRepository = new QuestionRepositoryDatabase(connection)
+  })
 
+  beforeEach(async () => {
     await connection.clear(["questions", "topics", "disciplines"])
 
     portugues = disciplineMock({ name: "Português" })
@@ -48,8 +50,8 @@ describe("QuestionRepositoryDatabase", () => {
     await disciplineRepository.save(portugues)
   })
 
-  afterEach(() => {
-    connection.close()
+  afterAll(async () => {
+    await connection.close()
   })
 
   test("should save a new question", async () => {

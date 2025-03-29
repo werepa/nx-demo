@@ -57,7 +57,7 @@ describe("QuizRepository", () => {
   let learning1: Learning
   let learning2: Learning
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     connection = getTestDatabaseAdapter()
 
     userRepository = new UserRepositoryDatabase(connection)
@@ -65,16 +65,6 @@ describe("QuizRepository", () => {
     questionRepository = new QuestionRepositoryDatabase(connection)
     quizRepository = new QuizRepositoryDatabase(connection, userRepository, disciplineRepository)
     learningRepository = new LearningRepositoryDatabase(connection)
-
-    await connection.clear([
-      "user_topic_learnings",
-      "quiz_answers",
-      "quizzes",
-      "questions",
-      "topics",
-      "disciplines",
-      "users",
-    ])
 
     // UseCase
     getLearning = new GetLearning(disciplineRepository, userRepository, learningRepository)
@@ -86,6 +76,18 @@ describe("QuizRepository", () => {
       quizRepository,
       learningRepository
     )
+  })
+
+  beforeEach(async () => {
+    await connection.clear([
+      "user_topic_learnings",
+      "quiz_answers",
+      "quizzes",
+      "questions",
+      "topics",
+      "disciplines",
+      "users",
+    ])
 
     const fixture = await databaseFixture({
       connection,
@@ -128,8 +130,8 @@ describe("QuizRepository", () => {
     topicInactive = fixture.topicInactive
   })
 
-  afterEach(() => {
-    connection.close()
+  afterAll(async () => {
+    await connection.close()
   })
 
   test.only("should create fixture data", () => {

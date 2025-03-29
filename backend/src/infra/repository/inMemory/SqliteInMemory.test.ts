@@ -4,11 +4,11 @@ import BetterSqlite3 from "better-sqlite3"
 describe("SqliteInMemory", () => {
   let sqliteInMemory: SqliteInMemory
 
-  beforeEach(() => {
+  beforeAll(() => {
     sqliteInMemory = new SqliteInMemory()
   })
 
-  afterEach(() => {
+  afterAll(() => {
     sqliteInMemory.db.close()
   })
 

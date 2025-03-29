@@ -24,8 +24,8 @@ describe("DeleteDiscipline", () => {
     await connection.clear(["disciplines"])
   })
 
-  afterAll(() => {
-    connection.close()
+  afterAll(async () => {
+    await connection.close()
   })
 
   it("should delete a discipline", async () => {

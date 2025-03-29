@@ -44,7 +44,7 @@ describe("UseCase => CreateQuiz", () => {
   // let distancia: Topic
   // let terra: Topic
 
-  beforeEach(async () => {
+  beforeAll(() => {
     connection = getTestDatabaseAdapter()
 
     userRepository = new UserRepositoryDatabase(connection)
@@ -52,16 +52,6 @@ describe("UseCase => CreateQuiz", () => {
     questionRepository = new QuestionRepositoryDatabase(connection)
     quizRepository = new QuizRepositoryDatabase(connection, userRepository, disciplineRepository)
     learningRepository = new LearningRepositoryDatabase(connection)
-
-    await connection.clear([
-      "user_topic_learnings",
-      "quiz_answers",
-      "quizzes",
-      "questions",
-      "topics",
-      "disciplines",
-      "users",
-    ])
 
     // useCases
     createQuiz = new CreateQuiz(quizRepository, userRepository, disciplineRepository)
@@ -73,6 +63,18 @@ describe("UseCase => CreateQuiz", () => {
       quizRepository,
       learningRepository
     )
+  })
+
+  beforeEach(async () => {
+    await connection.clear([
+      "user_topic_learnings",
+      "quiz_answers",
+      "quizzes",
+      "questions",
+      "topics",
+      "disciplines",
+      "users",
+    ])
 
     const fixture = await databaseFixture({
       connection,
@@ -94,8 +96,8 @@ describe("UseCase => CreateQuiz", () => {
     // terra = fixture.terra
   })
 
-  afterEach(() => {
-    connection.close()
+  afterAll(async () => {
+    await connection.close()
   })
 
   test("should create a quiz of the correct type", async () => {
