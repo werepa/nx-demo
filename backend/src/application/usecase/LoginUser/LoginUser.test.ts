@@ -15,6 +15,7 @@ describe("Usecase => LoginUser", () => {
   beforeAll(async () => {
     connection = getTestDatabaseAdapter()
     userRepository = new UserRepositoryDatabase(connection)
+    createUser = new CreateUser(userRepository)
     loginUser = new LoginUser(userRepository)
   })
 

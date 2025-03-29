@@ -210,14 +210,14 @@ export class QuestionRepositoryDatabase implements QuestionRepository {
 
   private convertDatabaseQuestion(question: RawQuestionData): QuestionState {
     const rawOptionsList: QuestionOptionState[] = JSON.parse(question.options)
-    const questionOptionsDTO: QuestionOption[] = rawOptionsList.map((questionOptionDTO: QuestionOptionDTO) =>
+    const questionOptionsDTO: QuestionOption[] = rawOptionsList.map((questionOptionState: QuestionOptionState) =>
       QuestionOption.toDomain({
-        optionId: questionOptionDTO.optionId,
-        text: questionOptionDTO.text,
-        isCorrectAnswer: questionOptionDTO.isCorrectAnswer,
-        questionId: questionOptionDTO.questionId,
-        item: questionOptionDTO.item,
-        obs: questionOptionDTO.obs,
+        optionId: questionOptionState.optionId,
+        text: questionOptionState.text,
+        isCorrectAnswer: questionOptionState.key,
+        questionId: questionOptionState.questionId,
+        item: questionOptionState.item,
+        obs: questionOptionState.obs,
       })
     )
     return {

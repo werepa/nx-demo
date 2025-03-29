@@ -37,26 +37,26 @@ describe("GetNextQuestion", () => {
   let correctQuizAnswer: CheckQuizAnswer
 
   let userMember1: User
-  let userMember2: User
+  // let userMember2: User
   let portugues: Discipline
-  let portuguesClassificar: Topic
+  // let portuguesClassificar: Topic
   let pronomes: Topic
-  let pessoais: Topic
+  // let pessoais: Topic
   let casoReto: Topic
   let obliquos: Topic
   let tratamento: Topic
   let crase: Topic
   let palavrasRepetidas: Topic
   let palavrasMasculinas: Topic
-  let palavrasEspeciais: Topic
+  // let palavrasEspeciais: Topic
   let distancia: Topic
   let terra: Topic
-  let nomesCidades: Topic
+  // let nomesCidades: Topic
   let quiz1: Quiz
-  let quiz2: Quiz
-  let questions: Question[]
+  // let quiz2: Quiz
+  // let questions: Question[]
   let learning1: Learning
-  let learning2: Learning
+  // let learning2: Learning
 
   beforeAll(async () => {
     connection = getTestDatabaseAdapter()
@@ -105,21 +105,21 @@ describe("GetNextQuestion", () => {
     })
 
     userMember1 = fixture.userMember1
-    userMember2 = fixture.userMember2
+    // userMember2 = fixture.userMember2
     portugues = fixture.portugues
-    portuguesClassificar = fixture.portuguesClassificar
+    // portuguesClassificar = fixture.portuguesClassificar
     pronomes = fixture.pronomes
-    pessoais = fixture.pessoais
+    // pessoais = fixture.pessoais
     casoReto = fixture.casoReto
     obliquos = fixture.obliquos
     tratamento = fixture.tratamento
     crase = fixture.crase
     palavrasRepetidas = fixture.palavrasRepetidas
     palavrasMasculinas = fixture.palavrasMasculinas
-    palavrasEspeciais = fixture.palavrasEspeciais
+    // palavrasEspeciais = fixture.palavrasEspeciais
     distancia = fixture.distancia
     terra = fixture.terra
-    nomesCidades = fixture.nomesCidades
+    // nomesCidades = fixture.nomesCidades
 
     const { quizId } = await createQuiz.execute({
       disciplineId: portugues?.disciplineId,
@@ -135,7 +135,7 @@ describe("GetNextQuestion", () => {
     await connection.close()
   })
 
-  test("should return the next question for a given topic and user", async () => {
+  test("should return the next question for a given quiz ID", async () => {
     const verifyNextQuestion = async (expectedTopic: Topic, correctAnswered = true) => {
       const nextQuestion = await getNextQuestion.execute({
         quizId: quiz1.quizId,

@@ -6,7 +6,6 @@ import { QuizRepository } from "../../repository/QuizRepository"
 import { Learning } from "../../../domain/entity/Learning"
 import { Quiz } from "../../../domain/entity/Quiz"
 import { QuizAnswer } from "../../../domain/entity/QuizAnswer"
-import { Topic } from "../../../domain/entity/Topic"
 import { TopicLearning } from "../../../domain/entity/TopicLearning"
 
 export class GetNextQuestion implements UseCase {
@@ -16,9 +15,11 @@ export class GetNextQuestion implements UseCase {
     private readonly learningRepository: LearningRepository
   ) {}
 
-  async execute(dto: Input): Promise<Question> {
+  async execute(dto: GetNextQuestionCommand): Promise<Question> {
     let nextQuestion = null
     const quiz = await this.quizRepository.getById(dto.quizId)
+
+    console.log("GetNextQuestion.execute quiz", quiz.toDTO())
 
     if (!quiz) {
       throw new Error("Quiz not found!")
@@ -199,7 +200,7 @@ export class GetNextQuestion implements UseCase {
   }
 }
 
-type Input = {
+type GetNextQuestionCommand = {
   quizId: string
   randomWait?: number // number of questions to wait before repeat a topic (10+randomWait)
 }
