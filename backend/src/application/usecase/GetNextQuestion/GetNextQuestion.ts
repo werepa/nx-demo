@@ -19,8 +19,6 @@ export class GetNextQuestion implements UseCase {
     let nextQuestion = null
     const quiz = await this.quizRepository.getById(dto.quizId)
 
-    console.log("GetNextQuestion.execute quiz", quiz.toDTO())
-
     if (!quiz) {
       throw new Error("Quiz not found!")
     }
