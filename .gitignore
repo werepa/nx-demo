@@ -32,8 +32,11 @@ node_modules
 npm-debug.log
 yarn-error.log
 testem.log
-tsconfig.tsbuildinfo
 /typings
+
+# TypeScript build info
+tsconfig.tsbuildinfo
+**/tsconfig.tsbuildinfo
 
 # System Files
 .DS_Store

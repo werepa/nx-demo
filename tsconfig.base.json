@@ -23,6 +23,7 @@
     "strictNullChecks": false,
     "strict": false,
     "target": "es2022",
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "sourceMap": true
   }
 }

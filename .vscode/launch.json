@@ -17,6 +17,50 @@
       "cwd": "${workspaceRoot}",
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "name": "Debug Backend",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "nx",
+        "serve",
+        "backend"
+      ],
+      "cwd": "${workspaceRoot}",
+      "console": "integratedTerminal",
+      "outFiles": [
+        "${workspaceFolder}/backend/dist/**/*.js"
+      ],
+      "sourceMaps": true,
+      "preLaunchTask": "build-backend"
+    },
+    {
+      "name": "Debug Backend 2",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "nx",
+        "serve",
+        "backend"
+      ],
+      "cwd": "${workspaceRoot}",
+      "console": "integratedTerminal",
+      "sourceMaps": true,
+      "outFiles": [
+        "${workspaceFolder}/dist/apps/backend/**/*.js"
+      ],
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/**",
+        "!**/node_modules/**"
+      ],
+      "restart": true,
+      "envFile": "${workspaceFolder}/.env"
     }
   ]
 }
