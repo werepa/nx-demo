@@ -69,12 +69,10 @@ export type QuestionState = {
   createdAt?: Date
 }
 
-// TODO: substituir key por isCorrectAnswer no DB de desenvolvimento e produção
 export type QuestionOptionState = {
   optionId: string
   text: string
-  isCorrectAnswer?: boolean
-  key?: boolean
+  isCorrectAnswer: boolean
   item: number
   obs: string
   questionId: string

@@ -1,4 +1,4 @@
-import { Application, Request, Response } from "express"
+import { Request, Response } from "express"
 import { CreateQuiz, GetQuizzes, GetQuizById, GetNextQuestion, CheckQuizAnswer } from "../../../application/usecase"
 
 /**

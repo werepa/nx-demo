@@ -31,6 +31,9 @@ interface RawQuestionData {
 
 export class QuestionRepositoryDatabase implements QuestionRepository {
   constructor(private readonly connection: DatabaseConnection) {}
+  migrateOptions(): Promise<{ updatedCount: number; deactivatedCount: number }> {
+    throw new Error("Method not implemented.")
+  }
 
   private prepareQuestionParams(question: Question): (string | number | boolean)[] {
     return [
@@ -214,7 +217,7 @@ export class QuestionRepositoryDatabase implements QuestionRepository {
       QuestionOption.toDomain({
         optionId: questionOptionState.optionId,
         text: questionOptionState.text,
-        isCorrectAnswer: questionOptionState.key,
+        isCorrectAnswer: questionOptionState.isCorrectAnswer,
         questionId: questionOptionState.questionId,
         item: questionOptionState.item,
         obs: questionOptionState.obs,

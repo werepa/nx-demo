@@ -15,6 +15,7 @@ export interface QuestionRepository {
   }): Promise<Question | null>
   getByHash(simulexHash: string): Promise<Question | null>
   getDisciplineStatistics(disciplineId: string): Promise<QuestionDisciplineStatistics>
+  migrateOptions(): Promise<{ updatedCount: number; deactivatedCount: number }>
 }
 
 export type QuestionDisciplineStatistics = {
